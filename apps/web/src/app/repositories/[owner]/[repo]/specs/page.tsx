@@ -1,3 +1,4 @@
+import { Waypoints } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { EmptyNotice, LoadErrors, Mono } from '../../../../../components/dashboard.tsx';
@@ -41,12 +42,19 @@ export default async function RemoteSpecsPage({ params, searchParams }: Props) {
       {view.status === 'ready' ? (
         view.check ? (
           <>
-            <div className="mb-6">
+            <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
               <RevisionLine
                 sha={view.check.sha}
                 label={view.check.ref}
                 htmlUrl={view.repository.htmlUrl}
               />
+              <Link
+                href={`${repositoryPath(owner, repo, 'specs')}/graph${query}`}
+                className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
+              >
+                <Waypoints className="size-4" aria-hidden />
+                Graph view
+              </Link>
             </div>
             <SpecIndex
               reader={createReader(
