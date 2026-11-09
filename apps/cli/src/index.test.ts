@@ -14,6 +14,8 @@ import {
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { test } from 'node:test';
+import { SETUP } from '@spectrum/spec-engine/setup';
+import { VERSION } from './version.ts';
 
 const root = resolve(import.meta.dirname, '../../..');
 const entry = resolve(import.meta.dirname, 'index.ts');
@@ -77,6 +79,130 @@ test('CLI rejects invalid output selections without changing the customer reposi
     assert.match(result.stderr, /format/);
   }
   assert.deepEqual(await readdir(directory), []);
+});
+
+test('CLI describes draft inputs without writing or requiring a values file', async (t) => {
+  const directory = await emptyRepository(t);
+  const result = cli(['new', 'interaction', '--describe'], directory);
+  assert.equal(result.status, 0, result.stderr);
+  const description = JSON.parse(result.stdout);
+  assert.equal(description.writes, false);
+  assert.equal(description.templates[0].id, 'feature.interaction');
+  assert.ok(description.requiredValues.includes('interaction_id'));
+  assert.deepEqual(await readdir(directory), []);
+  assert.equal(cli(['new', '--help'], directory).status, 0);
+});
+
+test('CLI creates the exact previewed draft and preserves an existing user file', async (t) => {
+  const directory = await emptyRepository(t);
+  const description = JSON.parse(cli(['new', 'interaction', '--describe'], directory).stdout);
+  const valuesPath = join(directory, 'values.json');
+  await writeFile(
+    valuesPath,
+    JSON.stringify(
+      Object.fromEntries(description.requiredValues.map((key: string) => [key, 'sample'])),
+    ),
+  );
+  const args = ['new', 'interaction', directory, '--values', valuesPath];
+  const preview = cli([...args, '--dry-run']);
+  assert.equal(preview.status, 0, preview.stderr);
+  const plan = JSON.parse(preview.stdout);
+  assert.equal(plan.check, null);
+  assert.deepEqual(plan.created, []);
+  assert.deepEqual(await readdir(directory), ['values.json']);
+  const created = cli(args);
+  assert.equal(created.status, 0, created.stderr);
+  const path = join(directory, plan.files[0].path);
+  assert.equal(await readFile(path, 'utf8'), plan.files[0].content);
+  await writeFile(path, 'user content');
+  const conflict = cli(args);
+  assert.equal(conflict.status, 1, conflict.stderr);
+  assert.deepEqual(JSON.parse(conflict.stdout).created, []);
+  assert.equal(await readFile(path, 'utf8'), 'user content');
+});
+
+test('CLI feature draft preflights companions and rejects ambiguous or unsafe arguments', async (t) => {
+  const directory = await emptyRepository(t);
+  const description = JSON.parse(cli(['new', 'feature', '--describe']).stdout);
+  const valuesPath = join(directory, 'values.json');
+  await writeFile(
+    valuesPath,
+    JSON.stringify(
+      Object.fromEntries(description.requiredValues.map((key: string) => [key, 'sample'])),
+    ),
+  );
+  const args = ['new', 'feature', directory, '--values', valuesPath];
+  const preview = cli([...args, '--dry-run']);
+  assert.equal(preview.status, 0, preview.stderr);
+  const plan = JSON.parse(preview.stdout);
+  assert.equal(plan.files.length, 3);
+  const blocked = join(directory, plan.files[1].path);
+  await mkdir(resolve(blocked, '..'), { recursive: true });
+  await writeFile(blocked, 'existing contract');
+  const conflict = cli(args);
+  assert.equal(conflict.status, 1, conflict.stderr);
+  assert.deepEqual(JSON.parse(conflict.stdout).created, []);
+  for (const file of [plan.files[0], plan.files[2]])
+    await assert.rejects(readFile(join(directory, file.path), 'utf8'));
+  for (const invalid of [
+    ['new'],
+    ['new', 'interaction'],
+    ['new', 'interaction', '--force'],
+    ['new', 'interaction', '--describe', '--values', valuesPath],
+    [...args, '--out', 'draft.md'],
+    ['new', 'interaction', directory, '--values', valuesPath, '--out', '../outside.md'],
+  ]) {
+    const result = cli(invalid);
+    assert.equal(result.status, 1, result.stderr);
+    assert.equal(result.stdout, '');
+  }
+  assert.equal(await readFile(blocked, 'utf8'), 'existing contract');
+});
+
+test('CLI doctor distinguishes skipped checks and preserves an uninitialized repository', async (t) => {
+  const directory = await emptyRepository(t);
+  const result = cli(['doctor', directory]);
+  assert.equal(result.status, 1, result.stderr);
+  const report = JSON.parse(result.stdout);
+  assert.equal(report.mode, 'doctor');
+  assert.equal(report.check.status, 'notRun');
+  assert.ok(report.issues.some((issue: { code: string }) => issue.code === 'config-unavailable'));
+  const text = cli(['doctor', directory, '--format', 'text']);
+  assert.equal(text.status, 1, text.stderr);
+  assert.match(text.stdout, /^Spectrum doctor: attention required/);
+  assert.match(text.stdout, /Repository check: notRun/);
+  assert.deepEqual(await readdir(directory), []);
+});
+
+test('CLI doctor executes a real check and reports managed skill drift without modifying it', async (t) => {
+  const directory = await emptyRepository(t);
+  assert.equal(cli(['init', directory]).status, 0);
+  await writeFile(
+    join(directory, 'package.json'),
+    JSON.stringify({ devDependencies: { [SETUP.packageName]: VERSION } }),
+  );
+  const installedPath = join(directory, 'node_modules', SETUP.packageName, 'package.json');
+  await mkdir(resolve(installedPath, '..'), { recursive: true });
+  await writeFile(installedPath, JSON.stringify({ name: SETUP.packageName, version: VERSION }));
+  assert.equal(cli(['skills', 'install', directory]).status, 0);
+  const skillPath = join(directory, SETUP.skills.claude);
+  const drifted = (await readFile(skillPath, 'utf8')).replace(
+    `${SETUP.skillMarker} ${VERSION}`,
+    `${SETUP.skillMarker} 0.0.1`,
+  );
+  await writeFile(skillPath, drifted);
+  const configBefore = await readFile(join(directory, SETUP.config));
+  const result = cli(['doctor', directory]);
+  assert.equal(result.status, 0, result.stderr);
+  const report = JSON.parse(result.stdout);
+  assert.equal(report.check.status, 'passed');
+  assert.equal(report.cli.version, VERSION);
+  assert.equal(report.package.installedVersion, VERSION);
+  assert.ok(
+    report.issues.some((issue: { code: string }) => issue.code === 'skill-version-mismatch'),
+  );
+  assert.equal(await readFile(skillPath, 'utf8'), drifted);
+  assert.deepEqual(await readFile(join(directory, SETUP.config)), configBefore);
 });
 
 test('CLI profile reads an existing repository without installing a config', async (t) => {

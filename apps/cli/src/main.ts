@@ -1,7 +1,12 @@
 import { readFile } from 'node:fs/promises';
 import { checkRepository } from '@spectrum/spec-engine';
 import { SETUP } from '@spectrum/spec-engine/setup';
-import { diagnosticsExitCode, renderDiagnostics, repositoryDiagnostics } from './diagnostics.ts';
+import {
+  type DiagnosticsOptions,
+  diagnosticsExitCode,
+  renderDiagnostics,
+  repositoryDiagnostics,
+} from './diagnostics.ts';
 import { createDraft, describeDraft, readTemplateValues } from './new-command.ts';
 import { formatCheckResult, formatSpecList, parseOutputFormat } from './output.ts';
 import { initRepository, installSkills, parseAgents, repositoryStatus } from './setup-commands.ts';
@@ -33,7 +38,13 @@ const COMMANDS: Record<string, Record<string, boolean>> = {
   'skills install': { '--agent': true, '--force': false, '--dry-run': false },
   status: {},
   doctor: { '--format': true },
-  new: { '--values': true, '--out': true, '--dry-run': false, '--describe': false },
+  new: {
+    '--values': true,
+    '--out': true,
+    '--dry-run': false,
+    '--describe': false,
+    '--help': false,
+  },
 };
 
 class UsageError extends Error {}
@@ -80,12 +91,19 @@ function print(value: unknown) {
 }
 
 /** Run one CLI invocation and return its exit status. */
-export async function run(argv: string[]): Promise<number> {
+export async function run(
+  argv: string[],
+  runtime: Pick<DiagnosticsOptions, 'cliSource'> = {},
+): Promise<number> {
   if (argv[0] === '--version' || argv[0] === 'version') {
     console.log(`${SETUP.packageName} ${VERSION}`);
     return 0;
   }
   if (!argv.length || argv[0] === 'help' || argv[0] === '--help') {
+    console.log(USAGE);
+    return 0;
+  }
+  if (argv[0] === 'new' && argv.length === 2 && argv[1] === '--help') {
     console.log(USAGE);
     return 0;
   }
@@ -106,13 +124,17 @@ export async function run(argv: string[]): Promise<number> {
       mode: 'doctor',
       cliVersion: VERSION,
       cliPath: process.argv[1],
-      cliSource: 'unknown',
+      cliSource: runtime.cliSource ?? 'unknown',
     });
     if (format === 'text') console.log(renderDiagnostics(result));
     else print(result);
     return diagnosticsExitCode(result);
   }
   if (command === 'new') {
+    if (options.has('--help')) {
+      console.log(USAGE);
+      return 0;
+    }
     if (!parsed.kind) throw new Error('Expected a template kind.');
     if (options.has('--describe')) {
       if (options.size !== 1) throw new Error('--describe cannot be combined with write options.');

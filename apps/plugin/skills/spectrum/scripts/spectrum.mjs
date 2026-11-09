@@ -11404,7 +11404,13 @@ var COMMANDS = {
   "skills install": { "--agent": true, "--force": false, "--dry-run": false },
   status: {},
   doctor: { "--format": true },
-  new: { "--values": true, "--out": true, "--dry-run": false, "--describe": false }
+  new: {
+    "--values": true,
+    "--out": true,
+    "--dry-run": false,
+    "--describe": false,
+    "--help": false
+  }
 };
 var UsageError = class extends Error {
 };
@@ -11442,12 +11448,16 @@ function parse3(argv) {
 function print(value) {
   console.log(JSON.stringify(value, null, 2));
 }
-async function run(argv) {
+async function run(argv, runtime = {}) {
   if (argv[0] === "--version" || argv[0] === "version") {
     console.log(`${SETUP.packageName} ${VERSION}`);
     return 0;
   }
   if (!argv.length || argv[0] === "help" || argv[0] === "--help") {
+    console.log(USAGE);
+    return 0;
+  }
+  if (argv[0] === "new" && argv.length === 2 && argv[1] === "--help") {
     console.log(USAGE);
     return 0;
   }
@@ -11468,13 +11478,17 @@ async function run(argv) {
       mode: "doctor",
       cliVersion: VERSION,
       cliPath: process.argv[1],
-      cliSource: "unknown"
+      cliSource: runtime.cliSource ?? "unknown"
     });
     if (format === "text") console.log(renderDiagnostics(result2));
     else print(result2);
     return diagnosticsExitCode(result2);
   }
   if (command === "new") {
+    if (options.has("--help")) {
+      console.log(USAGE);
+      return 0;
+    }
     if (!parsed.kind) throw new Error("Expected a template kind.");
     if (options.has("--describe")) {
       if (options.size !== 1) throw new Error("--describe cannot be combined with write options.");
@@ -11703,7 +11717,7 @@ async function launch(argv) {
   for (const note of notes) console.error(`spectrum: ${note}`);
   if (!cli) {
     console.error(describe(null, VERSION));
-    return run(argv);
+    return run(argv, { cliSource: "plugin" });
   }
   const older = (compareVersions(cli.version, VERSION) ?? -1) < 0;
   const result = spawnSync2(cli.command, [...cli.args, ...argv], {
@@ -11718,14 +11732,14 @@ async function launch(argv) {
     const code = result.error.code;
     if (code !== "ENOENT" && code !== "EACCES") return 1;
     console.error(describe(null, VERSION));
-    return run(argv);
+    return run(argv, { cliSource: "plugin" });
   }
   if (older && result.status === USAGE_STATUS) {
     console.error(
       `spectrum: the ${cli.source} CLI ${cli.version ?? "(unknown version)"} does not accept this command; running the bundled ${VERSION} instead.`
     );
     console.error(describe(null, VERSION));
-    return run(argv);
+    return run(argv, { cliSource: "plugin" });
   }
   if (older) {
     process.stdout.write(result.stdout);

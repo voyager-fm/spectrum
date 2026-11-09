@@ -20,7 +20,7 @@ async function launch(argv: string[]): Promise<number> {
   for (const note of notes) console.error(`spectrum: ${note}`);
   if (!cli) {
     console.error(describe(null, VERSION));
-    return run(argv);
+    return run(argv, { cliSource: 'plugin' });
   }
   // An older pinned CLI may not have a command this skill describes. Capture its output so a
   // usage rejection can fall back to the bundle instead of reaching the agent as a result.
@@ -38,7 +38,7 @@ async function launch(argv: string[]): Promise<number> {
     const code = (result.error as NodeJS.ErrnoException).code;
     if (code !== 'ENOENT' && code !== 'EACCES') return 1;
     console.error(describe(null, VERSION));
-    return run(argv);
+    return run(argv, { cliSource: 'plugin' });
   }
   if (older && result.status === USAGE_STATUS) {
     console.error(
@@ -46,7 +46,7 @@ async function launch(argv: string[]): Promise<number> {
         `this command; running the bundled ${VERSION} instead.`,
     );
     console.error(describe(null, VERSION));
-    return run(argv);
+    return run(argv, { cliSource: 'plugin' });
   }
   if (older) {
     process.stdout.write(result.stdout);

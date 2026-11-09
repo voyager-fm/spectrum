@@ -149,3 +149,68 @@ test('standalone output formats work without workspace files and preserve error 
   assert.equal(github.status, 0, github.stderr);
   assert.match(github.stdout, /^::warning /m);
 });
+
+test('standalone generation describes and creates embedded templates without workspace assets', async (t) => {
+  const directory = await mkdtemp(join(tmpdir(), 'spectrum-new-bundle-'));
+  t.after(() => rm(directory, { recursive: true, force: true }));
+  const binary = join(directory, 'spectrum.mjs');
+  await writeFile(binary, await bundleCli());
+  const client = join(directory, 'client');
+  await mkdir(client);
+  const run = (args: string[]) =>
+    spawnSync(process.execPath, [binary, ...args], {
+      cwd: client,
+      encoding: 'utf8',
+      env: { ...process.env, PATH: '' },
+    });
+  const described = run(['new', 'interaction', '--describe']);
+  assert.equal(described.status, 0, described.stderr);
+  const description = JSON.parse(described.stdout);
+  assert.equal(description.writes, false);
+  const values = Object.fromEntries(
+    description.requiredValues.map((key: string) => [key, 'sample']),
+  );
+  const valuesPath = join(directory, 'values.json');
+  await writeFile(valuesPath, JSON.stringify(values));
+  const args = ['new', 'interaction', '--values', valuesPath];
+  const preview = run([...args, '--dry-run']);
+  assert.equal(preview.status, 0, preview.stderr);
+  const plan = JSON.parse(preview.stdout);
+  assert.equal(plan.check, null);
+  assert.deepEqual(await import('node:fs/promises').then((fs) => fs.readdir(client)), []);
+  const created = run(args);
+  assert.equal(created.status, 0, created.stderr);
+  const result = JSON.parse(created.stdout);
+  assert.deepEqual(result.created, [plan.files[0].path]);
+  assert.equal(await readFile(join(client, plan.files[0].path), 'utf8'), plan.files[0].content);
+  const conflict = run(args);
+  assert.equal(conflict.status, 1, conflict.stderr);
+  assert.deepEqual(JSON.parse(conflict.stdout).created, []);
+});
+
+test('bundled doctor identifies its actual plugin fallback without requiring a local package', async (t) => {
+  const directory = await mkdtemp(join(tmpdir(), 'spectrum-doctor-bundle-'));
+  t.after(() => rm(directory, { recursive: true, force: true }));
+  const binary = join(directory, 'spectrum.mjs');
+  await writeFile(binary, await bundleCli());
+  const client = join(directory, 'client');
+  await mkdir(client);
+  const run = (args: string[]) =>
+    spawnSync(process.execPath, [binary, ...args], {
+      cwd: client,
+      encoding: 'utf8',
+      env: { ...process.env, PATH: '' },
+    });
+  assert.equal(run(['init']).status, 0);
+  const result = run(['doctor']);
+  assert.equal(result.status, 0, result.stderr);
+  const report = JSON.parse(result.stdout);
+  assert.equal(report.cli.source, 'plugin');
+  assert.equal(report.check.status, 'passed');
+  assert.equal(report.package.installedVersion, null);
+  assert.equal(report.ready, true);
+  const text = run(['doctor', '--format', 'text']);
+  assert.equal(text.status, 0, text.stderr);
+  assert.match(text.stdout, /^Spectrum doctor: ready/);
+  assert.match(text.stdout, /\(plugin\)/);
+});
