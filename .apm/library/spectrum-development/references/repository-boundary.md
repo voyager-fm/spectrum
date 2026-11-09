@@ -1,6 +1,6 @@
 # Engine and client repository boundary
 
-This repository holds two different things. Keep them apart in every change.
+This repository holds two different things. Keep them apart in every change. This boundary is separate from the product layers (local tool and hosted application) in [implementation](implementation.md#product-layers), which split the engine side.
 
 | Part | Paths | What it is |
 | --- | --- | --- |

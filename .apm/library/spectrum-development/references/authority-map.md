@@ -14,6 +14,7 @@ Use [the configured source map](../../../../.spectrum/config.json) to locate the
 | Objects, surfaces, regions and stable feature/interaction IDs | Configured IA and FI inventories under `.spectrum/product/` |
 | Behavior and acceptance criteria | The affected feature bundle's contracts, flows and interaction Markdown specs |
 | Web routes and page behavior | Configured route inventory and page bundles under `.spectrum/product/website/` |
+| Which product a change belongs to (local tool or hosted application) | The product-layers architecture in the configured engineering root; rules in [implementation](implementation.md#product-layers) |
 | Runtime and package boundaries | [Distribution contract](../../../../.spectrum/contracts/distribution.md) and the application-runtime architecture in the configured engineering root |
 | Engineering decisions and scoped instructions | Applicable `.spectrum/engineering/`, `.spectrum/rules/` and local `AGENTS.md` |
 
@@ -28,10 +29,10 @@ Follow actual callers, public exports and tests; this map is a starting point, n
 | `packages/core` | Shared domain types and contracts |
 | `packages/spec-engine` | Configured repository reads, parsing, relationships and structural validation |
 | `packages/changeset` | Proposal approval and revision guards |
-| `packages/integrations` | GitHub/Linear adapter contracts; inspect for an implementation before claiming connectivity |
-| `apps/cli` | Deterministic commands consuming the shared packages |
-| `apps/plugin` | Distributed product skills, manifest and bundled CLI |
-| `apps/web` | Next.js dashboard and planned API, webhook, integration and model execution entry points |
+| `packages/integrations` | Hosted adapters used only by `apps/web`: GitHub App, user authorization and snapshot clients; Linear is a contract only. Inspect for an implementation before claiming connectivity |
+| `apps/cli` | Local tool: deterministic commands consuming the shared packages |
+| `apps/plugin` | Local tool: distributed product skills, manifest and the bundled CLI launcher |
+| `apps/web` | Hosted application: dashboard, GitHub connection, accounts and stored checks; planned webhook, automation and model execution entry points |
 | `.apm/library/`, `apm.yml`, `apm.lock.yaml` | Development skill sources, selection and generated deployment lock; see [harness ownership](../../../../.apm/README.md) |
 
 When a public contract, parser or proposal rule changes, inspect the CLI, plugin and dashboard consumers even when their files are unchanged. A server ownership decision does not prove that its planned entry points exist.
