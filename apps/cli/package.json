@@ -2,12 +2,17 @@
   "name": "@voyager-fm/spectrum",
   "version": "0.1.0",
   "description": "Check, initialize and agent-enable repository product specs in .spectrum/.",
-  "license": "UNLICENSED",
+  "license": "MIT",
   "type": "module",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/voyager-fm/spectrum.git",
     "directory": "apps/cli"
+  },
+  "homepage": "https://github.com/voyager-fm/spectrum/tree/main/apps/cli#readme",
+  "bugs": "https://github.com/voyager-fm/spectrum/issues",
+  "publishConfig": {
+    "access": "public"
   },
   "engines": {
     "node": ">=20"
@@ -17,7 +22,8 @@
   },
   "files": [
     "dist/spectrum.mjs",
-    "README.md"
+    "README.md",
+    "LICENSE"
   ],
   "scripts": {
     "build": "node src/build.ts",
