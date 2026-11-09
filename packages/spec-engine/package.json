@@ -6,7 +6,8 @@
   "exports": {
     ".": "./src/index.ts",
     "./templates": "./src/templates.ts",
-    "./setup": "./src/setup.ts"
+    "./setup": "./src/setup.ts",
+    "./markdown": "./src/markdown-view.ts"
   },
   "dependencies": {
     "@global-torque/markdown-it-wikilinks": "0.2.0",
