@@ -30,33 +30,51 @@ import {
 import { EmptyNotice, Mono, Section, StatCard, StatusBadge } from './dashboard.tsx';
 
 /*
- * Charts stay monotone (see the spectrum-ui design rules): ordered states use one gray ramp mixed
- * from the theme's foreground and background, so the ramp re-steps itself in dark mode, and the
- * destructive token marks errors only. Every value a chart shows is also printed as text.
+ * Chart color follows the spectrum-ui design rules: ordered states use one ramp of the indigo brand
+ * accent, mixed from the theme's background up to the accent and then toward its foreground, so
+ * the ramp re-steps itself in dark mode. Errors use the destructive token and warnings the warning
+ * token; neither appears anywhere else in a chart. Every value a chart shows is also printed as text.
+ * The ramp was checked with the dataviz palette validator (ordinal, light and dark) for up to six
+ * steps.
  */
 
-/** Ramp step `index` of `count`, light to dark in light mode and dim to bright in dark mode. */
-function rampMix(index: number, count: number): number {
-  if (count <= 1) return 70;
-  return Math.round(24 + (index / (count - 1)) * 64);
+/**
+ * Ramp position of step `index` of `count`, from 0 (faint) to 1 (strongest). Few steps use a
+ * narrower band around the accent, so two values read as two shades of it rather than as the
+ * ramp's extremes; four or more steps use the whole ramp.
+ */
+function rampStep(index: number, count: number): number {
+  if (count <= 1) return 0.75;
+  const span = Math.min(1, 0.45 * (count - 1));
+  const start = Math.min(Math.max(0.6 - span / 2, 0), 1 - span);
+  return start + (index / (count - 1)) * span;
 }
 
-function rampFill(mix: number): CSSProperties {
-  return { background: `color-mix(in oklch, var(--foreground) ${mix}%, var(--background))` };
+/** The first three quarters rise from 50% accent to the accent; the rest deepens it by up to 45%. */
+function rampFill(step: number): CSSProperties {
+  if (step <= 0.75) {
+    const mix = Math.round(50 + (step / 0.75) * 50);
+    return { background: `color-mix(in oklch, var(--brand) ${mix}%, var(--background))` };
+  }
+  const mix = Math.round(100 - ((step - 0.75) / 0.25) * 45);
+  return { background: `color-mix(in oklch, var(--brand) ${mix}%, var(--foreground))` };
 }
 
-/** Label ink for text set inside a ramp fill. */
-function rampInk(mix: number): CSSProperties {
-  return { color: mix >= 55 ? 'var(--background)' : 'var(--foreground)' };
+/**
+ * Label ink for text set inside a ramp fill. The ramp mirrors between modes, so one threshold
+ * keeps every label at 4.8:1 or better in both.
+ */
+function rampInk(step: number): string {
+  return step < 0.5 ? 'text-foreground' : 'text-background';
 }
 
 const ERROR_FILL: CSSProperties = { background: 'var(--destructive)' };
-const WARNING_FILL = rampFill(38);
+const WARNING_FILL: CSSProperties = { background: 'var(--warning)' };
 
 /** Assigns each value its ramp step once, so the same value keeps its shade in every chart. */
 export function rampFor(parts: Part[]): (value: string) => number {
   const index = new Map(parts.map((p, i) => [p.value, i]));
-  return (value) => rampMix(index.get(value) ?? 0, parts.length);
+  return (value) => rampStep(index.get(value) ?? 0, parts.length);
 }
 
 function label(value: string) {
@@ -96,13 +114,13 @@ function Swatch({ style, className }: { style: CSSProperties; className?: string
 export function SegmentedBar({
   parts,
   total,
-  mixFor,
+  stepFor,
   size = 'tall',
   name,
 }: {
   parts: Part[];
   total: number;
-  mixFor: (value: string) => number;
+  stepFor: (value: string) => number;
   size?: 'tall' | 'thin';
   name: string;
 }) {
@@ -115,7 +133,7 @@ export function SegmentedBar({
       className={cn('flex w-full gap-0.5', size === 'tall' ? 'h-7' : 'h-2')}
     >
       {visible.map((p) => {
-        const mix = mixFor(p.value);
+        const step = stepFor(p.value);
         const pct = (p.count / total) * 100;
         return (
           <span
@@ -124,10 +142,10 @@ export function SegmentedBar({
               'group relative flex min-w-0.5 items-center',
               size === 'tall' ? 'rounded px-1.5' : 'rounded-full',
             )}
-            style={{ ...rampFill(mix), width: `${pct}%` }}
+            style={{ ...rampFill(step), width: `${pct}%` }}
           >
             {size === 'tall' && pct >= 12 ? (
-              <span className="text-[11px] font-medium tabular-nums" style={rampInk(mix)}>
+              <span className={cn('text-[11px] font-medium tabular-nums', rampInk(step))}>
                 {share(p.count, total)}
               </span>
             ) : null}
@@ -147,17 +165,17 @@ export function SegmentedBar({
 function Legend({
   parts,
   total,
-  mixFor,
+  stepFor,
 }: {
   parts: Part[];
   total: number;
-  mixFor: (value: string) => number;
+  stepFor: (value: string) => number;
 }) {
   return (
     <ul className="flex flex-wrap gap-x-4 gap-y-1 text-xs">
       {parts.map((p) => (
         <li key={p.value} className="flex items-center gap-1.5">
-          <Swatch style={rampFill(mixFor(p.value))} />
+          <Swatch style={rampFill(stepFor(p.value))} />
           <span>{label(p.value)}</span>
           <span className="text-muted-foreground tabular-nums">
             {p.count} · {share(p.count, total)}
@@ -170,7 +188,11 @@ function Legend({
 
 const DISTRIBUTIONS = [
   { key: 'review', title: 'Document review', note: 'Declared in each spec’s frontmatter.' },
-  { key: 'lifecycle', title: 'Declared lifecycle', note: 'FI status; not shipped evidence.' },
+  {
+    key: 'lifecycle',
+    title: 'Declared lifecycle',
+    note: 'Status column of the feature inventory.',
+  },
   { key: 'phase', title: 'Phase', note: 'Planning horizon from FI.' },
 ] as const;
 
@@ -181,24 +203,29 @@ export function StatusDistributionPanel({
   distribution: StatusDistribution;
   categories: CategoryRow[];
 }) {
-  const lifecycleMix = rampFor(distribution.lifecycle);
+  const lifecycleStep = rampFor(distribution.lifecycle);
   return (
     <Section
       title="Spec health"
-      description={`How ${distribution.total} interaction specs split by declared state. Document status and lifecycle are not implementation or test evidence.`}
+      description={`How ${distribution.total} interaction specs split by declared state.`}
     >
       <div className="grid gap-6 rounded-xl border p-4 sm:p-5">
         {DISTRIBUTIONS.map(({ key, title, note }) => {
           const parts = distribution[key];
-          const mixFor = key === 'lifecycle' ? lifecycleMix : rampFor(parts);
+          const stepFor = key === 'lifecycle' ? lifecycleStep : rampFor(parts);
           return (
             <div key={key} className="flex flex-col gap-2">
               <div className="flex flex-wrap items-baseline justify-between gap-x-3">
                 <h3 className="text-sm font-medium">{title}</h3>
                 <p className="text-xs text-muted-foreground">{note}</p>
               </div>
-              <SegmentedBar parts={parts} total={distribution.total} mixFor={mixFor} name={title} />
-              <Legend parts={parts} total={distribution.total} mixFor={mixFor} />
+              <SegmentedBar
+                parts={parts}
+                total={distribution.total}
+                stepFor={stepFor}
+                name={title}
+              />
+              <Legend parts={parts} total={distribution.total} stepFor={stepFor} />
             </div>
           );
         })}
@@ -227,7 +254,7 @@ export function StatusDistributionPanel({
                     <SegmentedBar
                       parts={row.lifecycle}
                       total={row.specs}
-                      mixFor={lifecycleMix}
+                      stepFor={lifecycleStep}
                       size="thin"
                       name={`${row.categoryKey} declared lifecycle`}
                     />
@@ -283,22 +310,15 @@ export function AcceptancePanel({
   return (
     <Section
       title="Acceptance criteria"
-      description="What the specs state, not what ran. Execution evidence is not recorded."
+      description="Criteria stated in each spec and whether they carry a stable ID."
     >
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <StatCard title="Criteria" value={total}>
           across {specCount} specs
         </StatCard>
         <StatCard title="Stable IDs" value={share(withId, total)}>
-          <div
-            aria-hidden
-            className="mb-1.5 h-1.5 w-full overflow-hidden rounded-full"
-            style={rampFill(12)}
-          >
-            <div
-              className="h-full rounded-full"
-              style={{ ...rampFill(80), width: `${idShare}%` }}
-            />
+          <div aria-hidden className="mb-1.5 h-1.5 w-full overflow-hidden rounded-full bg-muted">
+            <div className="h-full rounded-full bg-brand" style={{ width: `${idShare}%` }} />
           </div>
           {withId} of {total} carry an <Mono>AC-</Mono> ID
         </StatCard>
@@ -334,10 +354,6 @@ export function AcceptancePanel({
             )}
           </div>
         </div>
-      ) : total ? (
-        <p className="text-sm text-muted-foreground">
-          Every spec states criteria and every criterion has a stable ID.
-        </p>
       ) : null}
     </Section>
   );
@@ -413,7 +429,7 @@ export function FindingsPanel({
     <Section
       id="findings"
       title="Findings"
-      description="Deterministic structural findings from the shared engine. No model runs."
+      description="Structural findings from the shared engine, grouped by code, file or spec."
     >
       {emptyNote}
       {grouped.total === 0 ? null : (
@@ -731,7 +747,7 @@ export function CheckTrendPanel({
                     {current ? (
                       <span
                         aria-hidden
-                        className="absolute -bottom-2 size-1.5 rounded-full bg-foreground"
+                        className="absolute -bottom-2 size-1.5 rounded-full bg-brand"
                       />
                     ) : null}
                     <Tip>
@@ -765,7 +781,7 @@ export function CheckTrendPanel({
             >
               <polyline
                 fill="none"
-                stroke="var(--foreground)"
+                stroke="var(--brand)"
                 strokeWidth={2}
                 strokeLinejoin="round"
                 strokeLinecap="round"
@@ -778,7 +794,7 @@ export function CheckTrendPanel({
                 <span key={r.sha} className="group relative h-full">
                   <span
                     aria-hidden
-                    className="absolute left-1/2 size-2 -translate-x-1/2 translate-y-1/2 rounded-full bg-foreground ring-2 ring-background"
+                    className="absolute left-1/2 size-2 -translate-x-1/2 translate-y-1/2 rounded-full bg-brand ring-2 ring-background"
                     style={{ bottom: `${(r.specs / specTop) * 100}%` }}
                   />
                   <Tip>

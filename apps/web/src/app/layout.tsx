@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from 'next/font/google';
 import type { ReactNode } from 'react';
 import { cn } from '@/lib/utils';
 import { AccountControl } from '../components/account.tsx';
+import { BrandMark } from '../components/brand.tsx';
 import { Nav } from '../components/nav.tsx';
 import { RepositorySwitcher } from '../components/repository-switcher.tsx';
 import { currentViewer } from '../lib/auth.ts';
@@ -32,12 +33,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
         <div className="grid min-h-svh md:grid-cols-[240px_minmax(0,1fr)]">
           <aside className="flex flex-col gap-6 border-b bg-sidebar p-3 text-sidebar-foreground md:sticky md:top-0 md:h-svh md:border-r md:border-b-0">
             <div className="flex items-center gap-2 px-2 pt-1">
-              <div
-                className="grid size-6 place-items-center rounded-md bg-primary text-xs font-bold text-primary-foreground"
-                aria-hidden
-              >
-                S
-              </div>
+              <BrandMark className="size-6 shrink-0" />
               <span className="font-semibold tracking-tight">Spectrum</span>
             </div>
             <RepositorySwitcher local={repo} github={github} />

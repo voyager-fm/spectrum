@@ -15,14 +15,14 @@ export function PageHead({ title, description }: { title: string; description: R
 }
 
 /**
- * Status semantics, rendered in monotone:
- * ok = verified good (solid), bad = failure (the only colored state),
+ * Status semantics. Badges stay in ink so the brand accent keeps meaning selection and emphasis:
+ * ok = verified good (solid ink), bad = failure (the only colored state),
  * planned = not implemented or stale (dashed), info = configuration fact, neutral = draft or untracked.
  */
 export type Tone = 'ok' | 'bad' | 'planned' | 'info' | 'neutral';
 
 export function StatusBadge({ tone = 'neutral', children }: { tone?: Tone; children: ReactNode }) {
-  if (tone === 'ok') return <Badge>{children}</Badge>;
+  if (tone === 'ok') return <Badge className="bg-foreground text-background">{children}</Badge>;
   if (tone === 'bad') return <Badge variant="destructive">{children}</Badge>;
   if (tone === 'planned')
     return (
