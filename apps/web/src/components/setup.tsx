@@ -1,7 +1,14 @@
 import type { SetupItem } from '@spectrum/spec-engine/setup';
 import { Check, CircleAlert, CircleDashed } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import type { Onboarding, OnboardingStep, StepState } from '../lib/onboarding.ts';
+import type {
+  AgentSetup,
+  EvidenceRow,
+  Onboarding,
+  OnboardingStep,
+  StepState,
+} from '../lib/onboarding.ts';
+import { AgentTabs } from './agent-tabs.tsx';
 import { CopyCommand } from './copy-command.tsx';
 import { Mono, StatusBadge, type Tone } from './dashboard.tsx';
 
@@ -112,32 +119,89 @@ function Step({
           </div>
         ) : null}
         {open && step.note ? <p className="text-xs text-muted-foreground">{step.note}</p> : null}
-        {step.evidence.length > 1 ? (
-          <ul className="flex flex-col gap-1 text-xs">
-            {step.evidence.map((row) => (
-              <li key={row.label} className="flex flex-wrap items-center gap-2">
-                <span className="w-full text-muted-foreground sm:w-44">{row.label}</span>
-                {row.item.state === 'missing' ? (
-                  <Mono className="text-muted-foreground">{row.item.path}</Mono>
-                ) : (
-                  <a
-                    href={sourceUrl(row.item.path)}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="font-mono underline-offset-4 hover:underline"
-                  >
-                    {row.item.path}
-                  </a>
-                )}
-                <span className={row.item.state === 'ok' ? '' : 'text-muted-foreground'}>
-                  {ITEM_LABEL[row.item.state]}
-                  {row.item.detail && row.item.state === 'ok' ? ` · ${row.item.detail}` : ''}
-                </span>
-              </li>
-            ))}
-          </ul>
+        {step.agents ? (
+          <AgentTabs
+            initial={
+              (step.agents.find((a) => a.state === 'done') ?? step.agents[0])?.key ?? 'claude'
+            }
+            tabs={step.agents.map((agent) => ({
+              key: agent.key,
+              label: agent.label,
+              installed: agent.state === 'done',
+              panel: <AgentPanel agent={agent} sourceUrl={sourceUrl} />,
+            }))}
+          />
         ) : null}
+        {step.evidence.length > 1 ? <Evidence rows={step.evidence} sourceUrl={sourceUrl} /> : null}
       </div>
     </li>
+  );
+}
+
+function AgentPanel({
+  agent,
+  sourceUrl,
+}: {
+  agent: AgentSetup;
+  sourceUrl: (path: string) => string;
+}) {
+  const badge = STEP_BADGE[agent.state];
+  return (
+    <>
+      <div className="flex flex-wrap items-center gap-2">
+        <StatusBadge tone={badge.tone}>
+          {agent.state === 'done'
+            ? 'Installed'
+            : agent.state === 'todo'
+              ? 'Not installed'
+              : badge.label}
+        </StatusBadge>
+        <p className="text-sm text-muted-foreground">{agent.summary}</p>
+      </div>
+      {agent.methods.map((method) => (
+        <div key={method.label} className="flex flex-col gap-1.5">
+          <p className="text-xs text-muted-foreground">{method.label}</p>
+          {method.commands.map((command) => (
+            <CopyCommand key={command} command={command} />
+          ))}
+        </div>
+      ))}
+      {agent.note ? <p className="text-xs text-muted-foreground">{agent.note}</p> : null}
+      <Evidence rows={agent.evidence} sourceUrl={sourceUrl} />
+    </>
+  );
+}
+
+function Evidence({
+  rows,
+  sourceUrl,
+}: {
+  rows: EvidenceRow[];
+  sourceUrl: (path: string) => string;
+}) {
+  return (
+    <ul className="flex flex-col gap-1 text-xs">
+      {rows.map((row) => (
+        <li key={row.label} className="flex flex-wrap items-center gap-2">
+          <span className="w-full text-muted-foreground sm:w-32">{row.label}</span>
+          {row.item.state === 'missing' ? (
+            <Mono className="text-muted-foreground">{row.item.path}</Mono>
+          ) : (
+            <a
+              href={sourceUrl(row.item.path)}
+              target="_blank"
+              rel="noreferrer"
+              className="font-mono underline-offset-4 hover:underline"
+            >
+              {row.item.path}
+            </a>
+          )}
+          <span className={row.item.state === 'ok' ? '' : 'text-muted-foreground'}>
+            {ITEM_LABEL[row.item.state]}
+            {row.item.detail && row.item.state === 'ok' ? ` · ${row.item.detail}` : ''}
+          </span>
+        </li>
+      ))}
+    </ul>
   );
 }

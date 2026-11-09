@@ -30,6 +30,23 @@ export interface OnboardingStep {
   alternative?: { label: string; commands: string[] };
   note?: string;
   evidence: EvidenceRow[];
+  /** Per-agent setup, shown as tabs. Only the agent step has it. */
+  agents?: AgentSetup[];
+}
+
+export type AgentKey = 'claude' | 'codex' | 'opencode';
+
+/** How one coding agent picks up Spectrum in this repository. */
+export interface AgentSetup {
+  key: AgentKey;
+  label: string;
+  /** done: installed for this agent; attention: a skill exists that Spectrum did not install. */
+  state: StepState;
+  summary: string;
+  /** Ways to install, in order of preference. Empty when installed. */
+  methods: { label: string; commands: string[] }[];
+  note?: string;
+  evidence: EvidenceRow[];
 }
 
 export interface Onboarding {
@@ -47,14 +64,75 @@ function stateOf(item: SetupItem): StepState {
   return 'attention';
 }
 
-export function onboardingSteps(setup: RepositorySetup): Onboarding {
-  const skills = [
-    { label: 'Claude Code skill', item: setup.skills.claude },
-    { label: 'Codex and OpenCode skill', item: setup.skills.codex },
+function skillCommand(agent: 'claude' | 'codex', item: SetupItem): string {
+  const command = `${SETUP_COMMANDS.skills} --agent ${agent}`;
+  return item.state === 'unmanaged' ? `${command} --force` : command;
+}
+
+function skillSummary(item: SetupItem, name: string): string {
+  if (item.state === 'ok')
+    return `The repository skill is installed${item.detail ? ` (${item.detail})` : ''}; it runs the CLI version the repository pins.`;
+  if (item.state === 'unmanaged')
+    return `A spectrum skill exists but was not installed by Spectrum. Reinstalling with --force replaces it.`;
+  if (item.state === 'invalid')
+    return `The skill file could not be read: ${item.detail ?? 'unknown problem'}.`;
+  return `No Spectrum skill is installed for ${name}.`;
+}
+
+/** Claude Code, Codex and OpenCode, each with the files it reads and the commands that install them. */
+export function agentSetups(setup: RepositorySetup): AgentSetup[] {
+  const claudeSkill = { label: 'Repository skill', item: setup.skills.claude };
+  const plugin = { label: 'Plugin', item: setup.plugin };
+  const sharedSkill = { label: 'Repository skill', item: setup.skills.codex };
+  const claudeDone = claudeSkill.item.state === 'ok' || plugin.item.state === 'ok';
+  const shared = (key: 'codex' | 'opencode', label: string, other: string): AgentSetup => ({
+    key,
+    label,
+    state: stateOf(sharedSkill.item),
+    summary: skillSummary(sharedSkill.item, label),
+    methods:
+      sharedSkill.item.state === 'ok'
+        ? []
+        : [
+            {
+              label: 'Install the repository skill',
+              commands: [skillCommand('codex', sharedSkill.item)],
+            },
+          ],
+    note: `${label} and ${other} read the same file, so one install covers both.`,
+    evidence: [sharedSkill],
+  });
+  return [
+    {
+      key: 'claude',
+      label: 'Claude Code',
+      state: claudeDone ? 'done' : stateOf(claudeSkill.item),
+      summary: claudeDone
+        ? plugin.item.state === 'ok' && claudeSkill.item.state !== 'ok'
+          ? 'The Spectrum plugin is enabled; it follows the marketplace version.'
+          : skillSummary(claudeSkill.item, 'Claude Code')
+        : skillSummary(claudeSkill.item, 'Claude Code'),
+      methods: claudeDone
+        ? []
+        : [
+            {
+              label: 'Install the repository skill',
+              commands: [skillCommand('claude', claudeSkill.item)],
+            },
+            { label: 'Or enable the plugin', commands: [...SETUP_COMMANDS.plugin] },
+          ],
+      evidence: [claudeSkill, plugin],
+    },
+    shared('codex', 'Codex', 'OpenCode'),
+    shared('opencode', 'OpenCode', 'Codex'),
   ];
-  const plugin = { label: 'Claude Code plugin', item: setup.plugin };
-  const agentDone = [...skills, plugin].some((row) => row.item.state === 'ok');
-  const agentAttention = !agentDone && skills.some((row) => row.item.state === 'unmanaged');
+}
+
+export function onboardingSteps(setup: RepositorySetup): Onboarding {
+  const agents = agentSetups(setup);
+  const installed = agents.filter((agent) => agent.state === 'done');
+  const agentDone = installed.length > 0;
+  const agentAttention = !agentDone && agents.some((agent) => agent.state === 'attention');
 
   const packageState = stateOf(setup.package);
   const configState = stateOf(setup.config);
@@ -109,17 +187,13 @@ export function onboardingSteps(setup: RepositorySetup): Onboarding {
       title: 'Connect your coding agent',
       state: agentDone ? 'done' : agentAttention ? 'attention' : 'todo',
       summary: agentDone
-        ? 'An agent integration is installed. Repository skills pin the CLI version; the plugin follows the marketplace.'
+        ? `Installed for ${installed.map((agent) => agent.label).join(', ')}. Choose another agent to add it.`
         : agentAttention
-          ? 'A spectrum skill exists but was not installed by Spectrum. Reinstalling with --force replaces it.'
-          : 'No Spectrum skill or plugin is installed. Install repository skills, or enable the plugin.',
-      commands: agentDone
-        ? []
-        : [agentAttention ? `${SETUP_COMMANDS.skills} --force` : SETUP_COMMANDS.skills],
-      alternative: agentDone
-        ? undefined
-        : { label: 'Or enable the Claude Code plugin', commands: [...SETUP_COMMANDS.plugin] },
-      evidence: [...skills, plugin],
+          ? 'A spectrum skill exists but was not installed by Spectrum. Choose the agent to reinstall it for.'
+          : 'No Spectrum skill or plugin is installed. Choose the agent you use.',
+      commands: [],
+      evidence: [],
+      agents,
     },
   ];
   const done = steps.filter((step) => step.state === 'done').length;

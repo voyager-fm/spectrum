@@ -42,9 +42,47 @@ describe('onboardingSteps', () => {
     ]);
     assert.match(step(setup(), 'package').note ?? '', /not published to npm yet/);
     assert.deepEqual(step(setup(), 'config').commands, ['npx --no spectrum init']);
-    const agent = step(setup(), 'agent');
-    assert.deepEqual(agent.commands, ['npx --no spectrum skills install']);
-    assert.equal(agent.alternative?.commands.length, 2);
+    const agents = step(setup(), 'agent').agents ?? [];
+    assert.deepEqual(
+      agents.map((a) => [a.key, a.state]),
+      [
+        ['claude', 'todo'],
+        ['codex', 'todo'],
+        ['opencode', 'todo'],
+      ],
+    );
+    const [claude, codex, opencode] = agents;
+    assert.deepEqual(
+      claude?.methods.map((m) => m.commands),
+      [
+        ['npx --no spectrum skills install --agent claude'],
+        [
+          'claude plugin marketplace add voyager-fm/spectrum',
+          'claude plugin install spectrum@spectrum',
+        ],
+      ],
+    );
+    assert.deepEqual(codex?.methods[0]?.commands, [
+      'npx --no spectrum skills install --agent codex',
+    ]);
+    assert.deepEqual(opencode?.methods, codex?.methods, 'Codex and OpenCode share one skill file');
+  });
+
+  it('marks only the agents that are installed', () => {
+    const codexOnly = setup({
+      skills: {
+        claude: item('missing', '.claude/skills/spectrum/SKILL.md'),
+        codex: item('ok', '.agents/skills/spectrum/SKILL.md', '0.1.0'),
+      },
+    });
+    const agent = step(codexOnly, 'agent');
+    assert.equal(agent.state, 'done');
+    assert.match(agent.summary, /Installed for Codex, OpenCode/);
+    const [claude, codex] = agent.agents ?? [];
+    assert.equal(claude?.state, 'todo');
+    assert.equal(claude?.methods.length, 2, 'Claude Code still offers its commands');
+    assert.equal(codex?.state, 'done');
+    assert.deepEqual(codex?.methods, []);
   });
 
   it('counts either repository skills or the plugin as a connected agent', () => {
@@ -55,11 +93,12 @@ describe('onboardingSteps', () => {
       },
     });
     assert.equal(step(withSkill, 'agent').state, 'done');
-    assert.deepEqual(step(withSkill, 'agent').commands, []);
+    assert.deepEqual(step(withSkill, 'agent').agents?.[0]?.methods, []);
     const withPlugin = setup({
       plugin: item('ok', '.claude/settings.json', 'spectrum@spectrum enabled'),
     });
     assert.equal(step(withPlugin, 'agent').state, 'done');
+    assert.match(step(withPlugin, 'agent').agents?.[0]?.summary ?? '', /plugin is enabled/);
   });
 
   it('never counts a skill Spectrum did not install as done', () => {
@@ -71,7 +110,9 @@ describe('onboardingSteps', () => {
     });
     const agent = step(unmanaged, 'agent');
     assert.equal(agent.state, 'attention');
-    assert.deepEqual(agent.commands, ['npx --no spectrum skills install --force']);
+    assert.deepEqual(agent.agents?.[0]?.methods[0]?.commands, [
+      'npx --no spectrum skills install --agent claude --force',
+    ]);
   });
 
   it('asks to repair an invalid configuration instead of running init over it', () => {

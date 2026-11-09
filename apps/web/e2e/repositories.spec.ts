@@ -59,3 +59,27 @@ test('a connected repository shows its setup and its specs at one commit', async
   });
   await expect(page.getByText(id, { exact: true }).first()).toBeVisible();
 });
+
+test('the agent step switches commands per coding agent and remembers the choice', async ({
+  page,
+}) => {
+  await page.goto('/repositories/voyager-fm/spectrum');
+  const setup = page.getByRole('heading', { name: 'Connect a GitHub App' });
+  const agents = page.getByRole('tablist', { name: 'Coding agent' });
+  await expect(setup.or(agents)).toBeVisible({ timeout: 30_000 });
+  if (await setup.isVisible()) return;
+
+  await expect(agents.getByRole('tab')).toHaveText([/Claude Code/, /Codex/, /OpenCode/]);
+  await agents.getByRole('tab', { name: /Codex/ }).click();
+  const panel = page.getByRole('tabpanel');
+  await expect(panel.getByText('.agents/skills/spectrum/SKILL.md')).toBeVisible();
+  const codexCommand = panel.getByText('npx --no spectrum skills install --agent codex');
+  const installed = panel.getByText('Installed', { exact: true });
+  await expect(codexCommand.or(installed)).toBeVisible();
+  await expect(panel.getByText('claude plugin install')).toHaveCount(0);
+
+  await page.reload();
+  await expect(
+    page.getByRole('tablist', { name: 'Coding agent' }).getByRole('tab', { name: /Codex/ }),
+  ).toHaveAttribute('aria-selected', 'true', { timeout: 30_000 });
+});
