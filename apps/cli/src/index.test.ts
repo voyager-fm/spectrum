@@ -172,7 +172,7 @@ test('CLI rejects unknown options and agents and reports its version', async (t)
   const version = cli(['--version']);
   assert.equal(version.status, 0);
   const manifest = JSON.parse(await readFile(join(root, 'apps/cli/package.json'), 'utf8'));
-  assert.equal(version.stdout.trim(), manifest.version);
+  assert.equal(version.stdout.trim(), `@voyager-fm/spectrum ${manifest.version}`);
 });
 
 test('status reports missing steps, readiness and skill version drift without writing', async (t) => {

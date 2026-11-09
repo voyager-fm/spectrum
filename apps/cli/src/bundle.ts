@@ -4,6 +4,7 @@ import { build, type Plugin } from 'esbuild';
 import { VERSION } from './version.ts';
 
 // Bundles the CLI into one self-contained Node script for the npm package and the plugin.
+// The plugin bundles its launcher entry, which wraps the same CLI.
 // Template files and the package version are embedded, so the bundle reads nothing from the
 // workspace at run time.
 
@@ -44,9 +45,13 @@ function embed(files: Record<string, string>): Plugin {
   };
 }
 
-export async function bundleCli(generator: string): Promise<string> {
+/** Bundle `entry` (the CLI by default) with the embedded templates and version. */
+export async function bundleCli(generator: string, entry = ENTRY): Promise<string> {
   const result = await build({
-    entryPoints: [ENTRY],
+    entryPoints: [entry],
+    // Module paths in the output are relative to this; pin it so any working directory builds
+    // the same bytes.
+    absWorkingDir: resolve(cliRoot, '../..'),
     bundle: true,
     platform: 'node',
     format: 'esm',

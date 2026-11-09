@@ -5,16 +5,25 @@ description: Check and list the repository's Spectrum product specs in .spectrum
 
 # Spectrum
 
-Spectrum keeps product and technical specs in the repository under `.spectrum/`. You do the reasoning; the bundled CLI does the exact checks. Never guess a check result: run the CLI.
+Spectrum keeps product and technical specs in the repository under `.spectrum/`. You do the reasoning; the Spectrum CLI does the exact checks. Never guess a check result: run the CLI.
 
 ## Run the CLI
 
-Prefer the repository's own installed CLI so checks use the version the repository pins. From the repository root:
+From the repository root, run the bundled launcher, `scripts/spectrum.mjs` in this skill's base directory, with Node 20 or later:
 
-1. If `node_modules/.bin/spectrum` exists, run it: `node_modules/.bin/spectrum check`.
-2. Otherwise run the bundled copy, `scripts/spectrum.mjs` in this skill's base directory, with Node 20 or later: `node "<skill base directory>/scripts/spectrum.mjs" check`.
+```sh
+node "<skill base directory>/scripts/spectrum.mjs" check
+```
 
-Say which one you ran. Both accept the same commands:
+The launcher decides which Spectrum CLI runs, so checks use the version the repository pins:
+
+1. The repository's pinned `@voyager-fm/spectrum`, found from the working directory up to the Git root: `node_modules` (npm, Yarn classic, hoisted workspaces), pnpm's hidden hoist directory, or Yarn Plug'n'Play through `yarn run spectrum`.
+2. Otherwise a global `spectrum` on `PATH`, only when its package manifest identifies `@voyager-fm/spectrum` and its version is newer than the bundle.
+3. Otherwise the bundled CLI.
+
+Stdout and the exit status are the chosen CLI's own. Stderr names the CLI that ran and why another was skipped. If the pinned version is older than the bundle, stderr says so; when that older CLI rejects a command as unknown (exit code 2), the launcher runs the bundled CLI instead and says so.
+
+Tell the user which CLI ran and its version, from the stderr line, and relay any version note. The CLI accepts:
 
 ```sh
 spectrum check [repository path]
@@ -22,7 +31,7 @@ spectrum list [repository path]
 spectrum --version
 ```
 
-The repository path defaults to the current directory.
+The repository path defaults to the current directory. The launcher picks the CLI from the working directory, not from that path, so run it from the repository you are checking. `--version` prints the package name and version.
 
 - `check` prints `{ "ok", "findings", "specs", "config", "model" }` as JSON. Exit code 0 means no structural errors; unresolved warnings remain visible. Exit code 1 means structural errors or a missing/invalid configuration.
 - `list` prints the parsed interaction specs as a JSON array. It uses the same validation and exit status.

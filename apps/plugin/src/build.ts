@@ -4,15 +4,18 @@ import { fileURLToPath } from 'node:url';
 import { bundleCli as bundleStandaloneCli } from '../../cli/src/bundle.ts';
 import { validatePlugin } from './validate.ts';
 
-// Validates the plugin and bundles apps/cli into every skill that runs it.
+// Validates the plugin and bundles apps/cli, behind the launcher, into every skill that runs it.
 // `--check` writes nothing and fails when a checked-in bundle is stale.
 
 const pluginRoot = resolve(import.meta.dirname, '..');
 const repoRoot = resolve(pluginRoot, '../..');
 const BUNDLE = 'scripts/spectrum.mjs';
 
+const LAUNCHER = resolve(import.meta.dirname, 'launcher.ts');
+
+/** The plugin's `scripts/spectrum.mjs`: the CLI behind the launcher that picks which CLI runs. */
 export function bundleCli(): Promise<string> {
-  return bundleStandaloneCli('apps/plugin/src/build.ts');
+  return bundleStandaloneCli('apps/plugin/src/build.ts', LAUNCHER);
 }
 
 async function readOrNull(path: string): Promise<string | null> {
