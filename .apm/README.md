@@ -1,6 +1,6 @@
 # Spectrum development harness
 
-Four authored Agent Skills provide development orchestration, UI, test authoring and evidence-based verification. Root AGENTS.md links them explicitly.
+Three authored Agent Skills provide development orchestration (including verification), dashboard UI and test authoring. Root AGENTS.md links them explicitly.
 
 ## Layout and APM ownership
 - `.apm/library/<skill>/`: canonical authored skill sources. Each directory is a local APM package selected in root `apm.yml`.
@@ -37,4 +37,4 @@ Static file/frontmatter/link checks establish structure only. No model-run skill
 
 Security checks are integrated into test authoring and review where they have a behavior owner; no standalone scanner or generic security agent was added. No UI framework, client configuration, MCP server, service credential, CI workflow or external review bot was enabled. Source project licensing and event reuse eligibility remain separate questions for any future verbatim code reuse.
 
-Removed on 2026-11-09 as redundant for the current scaffold: spectrum-review-feedback (overlaps spectrum-verification and client-native review), references/delegation.md (its single-integration-owner rule remains in spectrum-development) and the never-run evals.json. spectrum-spec-authoring was also removed because it encoded the provisional document model; reintroduce it after the model's canonical serialization and IDs are frozen.
+Removed on 2026-11-09 as redundant for the current scaffold: spectrum-review-feedback (overlapped verification and client-native review), references/delegation.md (its single-integration-owner rule remains in spectrum-development) and the never-run evals.json. spectrum-spec-authoring was also removed because it encoded the provisional document model; reintroduce it after the model's canonical serialization and IDs are frozen. spectrum-verification was folded into spectrum-development's verify step and spectrum-ui's references/verification.md to keep the harness small during the build window.

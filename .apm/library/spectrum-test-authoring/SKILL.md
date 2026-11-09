@@ -1,6 +1,6 @@
 ---
 name: spectrum-test-authoring
-description: "Create or repair behavior-focused Spectrum unit, API or browser tests. Use before new assertions, integration fixtures or security regression coverage; verification-only requests use spectrum-verification."
+description: "Create or repair behavior-focused Spectrum unit, API or browser tests. Use before new assertions, integration fixtures or security regression coverage."
 ---
 
 # Spectrum test authoring
@@ -16,4 +16,4 @@ Start with the behavior and its actual owner, not the directory layout. Product 
 5. Where implemented, cover invalid webhook signatures, duplicate delivery, stale revision, changed approval digest, path traversal/symlink escape, unauthorized access and secret redaction. Derive expectations from approved contracts; do not implement a security feature merely because it appears on this checklist.
 6. Run the owning suite and confirm nonzero selected tests. Record the failure before a fix where feasible and the result after it. If execution is blocked, report authored coverage separately from executed coverage.
 
-Use spectrum-verification to reconcile final evidence. No new framework, CI workflow, external service or automatic security scan is enabled by this skill.
+No new framework, CI workflow, external service or automatic security scan is enabled by this skill.

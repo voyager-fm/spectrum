@@ -7,4 +7,3 @@ dependencies:
     - path: ./.apm/library/spectrum-development
     - path: ./.apm/library/spectrum-test-authoring
     - path: ./.apm/library/spectrum-ui
-    - path: ./.apm/library/spectrum-verification
