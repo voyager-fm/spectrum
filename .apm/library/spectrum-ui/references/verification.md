@@ -7,6 +7,12 @@ Report each item as passed, failed or not run. Do not merge them into one "verif
 - Loader behavior belongs in `apps/web/src/lib/dashboard.test.ts`. Use temporary repositories for missing and broken `.spectrum` data. Do not test rendered markup to freeze layout.
 - `pnpm --filter @spectrum/web build` when routing, metadata or server/client boundaries changed. Typecheck does not catch every build error.
 
+## Browser smoke tests
+- Use the root `.nvmrc` with `nvm use`. After dependency installation, run `pnpm --filter @spectrum/web exec playwright install chromium` to install the matching browser.
+- Run `pnpm test:e2e` for broad Chromium smoke coverage of dashboard loading and Specs/Rules navigation. Keep assertions about observable behavior; do not freeze detailed copy, layout or fixture counts.
+- `pnpm test:e2e:ui` opens the interactive runner. The suite reuses the local Spectrum server on port 3000 or starts its own, and retains a trace and screenshot on failure. See `apps/web/README.md` for commands and artifacts.
+- Browser tests run separately from `pnpm check`. These smoke tests do not cover every state or replace visual inspection.
+
 ## Running the dashboard
 - `pnpm dev` serves http://127.0.0.1:3000 against this repository. Next allows one dev server per directory: if another session already runs one, use that server (it hot-reloads your edits) instead of killing it.
 - To see empty and failure states, point it at a temporary repository: `SPECTRUM_REPOSITORY=/tmp/x pnpm dev` with no `.spectrum`, or with a malformed `config.json` or a feature spec with a broken link.

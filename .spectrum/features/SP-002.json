@@ -7,10 +7,5 @@
     "Statuses are document approval states, not implementation verification.",
     "Dashboard is loopback-only and read-only in this scaffold."
   ],
-  "links": [
-    "overview.md",
-    "rules/agents.md",
-    "contracts/change-set.md",
-    "flows/spec-loop.md"
-  ]
+  "links": ["overview.md", "rules/agents.md", "contracts/change-set.md", "flows/spec-loop.md"]
 }

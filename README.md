@@ -15,9 +15,11 @@ Inside Claude Code 2.1.275 or later: `/plugin install spectrum --marketplace voy
 
 ## Develop
 
-Node 22.18+ and pnpm 10 are required. From this directory:
+Node 22.18+ is required; `.nvmrc` pins the development runtime to Node 24.13.0. pnpm is pinned to 10.20.0. From this directory:
 
 ```sh
+nvm install
+nvm use
 pnpm install
 pnpm check
 pnpm spec:list
@@ -25,6 +27,23 @@ pnpm dev
 ```
 
 Open http://127.0.0.1:3000. The Next.js dashboard reads this repository's own .spectrum directory at request time; set `SPECTRUM_REPOSITORY=/path/to/repository` to read another local repository. `pnpm cli check /path/to/repository` validates another compatible repository without writing to it.
+
+Web browser tests: install Chromium with `pnpm --filter @spectrum/web exec playwright install chromium`, then run `pnpm test:e2e` (or `pnpm test:e2e:ui`). See [web development](apps/web/README.md) for server reuse and reports. Browser tests run separately from `pnpm check`.
+
+### Code quality
+The root `biome.json` is shared by every app and package. Biome is pinned in the root development dependencies; use the workspace binary through pnpm rather than a global installation.
+
+| Command | Purpose |
+| --- | --- |
+| `pnpm lint` | Check lint rules, formatting and import organization without writing files; warnings fail the check |
+| `pnpm lint:fix` | Apply formatting, safe lint fixes and import organization |
+| `pnpm format` | Format files without applying lint fixes |
+| `pnpm format:check` | Check formatting without writing files |
+| `pnpm check` | Run Biome, typechecks, tests, spec validation and plugin validation |
+
+JavaScript, TypeScript, JSX/TSX, JSON/JSONC and CSS use two spaces, LF line endings and a 100-column target. JavaScript strings use single quotes, JSX attributes use double quotes, and statements use semicolons. Tailwind CSS v4 directives are supported. `.editorconfig` supplies matching editor defaults.
+
+Biome respects `.gitignore`, including generated build output and deployed agent skills. The generated `apps/plugin/skills/*/scripts/spectrum.mjs` bundles are also excluded; regenerate them with `pnpm plugin:build`. Markdown, YAML, TOML and TSV are outside automatic code formatting so specification and harness source formats stay intact.
 
 ## Structure
 

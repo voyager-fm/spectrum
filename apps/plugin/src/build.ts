@@ -1,4 +1,4 @@
-import { chmod, readFile, readdir, writeFile } from 'node:fs/promises';
+import { chmod, readdir, readFile, writeFile } from 'node:fs/promises';
 import { join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { build } from 'esbuild';
@@ -59,16 +59,10 @@ async function main(check: boolean): Promise<number> {
       console.log(`wrote ${relative(repoRoot, target)}`);
     }
   }
-  for (const p of problems)
-    console.error(`${relative(repoRoot, p.path)}: ${p.message}`);
-  console.log(
-    problems.length ? `plugin: ${problems.length} problem(s)` : 'plugin: ok',
-  );
+  for (const p of problems) console.error(`${relative(repoRoot, p.path)}: ${p.message}`);
+  console.log(problems.length ? `plugin: ${problems.length} problem(s)` : 'plugin: ok');
   return problems.length ? 1 : 0;
 }
 
-if (
-  process.argv[1] &&
-  resolve(process.argv[1]) === fileURLToPath(import.meta.url)
-)
+if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url))
   process.exitCode = await main(process.argv.includes('--check'));

@@ -37,10 +37,10 @@ test('the shipped plugin passes validation', async () => {
 });
 
 test('frontmatter parsing strips quotes and rejects nested YAML', () => {
-  assert.deepEqual(
-    parseFrontmatter(skill('name: a\ndescription: "Does x."')).fields,
-    { name: 'a', description: 'Does x.' },
-  );
+  assert.deepEqual(parseFrontmatter(skill('name: a\ndescription: "Does x."')).fields, {
+    name: 'a',
+    description: 'Does x.',
+  });
   assert.throws(
     () => parseFrontmatter(skill('metadata:\n  author: x')),
     /Unsupported frontmatter line/,
@@ -49,30 +49,20 @@ test('frontmatter parsing strips quotes and rejects nested YAML', () => {
 });
 
 test('name must be kebab-case and match the directory', async () => {
-  await withSkill(
-    'good-skill',
-    skill('name: Bad--Name\ndescription: x'),
-    async (dir) => {
-      const m = await messages(dir, 'good-skill');
-      assert.ok(m.some((x) => x.startsWith('Invalid name')));
-      assert.ok(m.some((x) => x.includes('must equal the directory name')));
-    },
-  );
+  await withSkill('good-skill', skill('name: Bad--Name\ndescription: x'), async (dir) => {
+    const m = await messages(dir, 'good-skill');
+    assert.ok(m.some((x) => x.startsWith('Invalid name')));
+    assert.ok(m.some((x) => x.includes('must equal the directory name')));
+  });
 });
 
 test('description is required and limited to 1024 characters', async () => {
   await withSkill('s', skill('name: s'), async (dir) => {
     assert.ok((await messages(dir, 's')).includes('Missing description'));
   });
-  await withSkill(
-    's',
-    skill(`name: s\ndescription: ${'x'.repeat(1025)}`),
-    async (dir) => {
-      assert.ok(
-        (await messages(dir, 's')).some((x) => x.includes('limit is 1024')),
-      );
-    },
-  );
+  await withSkill('s', skill(`name: s\ndescription: ${'x'.repeat(1025)}`), async (dir) => {
+    assert.ok((await messages(dir, 's')).some((x) => x.includes('limit is 1024')));
+  });
 });
 
 test('unknown keys, long bodies and bad links are reported', async () => {
@@ -86,11 +76,7 @@ test('unknown keys, long bodies and bad links are reported', async () => {
       assert.ok(m.some((x) => x.startsWith('Body has')));
       assert.ok(m.includes('Link target does not exist: missing.md'));
       assert.ok(m.includes('Link leaves the skill directory: ../x.md'));
-      assert.ok(
-        !m.some(
-          (x) => x.includes('references/a.md') || x.includes('example.com'),
-        ),
-      );
+      assert.ok(!m.some((x) => x.includes('references/a.md') || x.includes('example.com')));
     },
     { 'references/a.md': '# A\n' },
   );

@@ -17,13 +17,18 @@
     "test:documents": "node scripts/test-document-snapshot.ts && node scripts/test-document-parsing.ts",
     "test:tables": "node scripts/test-table-validation.ts",
     "typecheck": "tsc --noEmit && pnpm --filter @spectrum/web typecheck",
-    "check": "pnpm typecheck && pnpm test && pnpm spec:check && pnpm plugin:check",
+    "lint": "biome check --error-on-warnings .",
+    "lint:fix": "biome check --write --error-on-warnings .",
+    "format": "biome format --write .",
+    "format:check": "biome format .",
+    "check": "pnpm lint && pnpm typecheck && pnpm test && pnpm spec:check && pnpm plugin:check",
     "agents:setup": "apm install --frozen && apm audit --ci",
     "agents:sync": "apm install && apm audit --ci",
     "plugin:build": "pnpm --filter @spectrum/plugin build",
     "plugin:check": "pnpm --filter @spectrum/plugin check"
   },
   "devDependencies": {
+    "@biomejs/biome": "2.6.6",
     "@types/node": "^22.0.0",
     "typescript": "^5.9.0"
   }

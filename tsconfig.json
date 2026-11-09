@@ -8,15 +8,8 @@
     "allowImportingTsExtensions": true,
     "erasableSyntaxOnly": true,
     "skipLibCheck": true,
-    "types": [
-      "node"
-    ]
+    "types": ["node"]
   },
-  "include": [
-    "apps/**/*.ts",
-    "packages/**/*.ts"
-  ],
-  "exclude": [
-    "apps/web"
-  ]
+  "include": ["apps/**/*.ts", "packages/**/*.ts"],
+  "exclude": ["apps/web"]
 }

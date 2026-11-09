@@ -1,4 +1,4 @@
-import { readFile, readdir, stat } from 'node:fs/promises';
+import { readdir, readFile, stat } from 'node:fs/promises';
 import { isAbsolute, join, relative, resolve } from 'node:path';
 
 // Rules from .spectrum/contracts/distribution.md and the Agent Skills specification.
@@ -9,13 +9,7 @@ export interface Problem {
 }
 
 const NAME = /^[a-z0-9]+(-[a-z0-9]+)*$/;
-const SKILL_KEYS = new Set([
-  'name',
-  'description',
-  'license',
-  'compatibility',
-  'allowed-tools',
-]);
+const SKILL_KEYS = new Set(['name', 'description', 'license', 'compatibility', 'allowed-tools']);
 const MAX_BODY_LINES = 500;
 
 export interface Frontmatter {
@@ -35,11 +29,8 @@ export function parseFrontmatter(text: string): Frontmatter {
     if (!line.trim()) continue;
     const match = /^([a-z][a-z-]*):\s+(.+)$/.exec(line);
     if (!match)
-      throw new Error(
-        `Unsupported frontmatter line (use one "key: value" per line): ${line}`,
-      );
-    if (match[1] in fields)
-      throw new Error(`Duplicate frontmatter key: ${match[1]}`);
+      throw new Error(`Unsupported frontmatter line (use one "key: value" per line): ${line}`);
+    if (match[1] in fields) throw new Error(`Duplicate frontmatter key: ${match[1]}`);
     fields[match[1]] = match[2].trim().replace(/^(["'])(.*)\1$/, '$2');
   }
   return { fields, body: source.slice(end + 5) };
@@ -54,10 +45,7 @@ async function exists(path: string): Promise<boolean> {
   }
 }
 
-export async function validateSkill(
-  dir: string,
-  dirName: string,
-): Promise<Problem[]> {
+export async function validateSkill(dir: string, dirName: string): Promise<Problem[]> {
   const path = join(dir, 'SKILL.md');
   const problems: Problem[] = [];
   const report = (message: string) => problems.push({ path, message });
@@ -75,23 +63,17 @@ export async function validateSkill(
   if (!name) report('Missing name');
   else {
     if (name.length > 64 || !NAME.test(name))
-      report(
-        `Invalid name "${name}": use 1-64 lowercase letters, digits and single hyphens`,
-      );
-    if (name !== dirName)
-      report(`Name "${name}" must equal the directory name "${dirName}"`);
+      report(`Invalid name "${name}": use 1-64 lowercase letters, digits and single hyphens`);
+    if (name !== dirName) report(`Name "${name}" must equal the directory name "${dirName}"`);
   }
   const description = fields.description ?? '';
   if (!description) report('Missing description');
   else if (description.length > 1024)
-    report(
-      `Description is ${description.length} characters; the limit is 1024`,
-    );
+    report(`Description is ${description.length} characters; the limit is 1024`);
   if (fields.compatibility !== undefined && fields.compatibility.length > 500)
     report('Compatibility exceeds 500 characters');
   const lines = body.split('\n').length;
-  if (lines > MAX_BODY_LINES)
-    report(`Body has ${lines} lines; the limit is ${MAX_BODY_LINES}`);
+  if (lines > MAX_BODY_LINES) report(`Body has ${lines} lines; the limit is ${MAX_BODY_LINES}`);
 
   for (const [, target] of body.matchAll(/\]\(([^)\s]+)\)/g)) {
     if (/^[a-z][a-z0-9+.-]*:/i.test(target) || target.startsWith('#')) continue;
@@ -100,8 +82,7 @@ export async function validateSkill(
     const rel = relative(dir, full);
     if (rel.startsWith('..') || isAbsolute(rel))
       report(`Link leaves the skill directory: ${target}`);
-    else if (!(await exists(full)))
-      report(`Link target does not exist: ${target}`);
+    else if (!(await exists(full))) report(`Link target does not exist: ${target}`);
   }
   return problems;
 }
@@ -111,12 +92,10 @@ export async function validatePlugin(root: string): Promise<Problem[]> {
   const manifestPath = join(root, '.claude-plugin/plugin.json');
   try {
     const manifest = JSON.parse(await readFile(manifestPath, 'utf8'));
-    const report = (message: string) =>
-      problems.push({ path: manifestPath, message });
+    const report = (message: string) => problems.push({ path: manifestPath, message });
     if (typeof manifest.name !== 'string' || !NAME.test(manifest.name))
       report('name must be kebab-case');
-    if (typeof manifest.version !== 'string' || !manifest.version)
-      report('version is required');
+    if (typeof manifest.version !== 'string' || !manifest.version) report('version is required');
     if (typeof manifest.description !== 'string' || !manifest.description)
       report('description is required');
     if (typeof manifest.author?.name !== 'string' || !manifest.author.name)
@@ -130,16 +109,14 @@ export async function validatePlugin(root: string): Promise<Problem[]> {
   if (await exists(join(root, 'bin'))) {
     problems.push({
       path: join(root, 'bin'),
-      message:
-        "Top-level bin/ is not allowed; ship the CLI in each skill's scripts/",
+      message: "Top-level bin/ is not allowed; ship the CLI in each skill's scripts/",
     });
   }
   const skillsDir = join(root, 'skills');
-  const entries = (await readdir(skillsDir, { withFileTypes: true })).filter(
-    (e) => e.isDirectory(),
+  const entries = (await readdir(skillsDir, { withFileTypes: true })).filter((e) =>
+    e.isDirectory(),
   );
-  if (!entries.length)
-    problems.push({ path: skillsDir, message: 'Plugin has no skills' });
+  if (!entries.length) problems.push({ path: skillsDir, message: 'Plugin has no skills' });
   for (const entry of entries) {
     const dir = join(skillsDir, entry.name);
     if (!(await exists(join(dir, 'SKILL.md'))))

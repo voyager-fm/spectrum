@@ -7,10 +7,5 @@
     "Duplicate IDs, malformed specs and missing local links fail validation.",
     "Validation never edits the repository."
   ],
-  "links": [
-    "overview.md",
-    "rules/agents.md",
-    "contracts/change-set.md",
-    "flows/spec-loop.md"
-  ]
+  "links": ["overview.md", "rules/agents.md", "contracts/change-set.md", "flows/spec-loop.md"]
 }

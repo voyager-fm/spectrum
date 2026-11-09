@@ -6,12 +6,7 @@
       "id": "obj-proposal",
       "title": "Proposal",
       "description": "A change proposal reviewed by a person. Document approval and applying changes are separate.",
-      "states": [
-        "draft",
-        "in_review",
-        "approved",
-        "stale"
-      ]
+      "states": ["draft", "in_review", "approved", "stale"]
     }
   ],
   "surfaces": [
@@ -35,12 +30,8 @@
       "title": "Review a proposal",
       "category_id": "cat-review",
       "intent": "A person reviews and approves the exact changes and supporting evidence.",
-      "object_ids": [
-        "obj-proposal"
-      ],
-      "surface_ids": [
-        "surface-review"
-      ],
+      "object_ids": ["obj-proposal"],
+      "surface_ids": ["surface-review"],
       "lifecycle": {
         "phase": "now",
         "implementation": "planned",
@@ -58,18 +49,10 @@
       "feature_id": "feat-review-proposal",
       "kind": "command",
       "trigger": "The reviewer selects Approve.",
-      "surface_ids": [
-        "surface-review"
-      ],
-      "object_ids": [
-        "obj-proposal"
-      ],
-      "contract_ids": [
-        "contract-approval"
-      ],
-      "flow_ids": [
-        "flow-review"
-      ],
+      "surface_ids": ["surface-review"],
+      "object_ids": ["obj-proposal"],
+      "contract_ids": ["contract-approval"],
+      "flow_ids": ["flow-review"],
       "spec_id": "spec-approve-proposal",
       "lifecycle": {
         "phase": "now",
@@ -86,12 +69,8 @@
       "id": "contract-approval",
       "title": "Proposal approval",
       "path": "contracts/approval.toml",
-      "object_ids": [
-        "obj-proposal"
-      ],
-      "interaction_ids": [
-        "int-approve-proposal"
-      ],
+      "object_ids": ["obj-proposal"],
+      "interaction_ids": ["int-approve-proposal"],
       "lifecycle": {
         "phase": "now",
         "implementation": "planned",
@@ -107,12 +86,8 @@
       "id": "flow-review",
       "title": "Review proposal",
       "path": "flows/review.md",
-      "contract_ids": [
-        "contract-approval"
-      ],
-      "interaction_ids": [
-        "int-approve-proposal"
-      ],
+      "contract_ids": ["contract-approval"],
+      "interaction_ids": ["int-approve-proposal"],
       "lifecycle": {
         "phase": "now",
         "implementation": "planned",
@@ -129,12 +104,8 @@
       "title": "Approve proposal",
       "path": "specs/approve-proposal.md",
       "interaction_id": "int-approve-proposal",
-      "contract_ids": [
-        "contract-approval"
-      ],
-      "flow_ids": [
-        "flow-review"
-      ],
+      "contract_ids": ["contract-approval"],
+      "flow_ids": ["flow-review"],
       "acceptance_criteria": [
         {
           "id": "AC-1",

@@ -103,12 +103,7 @@
       "additionalProperties": false,
       "properties": {
         "state": {
-          "enum": [
-            "draft",
-            "in_review",
-            "approved",
-            "changes_requested"
-          ]
+          "enum": ["draft", "in_review", "approved", "changes_requested"]
         },
         "approval": {
           "oneOf": [
@@ -132,19 +127,12 @@
                   "pattern": "^[a-f0-9]{64}$"
                 }
               },
-              "required": [
-                "actor_id",
-                "approved_at",
-                "content_sha256"
-              ]
+              "required": ["actor_id", "approved_at", "content_sha256"]
             }
           ]
         }
       },
-      "required": [
-        "state",
-        "approval"
-      ],
+      "required": ["state", "approval"],
       "allOf": [
         {
           "if": {
@@ -176,31 +164,16 @@
       "additionalProperties": false,
       "properties": {
         "phase": {
-          "enum": [
-            "now",
-            "next",
-            "later",
-            "undecided"
-          ]
+          "enum": ["now", "next", "later", "undecided"]
         },
         "implementation": {
-          "enum": [
-            "unverified",
-            "planned",
-            "in_progress",
-            "implemented",
-            "released"
-          ]
+          "enum": ["unverified", "planned", "in_progress", "implemented", "released"]
         },
         "review": {
           "$ref": "#/$defs/review"
         }
       },
-      "required": [
-        "phase",
-        "implementation",
-        "review"
-      ]
+      "required": ["phase", "implementation", "review"]
     },
     "object": {
       "type": "object",
@@ -227,12 +200,7 @@
           "uniqueItems": true
         }
       },
-      "required": [
-        "id",
-        "title",
-        "description",
-        "states"
-      ]
+      "required": ["id", "title", "description", "states"]
     },
     "surface": {
       "type": "object",
@@ -247,26 +215,14 @@
           "minLength": 1
         },
         "kind": {
-          "enum": [
-            "web",
-            "cli",
-            "api",
-            "background",
-            "desktop",
-            "other"
-          ]
+          "enum": ["web", "cli", "api", "background", "desktop", "other"]
         },
         "description": {
           "type": "string",
           "minLength": 1
         }
       },
-      "required": [
-        "id",
-        "title",
-        "kind",
-        "description"
-      ]
+      "required": ["id", "title", "kind", "description"]
     },
     "category": {
       "type": "object",
@@ -285,11 +241,7 @@
           "minLength": 1
         }
       },
-      "required": [
-        "id",
-        "title",
-        "description"
-      ]
+      "required": ["id", "title", "description"]
     },
     "feature": {
       "type": "object",
@@ -331,15 +283,7 @@
           "$ref": "#/$defs/lifecycle"
         }
       },
-      "required": [
-        "id",
-        "title",
-        "category_id",
-        "intent",
-        "object_ids",
-        "surface_ids",
-        "lifecycle"
-      ]
+      "required": ["id", "title", "category_id", "intent", "object_ids", "surface_ids", "lifecycle"]
     },
     "interaction": {
       "type": "object",
@@ -358,12 +302,7 @@
           "pattern": "^feat-[a-z][a-z0-9_-]*$"
         },
         "kind": {
-          "enum": [
-            "command",
-            "display",
-            "background",
-            "event"
-          ]
+          "enum": ["command", "display", "background", "event"]
         },
         "trigger": {
           "type": "string",
@@ -459,14 +398,7 @@
           "$ref": "#/$defs/lifecycle"
         }
       },
-      "required": [
-        "id",
-        "title",
-        "path",
-        "object_ids",
-        "interaction_ids",
-        "lifecycle"
-      ]
+      "required": ["id", "title", "path", "object_ids", "interaction_ids", "lifecycle"]
     },
     "flow": {
       "type": "object",
@@ -504,14 +436,7 @@
           "$ref": "#/$defs/lifecycle"
         }
       },
-      "required": [
-        "id",
-        "title",
-        "path",
-        "contract_ids",
-        "interaction_ids",
-        "lifecycle"
-      ]
+      "required": ["id", "title", "path", "contract_ids", "interaction_ids", "lifecycle"]
     },
     "spec": {
       "type": "object",
@@ -565,11 +490,7 @@
                 "minLength": 1
               },
               "verification": {
-                "enum": [
-                  "not_run",
-                  "passed",
-                  "failed"
-                ]
+                "enum": ["not_run", "passed", "failed"]
               },
               "evidence_refs": {
                 "type": "array",
@@ -580,12 +501,7 @@
                 "uniqueItems": true
               }
             },
-            "required": [
-              "id",
-              "statement",
-              "verification",
-              "evidence_refs"
-            ]
+            "required": ["id", "statement", "verification", "evidence_refs"]
           }
         }
       },
@@ -608,32 +524,20 @@
           "minLength": 1
         },
         "provider": {
-          "enum": [
-            "github",
-            "linear"
-          ]
+          "enum": ["github", "linear"]
         },
         "url": {
           "type": "string",
           "format": "uri"
         },
         "kind": {
-          "enum": [
-            "issue",
-            "pull_request"
-          ]
+          "enum": ["issue", "pull_request"]
         },
         "sync": {
           "const": "reference_only"
         }
       },
-      "required": [
-        "entity_id",
-        "provider",
-        "url",
-        "kind",
-        "sync"
-      ]
+      "required": ["entity_id", "provider", "url", "kind", "sync"]
     }
   }
 }

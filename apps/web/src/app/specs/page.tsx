@@ -1,8 +1,22 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { EmptyNotice, LoadErrors, Mono, PageHead, Section, StatusBadge } from '../../components/dashboard.tsx';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import {
+  EmptyNotice,
+  LoadErrors,
+  Mono,
+  PageHead,
+  Section,
+  StatusBadge,
+} from '../../components/dashboard.tsx';
 import { loadDashboard } from '../../lib/dashboard.ts';
 
 export const metadata: Metadata = { title: 'Specs' };
@@ -15,12 +29,19 @@ export default async function SpecsPage() {
     <>
       <PageHead
         title="Specs"
-        description={<>Feature specs from <Mono>.spectrum/features</Mono> and the shared contracts and flows they link to.</>}
+        description={
+          <>
+            Feature specs from <Mono>.spectrum/features</Mono> and the shared contracts and flows
+            they link to.
+          </>
+        }
       />
       <LoadErrors errors={data.errors} />
 
       {specs.length === 0 ? (
-        <EmptyNotice>No feature specs found. Run <Mono>pnpm spec:check</Mono> for details.</EmptyNotice>
+        <EmptyNotice>
+          No feature specs found. Run <Mono>pnpm spec:check</Mono> for details.
+        </EmptyNotice>
       ) : (
         <div className="rounded-xl border">
           <Table>
@@ -37,12 +58,19 @@ export default async function SpecsPage() {
               {specs.map((s) => (
                 <TableRow key={s.path}>
                   <TableCell>
-                    <Link href={`/specs/${encodeURIComponent(s.id)}`} className="font-mono text-xs font-medium underline-offset-4 hover:underline">
+                    <Link
+                      href={`/specs/${encodeURIComponent(s.id)}`}
+                      className="font-mono text-xs font-medium underline-offset-4 hover:underline"
+                    >
                       {s.id}
                     </Link>
                   </TableCell>
                   <TableCell className="whitespace-normal">{s.title}</TableCell>
-                  <TableCell><StatusBadge tone={s.status === 'approved' ? 'ok' : 'neutral'}>{s.status}</StatusBadge></TableCell>
+                  <TableCell>
+                    <StatusBadge tone={s.status === 'approved' ? 'ok' : 'neutral'}>
+                      {s.status}
+                    </StatusBadge>
+                  </TableCell>
                   <TableCell className="text-right tabular-nums">{s.acceptance.length}</TableCell>
                   <TableCell className="text-right tabular-nums">{s.links.length}</TableCell>
                 </TableRow>
@@ -71,9 +99,9 @@ export default async function SpecsPage() {
 
       <Section title="Relationship graph">
         <p className="text-sm text-muted-foreground">
-          Objects, surfaces, interactions and their contract/flow/spec relationships come from the richer document model (
-          <Mono>.spectrum/schemas/document-model.schema.json</Mono>). The spec engine does not read that model yet, so no
-          graph is shown.
+          Objects, surfaces, interactions and their contract/flow/spec relationships come from the
+          richer document model (<Mono>.spectrum/schemas/document-model.schema.json</Mono>). The
+          spec engine does not read that model yet, so no graph is shown.
         </p>
       </Section>
     </>

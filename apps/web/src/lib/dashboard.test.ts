@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { mkdtemp, mkdir, rm, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import test from 'node:test';
@@ -12,7 +12,9 @@ test('dashboard snapshot reads the repository own specs, rules and config', asyn
   assert.deepEqual(data.errors, []);
   assert.equal(data.check?.ok, true);
   assert.ok(data.check?.specs.some((s) => s.id === 'SP-001'));
-  assert.ok(data.rules.some((r) => r.path === '.spectrum/rules/agents.md' && r.title === 'Agent rules'));
+  assert.ok(
+    data.rules.some((r) => r.path === '.spectrum/rules/agents.md' && r.title === 'Agent rules'),
+  );
   assert.equal(data.overview?.title, 'Spectrum');
   assert.equal(data.config?.mode, 'proposal-only');
   assert.equal(data.config?.github, false);
@@ -42,10 +44,13 @@ test('documents are sorted, filtered to md/toml and titled by first heading', as
     await writeFile(join(dir, '.spectrum/rules/a.toml'), 'key = 1\n');
     await writeFile(join(dir, '.spectrum/rules/ignored.json'), '{}');
     const docs = await readDocuments(dir, 'rules');
-    assert.deepEqual(docs.map((d) => [d.path, d.title]), [
-      ['.spectrum/rules/a.toml', 'a.toml'],
-      ['.spectrum/rules/b.md', 'Beta rules'],
-    ]);
+    assert.deepEqual(
+      docs.map((d) => [d.path, d.title]),
+      [
+        ['.spectrum/rules/a.toml', 'a.toml'],
+        ['.spectrum/rules/b.md', 'Beta rules'],
+      ],
+    );
   } finally {
     await rm(dir, { recursive: true, force: true });
   }

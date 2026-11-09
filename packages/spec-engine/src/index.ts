@@ -1,20 +1,17 @@
-import { readFile, readdir, realpath } from 'node:fs/promises';
-import { resolve, relative, isAbsolute } from 'node:path';
+import { readdir, readFile, realpath } from 'node:fs/promises';
+import { isAbsolute, relative, resolve } from 'node:path';
 import type { CheckResult, Finding, Spec } from '@spectrum/core';
 export async function checkRepository(root: string): Promise<CheckResult> {
   const base = await realpath(root);
   const findings: Finding[] = [];
   const specs: Spec[] = [];
-  const config = JSON.parse(
-    await readFile(resolve(base, '.spectrum/config.json'), 'utf8'),
-  );
-  if (config.schemaVersion !== 1)
-    throw new Error('Unsupported Spectrum schemaVersion');
+  const config = JSON.parse(await readFile(resolve(base, '.spectrum/config.json'), 'utf8'));
+  if (config.schemaVersion !== 1) throw new Error('Unsupported Spectrum schemaVersion');
   if (config.specRoot !== 'features')
     throw new Error('Only the features specRoot is supported in this scaffold');
   const dir = resolve(base, '.spectrum/features');
-  for (const entry of (await readdir(dir, { withFileTypes: true })).sort(
-    (a, b) => a.name.localeCompare(b.name),
+  for (const entry of (await readdir(dir, { withFileTypes: true })).sort((a, b) =>
+    a.name.localeCompare(b.name),
   )) {
     if (!entry.isFile() || !entry.name.endsWith('.json')) continue;
     const path = '.spectrum/features/' + entry.name;
@@ -28,9 +25,7 @@ export async function checkRepository(root: string): Promise<CheckResult> {
         !['draft', 'approved'].includes(raw.status) ||
         !Array.isArray(raw.acceptance) ||
         raw.acceptance.length === 0 ||
-        !raw.acceptance.every(
-          (s: unknown) => typeof s === 'string' && s.trim(),
-        ) ||
+        !raw.acceptance.every((s: unknown) => typeof s === 'string' && s.trim()) ||
         !Array.isArray(raw.links) ||
         !raw.links.every((s: unknown) => typeof s === 'string')
       )
