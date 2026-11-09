@@ -41,7 +41,7 @@ The section says that each point is one deterministic structural check of one co
 
 ## Edge Cases / Failure Handling
 
-Without stored history (single-operator mode or the local Overview) the section explains that history is stored only when accounts are enabled and shows no chart. With one stored check the section shows that check and says a trend needs two. Charts never show sample data.
+In single-operator mode the section explains that history is stored only when accounts are enabled and shows no chart. The local Overview reads the working tree and stores no history, so it has no Check trend section. With one stored check the section shows that check and says a trend needs two. Charts never show sample data.
 
 ## Acceptance Criteria
 

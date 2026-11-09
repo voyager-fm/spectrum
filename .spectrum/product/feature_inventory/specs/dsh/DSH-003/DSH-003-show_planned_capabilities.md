@@ -21,7 +21,7 @@ Explain proposals, runs, PR reviews, rule proposals and model providers as unava
 
 ## Trigger / Entry Points
 
-The user opens `/proposals`, `/runs` or `/reviews`, reaches the Rule proposals section of `/rules`, or follows an Agent loop card from the Overview.
+The user opens `/proposals`, `/runs` or `/reviews`, reaches the Rule proposals section of `/rules`, or expands the Agent loop group in the sidebar.
 
 ## Preconditions
 
@@ -29,7 +29,7 @@ None. These pages render without repository data.
 
 ## Expected Outcome
 
-Each page shows a planned-state panel with a Not implemented badge, the reason it is unavailable, the governing contract when one exists and the list of upcoming capabilities. Navigation marks these items as Planned.
+Each page shows a planned-state panel with a Not implemented badge, the reason it is unavailable, the governing contract when one exists and the list of upcoming capabilities. Navigation lists these pages once, in a collapsed Agent loop group marked Planned that opens while one of its pages is shown.
 
 ## State Changes
 
@@ -48,7 +48,7 @@ A page keeps its planned state when a related configuration flag is enabled. Whe
 - [ ] **AC-1:** Proposals, Runs and PR reviews show a Not implemented planned state with a reason and upcoming capabilities.
 - [ ] **AC-2:** Planned pages offer no button, form or link that starts execution.
 - [ ] **AC-3:** Planned pages show no sample proposals, run history or review results.
-- [ ] **AC-4:** Navigation labels each planned page as Planned.
+- [ ] **AC-4:** Navigation groups the planned pages under one Agent loop group marked Planned.
 
 ## Permissions / Dependencies
 

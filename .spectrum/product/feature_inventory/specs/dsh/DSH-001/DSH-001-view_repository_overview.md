@@ -6,7 +6,7 @@ category_key: "DSH"
 feature_id: "DSH-001"
 status: "implementing"
 phase: "now"
-summary: "Summarize structural check health, specification counts, rules and mode for the configured repository."
+summary: "Summarize structural check health and specification counts for the configured repository."
 related_region: "web.overview"
 menu: "-"
 shortcut: "-"
@@ -17,7 +17,7 @@ document_status: "draft"
 
 ## Intent
 
-Summarize structural check health, specification counts, rules and mode for the configured repository.
+Summarize structural check health and specification counts for the configured repository.
 
 ## Trigger / Entry Points
 
@@ -29,7 +29,7 @@ The dashboard server runs locally and can read the configured repository. Extern
 
 ## Expected Outcome
 
-Summary cards show the structural check result and finding count, the number of interaction specifications and how many are marked approved, the number of rule files, and the configured mode and canonical source. Below the cards, the Spec health, Acceptance criteria and grouped Findings sections chart the same result (see Specification health interactions). An Agent loop section links to Proposals, Runs and PR reviews as not implemented, and to Integrations with the GitHub App connection state and Linear as not implemented.
+Two summary cards show the structural check result with its finding count, and the number of interaction specifications with the number of categories they span. Below the cards, the Spec health, Acceptance criteria and grouped Findings sections chart the same result (see Specification health interactions). The page shows no rule-file, mode or Agent loop cards: rules and integrations have their own pages, and the planned Agent loop pages are listed once, in the sidebar's collapsed Planned group.
 
 ## State Changes
 
@@ -37,18 +37,18 @@ No repository or server state changes.
 
 ## User-visible Feedback
 
-The check card says the check is deterministic and uses no model. The approved count is labeled as document review only.
+The page description states that document status is not implementation or test evidence. The check card says the check is deterministic and uses no model. Sections below do not repeat these statements.
 
 ## Edge Cases / Failure Handling
 
-When the check cannot run, the check card shows "Could not run" and the load error appears above the cards. Missing configuration shows the mode as unknown. Without findings, the Findings section states that there are none and that this does not show the code implements the specifications; it never shows sample rows.
+When the check cannot run, the check card shows "Could not run" and the load error appears above the cards. Without findings, the Findings section states that there are none; it never shows sample rows. The local repository stores no check history, so the page has no Check trend section.
 
 ## Acceptance Criteria
 
 - [ ] **AC-1:** The check card shows passed or failed from the shared engine result and the same finding count as the CLI.
 - [ ] **AC-2:** A failed load shows "Could not run" with the error and never a passing result.
-- [ ] **AC-3:** The approved count is labeled as document review state, not implementation or test evidence.
-- [ ] **AC-4:** Agent loop links show a Not implemented state.
+- [ ] **AC-3:** The page description states once that document status is not implementation or test evidence.
+- [ ] **AC-5:** The page shows no rule-file, mode or Agent loop cards and no Check trend section.
 
 ## Permissions / Dependencies
 

@@ -29,7 +29,7 @@ The local repository is always listed. Connected repositories are listed when th
 
 ## Expected Outcome
 
-Selecting an entry opens that repository's dashboard view. The current repository is marked.
+Selecting an entry opens that repository's dashboard view. The current repository is marked. The sidebar's Overview and Specs links follow the selected repository; Rules, which reads only the local repository, is listed while the local repository is selected.
 
 ## State Changes
 
@@ -48,6 +48,7 @@ Installation listing errors are shown in the switcher without hiding the local r
 - [ ] **AC-1:** The switcher lists the local repository and every repository the App installations can read.
 - [ ] **AC-2:** Selecting an entry opens that repository's view and marks it current.
 - [ ] **AC-3:** An unconfigured App or listing error leaves the local repository available and states why connected entries are missing.
+- [ ] **AC-4:** The sidebar Overview and Specs links open the selected repository's pages.
 
 ## Permissions / Dependencies
 
