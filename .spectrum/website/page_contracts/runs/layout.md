@@ -2,7 +2,7 @@
 
 ## Regions
 
-Repository navigation, page heading and load errors precede the page content. Tables and document previews use the existing dashboard components.
+Repository navigation and the Runs heading precede the planned Agent runs section. Use the existing planned-state component with a Not implemented badge, a reason and the upcoming capabilities. Offer no execution controls or sample run history while execution is unavailable.
 
 ## Sources
 

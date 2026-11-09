@@ -16,7 +16,7 @@ A failed load and an empty result look different. Show `—` or "Could not run" 
 
 ## Honesty rules
 - Never render an enabled button, success badge or toast for an action no adapter performs: approve, publish, sync, generate or review. Use `<Planned>` or a disabled control with the reason next to it.
-- Keep document status, structural check, implementation status and test evidence as separate fields. The spec detail page shows "Implementation: Not tracked" rather than inferring it from document status.
+- Keep document review, structural check, declared FI lifecycle and test evidence as separate fields. Spec detail shows the FI lifecycle and phase. AC evidence stays "Not recorded" until an implemented evidence adapter supplies actual execution records; Markdown checkboxes remain author annotations.
 - Label deterministic results as such ("deterministic, no model"). Do not describe a check as AI review.
 - Demo data, mocks or replays must be labeled on screen as such.
 

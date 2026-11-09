@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Mono, PageHead, Planned } from '../../components/dashboard.tsx';
+import { PageHead, Planned } from '../../components/dashboard.tsx';
 
 export const metadata: Metadata = { title: 'Runs' };
 
@@ -15,8 +15,8 @@ export default function RunsPage() {
           'Questions and approvals the run is waiting on',
         ]}
       >
-        The worker has no queue or model provider yet; <Mono>runJob</Mono> throws a not-implemented
-        error.
+        Discovery, drafting and review runs are not available yet. You can still browse specs and
+        run local checks.
       </Planned>
     </>
   );

@@ -68,24 +68,24 @@ dependencies:
   - .claude/skills/spectrum-ui/references/verification.md
   deployed_file_hashes:
     .agents/skills/spectrum-ui/SKILL.md: sha256:673de467241f8f59312520b26c9968d95d28cb8e8c66593ac49ee7117d42925f
-    .agents/skills/spectrum-ui/references/architecture.md: sha256:aa2150d2d0cada8832fa5f4eec90906bcfd181808341483c21505d9112c41569
+    .agents/skills/spectrum-ui/references/architecture.md: sha256:5e4b8b6ce81ae26e30c560c3efa5ea7e196dfc0ca772e98fdafbef330d7deea7
     .agents/skills/spectrum-ui/references/brand.md: sha256:47901d2ed13f6653936f77fb08b0507a73d6c5fb559abecb1c13af9ab1be566e
     .agents/skills/spectrum-ui/references/components.md: sha256:a0ac13a915926bf7413dff74c24739f74589abcddce8e25ae5a327fff0b3d2b8
     .agents/skills/spectrum-ui/references/design.md: sha256:3632676c3e80bfdb4128e8ca033ee6b24198b9bd223455840a829b6775c79f2e
     .agents/skills/spectrum-ui/references/review-patterns.md: sha256:100fa4215db1719a43f9f1eedc503a521ca2b6e3272bcc687c02c3a2e3065c80
-    .agents/skills/spectrum-ui/references/states-and-copy.md: sha256:a561f73616491cbc315a24c921beb33751f389ccad9906ad2230471e25be5e44
+    .agents/skills/spectrum-ui/references/states-and-copy.md: sha256:5780229a5748ee738fba46780c4ae2846822e937052e3d770bfbf7f2c34f50af
     .agents/skills/spectrum-ui/references/verification.md: sha256:f29749c8c51bbd8e6969f74345ed7246c645908d8445ed8c3ff714d83f4219df
     .claude/skills/spectrum-ui/SKILL.md: sha256:673de467241f8f59312520b26c9968d95d28cb8e8c66593ac49ee7117d42925f
-    .claude/skills/spectrum-ui/references/architecture.md: sha256:aa2150d2d0cada8832fa5f4eec90906bcfd181808341483c21505d9112c41569
+    .claude/skills/spectrum-ui/references/architecture.md: sha256:5e4b8b6ce81ae26e30c560c3efa5ea7e196dfc0ca772e98fdafbef330d7deea7
     .claude/skills/spectrum-ui/references/brand.md: sha256:47901d2ed13f6653936f77fb08b0507a73d6c5fb559abecb1c13af9ab1be566e
     .claude/skills/spectrum-ui/references/components.md: sha256:a0ac13a915926bf7413dff74c24739f74589abcddce8e25ae5a327fff0b3d2b8
     .claude/skills/spectrum-ui/references/design.md: sha256:3632676c3e80bfdb4128e8ca033ee6b24198b9bd223455840a829b6775c79f2e
     .claude/skills/spectrum-ui/references/review-patterns.md: sha256:100fa4215db1719a43f9f1eedc503a521ca2b6e3272bcc687c02c3a2e3065c80
-    .claude/skills/spectrum-ui/references/states-and-copy.md: sha256:a561f73616491cbc315a24c921beb33751f389ccad9906ad2230471e25be5e44
+    .claude/skills/spectrum-ui/references/states-and-copy.md: sha256:5780229a5748ee738fba46780c4ae2846822e937052e3d770bfbf7f2c34f50af
     .claude/skills/spectrum-ui/references/verification.md: sha256:f29749c8c51bbd8e6969f74345ed7246c645908d8445ed8c3ff714d83f4219df
   source: local
   local_path: ./.apm/library/spectrum-ui
-  content_hash: sha256:f89b7939d39e458cecf39dc09882d4d4b2a6f28bb217874caa50ac16fd9bc5ac
+  content_hash: sha256:30bb4f248c2d80d1f3589c0666e03b706def34e93cfab5f7bc059c1ed3de4741
 deployments:
 - kind: project-relative
   target: claude
@@ -176,7 +176,7 @@ deployments:
   owners:
   - ./.apm/library/spectrum-ui
   active_owner: ./.apm/library/spectrum-ui
-  content_hash: sha256:aa2150d2d0cada8832fa5f4eec90906bcfd181808341483c21505d9112c41569
+  content_hash: sha256:5e4b8b6ce81ae26e30c560c3efa5ea7e196dfc0ca772e98fdafbef330d7deea7
 - kind: project-relative
   target: claude
   value: .claude/skills/spectrum-ui/references/brand.md
@@ -221,7 +221,7 @@ deployments:
   owners:
   - ./.apm/library/spectrum-ui
   active_owner: ./.apm/library/spectrum-ui
-  content_hash: sha256:a561f73616491cbc315a24c921beb33751f389ccad9906ad2230471e25be5e44
+  content_hash: sha256:5780229a5748ee738fba46780c4ae2846822e937052e3d770bfbf7f2c34f50af
 - kind: project-relative
   target: claude
   value: .claude/skills/spectrum-ui/references/verification.md
@@ -320,7 +320,7 @@ deployments:
   owners:
   - ./.apm/library/spectrum-ui
   active_owner: ./.apm/library/spectrum-ui
-  content_hash: sha256:aa2150d2d0cada8832fa5f4eec90906bcfd181808341483c21505d9112c41569
+  content_hash: sha256:5e4b8b6ce81ae26e30c560c3efa5ea7e196dfc0ca772e98fdafbef330d7deea7
 - kind: project-relative
   target: codex
   value: .agents/skills/spectrum-ui/references/brand.md
@@ -365,7 +365,7 @@ deployments:
   owners:
   - ./.apm/library/spectrum-ui
   active_owner: ./.apm/library/spectrum-ui
-  content_hash: sha256:a561f73616491cbc315a24c921beb33751f389ccad9906ad2230471e25be5e44
+  content_hash: sha256:5780229a5748ee738fba46780c4ae2846822e937052e3d770bfbf7f2c34f50af
 - kind: project-relative
   target: codex
   value: .agents/skills/spectrum-ui/references/verification.md

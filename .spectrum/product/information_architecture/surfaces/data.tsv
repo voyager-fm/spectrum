@@ -1,5 +1,4 @@
 surface_key	label	kind	description
 cli	Command line	cli	Deterministic repository checks and specification listing.
-web	Repository dashboard	web	Read-only local views of the same repository model.
+web	Repository dashboard	web	Read-only local views of the shared model; the same application owns planned server capabilities.
 plugin	Agent plugin	agent_host	Host-agent reasoning with the bundled deterministic CLI.
-worker	Hosted worker	background	Planned remote job boundary; execution is unimplemented.

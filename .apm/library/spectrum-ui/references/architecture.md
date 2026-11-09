@@ -2,6 +2,8 @@
 
 Re-read `apps/web/src/` before relying on this map; it describes the dashboard as of 2026-11-09.
 
+`apps/web` is the single Next.js server application. It owns the dashboard and planned API, webhook, integration and model execution entry points. The current dashboard is read-only. Follow `.spectrum/engineering/common/architecture/application_runtime.md` for server ownership and execution lifetime.
+
 ## Stack
 - Next.js 16 App Router, React 19, TypeScript, Tailwind CSS v4 and shadcn/ui (Base UI primitives, lucide icons). No client data library or state manager is installed; do not add one for a single screen.
 - Every page is an async Server Component. The root layout sets `export const dynamic = 'force-dynamic'`, so each request reads the repository from disk.
@@ -16,16 +18,16 @@ Re-read `apps/web/src/` before relying on this map; it describes the dashboard a
 ```
 - `repositoryRoot()` reads `SPECTRUM_REPOSITORY` and defaults to the monorepo root. Use it for every repository read; never hardcode a path.
 - `loadDashboard()` wraps each read in `attempt()`. A failure adds a line to `errors` and returns `null` or `[]`. Pages render `<LoadErrors errors={data.errors} />` and never substitute sample data.
-- Put parsing and validation in `spec-engine` or `core`, not in a page. A page that computes domain truth (for example, deciding approval) duplicates the shared contract the CLI and worker must also use.
-- The dashboard is read-only. Writing to the repository, publishing to GitHub or calling a model belongs to an implemented adapter behind an approved contract, not to a page or route handler added for a demo.
+- Put parsing, validation and proposal rules in shared domain packages, not in a page. The CLI, plugin and Next.js server services consume the same contracts.
+- The dashboard is read-only. Future APIs and webhooks enter through Route Handlers; server modules in `lib/` coordinate shared packages and implemented adapters behind approved contracts. Pages render results. Do not add repository writes, GitHub publication or model calls for a demo, or claim persistent execution from a request callback.
 
 ## Routes
 | Route | File | Data |
 | --- | --- | --- |
 | `/` | `app/page.tsx` | check summary, findings, config, agent-loop links |
-| `/specs` | `app/specs/page.tsx` | feature specs, shared contracts and flows |
+| `/specs` | `app/specs/page.tsx` | FI-linked interaction specs, contracts, flows and relationship counts |
 | `/specs/[id]` | `app/specs/[id]/page.tsx` | one spec; `notFound()` for an unknown ID |
-| `/rules` | `app/rules/page.tsx` | `.spectrum/rules` documents |
+| `/rules` | `app/rules/page.tsx` | rule documents from the configured source roots |
 | `/settings` | `app/settings/page.tsx` | integration flags from `config.json` |
 | `/proposals`, `/runs`, `/reviews` | `app/<name>/page.tsx` | `<Planned>` placeholders only |
 

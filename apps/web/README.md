@@ -1,5 +1,15 @@
 # Web development
 
+## Application ownership
+
+`apps/web` is Spectrum's Next.js server application. It owns the dashboard and planned API, webhook, integration and model execution entry points. The current runtime provides a local read-only dashboard; Proposals, Runs and PR reviews remain planned.
+
+Server Components render data from `src/lib/dashboard.ts`. Add external HTTP entry points through Route Handlers and orchestration through server modules in `src/lib/` when their contracts and adapters are implemented. Keep domain types, parsing, validation and proposal rules in shared workspace packages. Persistent job state and queue delivery can be added when retry and restart recovery are required.
+
+See [application runtime](../../.spectrum/engineering/common/architecture/application_runtime.md) and [distribution](../../.spectrum/contracts/distribution.md) for ownership and implementation boundaries.
+
+## Local development
+
 From the repository root:
 
 ```sh

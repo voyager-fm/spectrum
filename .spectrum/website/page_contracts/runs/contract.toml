@@ -5,11 +5,12 @@ path = "/runs"
 implementation_status = "implemented"
 
 [responsibility]
-primary = "Explain the planned hosted execution boundary."
+primary = "Explain planned discovery, drafting and review runs."
 
 [policy]
 read_only = true
 capability = "planned"
+execution_controls = false
 declared_status_is_execution_evidence = false
 
 [policy_refs]

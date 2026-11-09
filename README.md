@@ -44,14 +44,15 @@ Biome respects `.gitignore`, including generated build output and deployed agent
 `apps/` holds deliverables and `packages/` shared workspace libraries; see `.spectrum/contracts/distribution.md`.
 - apps/plugin: the agent plugin. Skills in `skills/<name>/SKILL.md` run a bundled CLI from `scripts/spectrum.mjs`; `pnpm plugin:build` regenerates it and `pnpm plugin:check` validates skills and bundle freshness
 - apps/cli: deterministic check/list commands (unpublished; bundled into the plugin)
-- apps/web: Next.js (App Router) read-only dashboard with Tailwind CSS v4 and shadcn/ui in a monotone theme. Overview, specs, spec detail, rules and integrations read real repository data; proposals, runs and PR reviews are explicit not-implemented placeholders
-- apps/worker: explicit nonfunctional queue/job boundary
+- apps/web: Next.js (App Router) application owning the dashboard and planned server API, webhooks and model execution. The current dashboard is read-only, with Tailwind CSS v4 and shadcn/ui in a monotone theme. Overview, specs, spec detail, rules and integrations read real repository data; proposals, runs and PR reviews are explicit not-implemented placeholders
 - packages/core: shared spec and proposal types
 - packages/spec-engine: parsing, local links and validation
 - packages/changeset: proposal approval and staleness guard (partial)
 - packages/integrations: GitHub/Linear adapter contracts only
 - .spectrum: Spectrum's own feature specs, shared contracts, flows and rules
 - `*.test.ts` next to each package source: deterministic regression tests
+
+The Next.js application is the single server entry point. Shared packages own domain logic for both the application and CLI. Server APIs, integration adapters and model execution remain planned; the plugin continues to use its host agent's model. Add persistent job state and queue delivery when execution requires retries or recovery after a restart. See [application runtime](.spectrum/engineering/common/architecture/application_runtime.md) for ownership and the current execution boundary.
 
 ### Repository document model
 

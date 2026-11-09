@@ -17,6 +17,8 @@ Spectrum represents the documentation model used by Voyager app and web while pr
 - [Dashboard contract](../../../product/feature_specs/sp/contracts/dashboard.toml)
 - [Proposal contract](../../../product/feature_specs/sp/contracts/proposal.toml)
 - [Distribution architecture](../../../contracts/distribution.md)
+- [Application runtime](application_runtime.md)
+
 ## Engineering scope
 
 This document owns document parsing, deterministic reference checks and consumer data boundaries. Product policy remains in contracts and interaction specs. It does not select customer implementation architecture, deployment infrastructure, model credentials or repository permissions.
@@ -31,8 +33,8 @@ This document owns document parsing, deterministic reference checks and consumer
 | `@spectrum/changeset` | Existing partial approval/revision guard |
 | CLI | Check/list argument handling and JSON/exit contract |
 | Agent plugin | Host-agent context and a reproducible bundle of that CLI |
-| Dashboard loader | Repository state and shared model loading; page rendering consumes derived results |
-| Worker and integrations | Explicit unimplemented runtime/adapter boundaries |
+| Next.js application (`apps/web`) | Dashboard loader and page rendering; owns planned server API, webhook and model execution entry points |
+| `@spectrum/integrations` | GitHub/Linear adapter contracts; connectivity is unimplemented |
 
 FI owns mirrored metadata; Markdown owns ACs. Inventory `ref` metadata produces relationships without rewriting source files. Contracts preserve domain-specific tables, policies, state models and reads/writes. App interaction flows and web route/page bundles remain distinct document roles.
 
@@ -50,7 +52,7 @@ Engineering metadata preserves document type, lifecycle and descriptive implemen
 
 ## Accepted target
 
-Semantic policy review, automatic spec generation, authenticated digest-bound approval, transactional apply, customer test evidence ingestion, remote discovery and hosted review publication require implemented adapters. The existing proposal guard checks only review status, base revision and nonempty edits. A structurally valid repository is not proof that the target behavior or any external integration works.
+Semantic policy review, automatic spec generation, authenticated digest-bound approval, transactional apply, customer test evidence ingestion, remote discovery and hosted review publication require implemented adapters. The Next.js application owns their server entry points and coordinates shared domain packages; [application runtime](application_runtime.md) defines that boundary. The existing proposal guard checks only review status, base revision and nonempty edits. A structurally valid repository is not proof that the target behavior or any external integration works.
 
 ## Verification
 

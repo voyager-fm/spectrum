@@ -3,7 +3,7 @@
 Spectrum ships as an agent plugin: a bundle of skills that runs inside the user's coding agent (Claude Code first; other Agent Skills hosts later). The host agent's model does the judgment. A bundled deterministic CLI does everything that must be exact. Spectrum does not need its own model credentials on this path.
 
 ## Repository layout
-- `apps/` holds deliverables only. `apps/plugin` is the agent plugin, `apps/web` the dashboard, `apps/cli` the deterministic command line (an unpublished workspace package for now). `apps/worker` is a placeholder until a hosted GitHub review path exists.
+- `apps/` holds three deliverables: `apps/plugin` is the agent plugin, `apps/web` the Next.js application, and `apps/cli` the deterministic command line (an unpublished workspace package for now).
 - `packages/` holds shared libraries consumed as workspace packages (`@spectrum/<name>`) through package `exports`, never through relative paths into another package.
   - `core`: shared types and contracts.
   - `spec-engine`: reading, relationship and validation of `.spectrum/`.
@@ -11,6 +11,13 @@ Spectrum ships as an agent plugin: a bundle of skills that runs inside the user'
   - `integrations`: GitHub/Linear adapter contracts.
 - `.claude-plugin/marketplace.json` at the repository root lists `apps/plugin`, so `claude plugin marketplace add <owner>/<repo>` installs it.
 - Skills for *developing* Spectrum stay in `.apm/library/`. Product skills live only in `apps/plugin/skills/`. Neither copies the other.
+
+## Server application
+`apps/web` owns the dashboard and all planned server entry points: APIs, GitHub webhooks, integration calls and model execution. Route Handlers receive external HTTP requests; server services coordinate shared packages and implemented adapters. Domain parsing, validation and proposal rules stay in the workspace packages for reuse by the CLI and plugin.
+
+Today only local read-only dashboard views are executable. Server APIs, webhooks, model execution and saved run history remain unimplemented. The plugin's host-agent reasoning path continues to work independently of these planned services.
+
+Persistent execution state and queue delivery can be added when jobs require automatic retry or restart recovery. Execution duration and delivery guarantees depend on the deployment environment. See [application runtime](../engineering/common/architecture/application_runtime.md) for the accepted structure and execution limits.
 
 ## Plugin rules
 1. `apps/plugin/.claude-plugin/plugin.json` declares a kebab-case `name`, `version`, `description` and `author`.

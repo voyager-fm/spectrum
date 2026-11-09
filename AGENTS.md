@@ -1,9 +1,8 @@
 # Working on Spectrum
-
 Write all product content, specifications, and commit messages in English.
 Read .spectrum/overview.md and .spectrum/rules/agents.md before changes.
 Use TypeScript with erasable syntax and explicit .ts imports (Node >=22.18).
-Keep the plugin, CLI, dashboard and worker on the shared workspace packages (@spectrum/core, spec-engine, changeset); see .spectrum/contracts/distribution.md.
+Keep the plugin, CLI and Next.js application on the shared workspace packages (@spectrum/core, spec-engine, changeset). apps/web owns the dashboard and planned server API, webhook and model execution entry points; see .spectrum/contracts/distribution.md and .spectrum/engineering/common/architecture/application_runtime.md.
 Use the root Biome configuration for shared linting, formatting and import organization; do not add ESLint or Prettier. Run `pnpm format` after development work and `pnpm check` before handoff. Use `pnpm lint:fix` for safe lint and import fixes. Add regression tests for changed behavior.
 Keep unimplemented integration paths explicit; never fabricate successful model calls or reviews.
 Keep specs aligned with changes, but distinguish planned requirements from verified functionality.
@@ -17,7 +16,6 @@ This section is temporary. Remove it when the hackathon ends; it applies from 20
 - Before pushing, run `pnpm check`, then `git pull --rebase --autostash origin main`. If the rebase conflicts or the autostash does not reapply cleanly, stop and tell the user; never drop a stash.
 
 ## Development harness
-
 Skill sources live in `.apm/library/<skill>/` and are selected in `apm.yml`. After cloning, run `pnpm agents:setup` to restore native skills from `apm.lock.yaml` into `.agents/skills/` (Codex, OpenCode) and `.claude/skills/` (Claude Code) and audit them. After editing a skill source, run `pnpm agents:sync` to redeploy and record the new lock. The native outputs are generated and ignored: never hand-edit them.
 
 - Non-trivial implementation and verification before handoff: [spectrum-development](.apm/library/spectrum-development/SKILL.md).
