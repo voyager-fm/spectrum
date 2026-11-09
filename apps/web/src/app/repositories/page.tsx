@@ -42,7 +42,11 @@ export default async function RepositoriesPage({ searchParams }: Props) {
         title="Repositories"
         description="GitHub repositories this server can read through the Spectrum GitHub App. Checks are read-only and run the deterministic spec check at one pinned commit."
       />
-      <GettingStarted configured={data.status.configured} repositories={data.repositories.length} />
+      <GettingStarted
+        configured={data.status.configured}
+        repositories={data.repositories.length}
+        signedOut={data.viewer.mode === 'accounts' && !data.viewer.user}
+      />
       {!data.status.configured ? (
         <GitHubSetup missing={data.status.missing} />
       ) : data.viewer.mode === 'misconfigured' ? (
@@ -153,9 +157,12 @@ export default async function RepositoriesPage({ searchParams }: Props) {
 function GettingStarted({
   configured,
   repositories,
+  signedOut,
 }: {
   configured: boolean;
   repositories: number;
+  /** Accounts are on and nobody is signed in: the count says nothing yet. */
+  signedOut: boolean;
 }) {
   const steps = [
     {
@@ -171,7 +178,9 @@ function GettingStarted({
       detail:
         repositories > 0
           ? `${repositories} ${repositories === 1 ? 'repository is' : 'repositories are'} readable.`
-          : 'Choose which repositories the App may read.',
+          : signedOut
+            ? 'Sign in to see the repositories you can access.'
+            : 'Choose which repositories the App may read.',
     },
     {
       title: 'Set up Spectrum in each repository',
