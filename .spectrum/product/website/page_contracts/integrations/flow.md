@@ -6,7 +6,7 @@ Open `/settings` for the configured local repository.
 
 ## Ready
 
-Inspect declared configuration independently of live connectivity.
+Inspect integration connection state reported by the server. Repository configuration does not affect it.
 
 ## Empty and failure states
 

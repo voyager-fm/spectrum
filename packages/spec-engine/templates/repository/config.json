@@ -63,17 +63,5 @@
       "kind": "reference",
       "root": ".spectrum/product/specification_structure.md"
     }
-  ],
-  "integrations": {
-    "github": {
-      "enabled": false
-    },
-    "linear": {
-      "enabled": false
-    }
-  },
-  "agents": {
-    "enabled": false,
-    "max_repair_attempts": 2
-  }
+  ]
 }

@@ -20,7 +20,6 @@ test('dashboard snapshot reads the repository own specs, rules and config', asyn
   );
   assert.equal(data.overview?.title, 'Spectrum');
   assert.equal(data.config?.mode, 'proposal-only');
-  assert.equal(data.config?.github, false);
   assert.equal(data.config?.canonicalSource, 'git-files');
 });
 

@@ -9720,29 +9720,6 @@ function parseConfiguration(raw) {
   });
   if (raw.overview !== void 0 && !text(raw.overview))
     throw new Error("overview must be a repository-relative path.");
-  const integrations = {};
-  if (raw.integrations !== void 0) {
-    if (!record(raw.integrations)) throw new Error("integrations must be a mapping.");
-    for (const name of ["github", "linear"]) {
-      const value = raw.integrations[name];
-      if (value === void 0) continue;
-      if (!record(value) || typeof value.enabled !== "boolean")
-        throw new Error(`${name}.enabled must be boolean.`);
-      integrations[name] = { enabled: value.enabled };
-    }
-  }
-  let agents;
-  if (raw.agents !== void 0) {
-    if (!record(raw.agents) || typeof raw.agents.enabled !== "boolean")
-      throw new Error("agents.enabled must be boolean.");
-    const attempts = raw.agents.max_repair_attempts;
-    if (attempts !== void 0 && (typeof attempts !== "number" || !Number.isInteger(attempts) || attempts < 0))
-      throw new Error("max_repair_attempts must be a nonnegative integer.");
-    agents = {
-      enabled: raw.agents.enabled,
-      ...attempts !== void 0 ? { max_repair_attempts: attempts } : {}
-    };
-  }
   return {
     schema_version: 2,
     name: raw.name,
@@ -9750,13 +9727,15 @@ function parseConfiguration(raw) {
     canonical_source: "git-files",
     inventories,
     documents,
-    ...raw.overview ? { overview: raw.overview } : {},
-    integrations,
-    agents
+    ...raw.overview ? { overview: raw.overview } : {}
   };
 }
-async function readConfiguration(root, configPath = ".spectrum/config.json") {
-  return parseConfiguration(JSON.parse(await readRepositoryText(root, configPath)));
+var RETIRED_CONFIGURATION_KEYS = ["integrations", "agents"];
+function retiredConfigurationKeys(raw) {
+  return record(raw) ? RETIRED_CONFIGURATION_KEYS.filter((key) => raw[key] !== void 0) : [];
+}
+async function readRawConfiguration(root, configPath = ".spectrum/config.json") {
+  return JSON.parse(await readRepositoryText(root, configPath));
 }
 
 // ../../packages/spec-engine/src/base-schemas.ts
@@ -10086,12 +10065,21 @@ async function checkRepository(root, options = {}) {
       error instanceof RepositoryFileError ? error.message : `Invalid ${fallback.replaceAll("invalid-", "")} at ${path}.`
     );
   };
+  const configPath = options.configPath ?? ".spectrum/config.json";
   try {
-    result.config = options.config !== void 0 ? parseConfiguration(options.config) : await readConfiguration(base, options.configPath);
+    const raw = options.config !== void 0 ? options.config : await readRawConfiguration(base, options.configPath);
+    result.config = parseConfiguration(raw);
+    for (const key of retiredConfigurationKeys(raw))
+      add(
+        "retired-config-key",
+        configPath,
+        `${key} is no longer read and does not reflect any connection. Remove it; the dashboard reports connection state from the server.`,
+        "warning"
+      );
   } catch (error) {
     add(
       "invalid-config",
-      options.configPath ?? ".spectrum/config.json",
+      configPath,
       error instanceof RepositoryFileError ? error.message : error instanceof SyntaxError ? "Configuration must be valid JSON." : error instanceof Error ? error.message : "Invalid configuration."
     );
     return result;

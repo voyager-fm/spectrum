@@ -16,25 +16,15 @@ export const metadata: Metadata = { title: 'Integrations' };
 
 export default async function SettingsPage() {
   const [data, github] = await Promise.all([loadDashboard(), githubAppStatus()]);
-  const config = data.config;
-  const rows = [
-    {
-      name: 'GitHub',
-      configured: config?.github,
-      detail: 'Read-only repository checks through the GitHub App',
-      connection: github.configured ? ('app' as const) : ('missing' as const),
-    },
-    { name: 'Linear', configured: config?.linear, detail: 'Links between requirements and issues' },
-    { name: 'Agents', configured: config?.agents, detail: 'Discovery, drafting and review jobs' },
-  ];
   return (
     <>
       <PageHead
         title="Integrations"
         description={
           <>
-            Read from <Mono>.spectrum/config.json</Mono>. Editing settings from the dashboard is not
-            supported.
+            Connection state comes from the server environment and the connected service, never from{' '}
+            <Mono>.spectrum/config.json</Mono>. Connecting or editing integrations from the
+            dashboard is not supported yet.
           </>
         }
       />
@@ -44,36 +34,33 @@ export default async function SettingsPage() {
           <TableHeader>
             <TableRow>
               <TableHead>Integration</TableHead>
-              <TableHead>Config flag</TableHead>
               <TableHead>Connection</TableHead>
               <TableHead>Purpose</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {rows.map((r) => (
-              <TableRow key={r.name}>
-                <TableCell className="font-medium">{r.name}</TableCell>
-                <TableCell>
-                  <StatusBadge tone={r.configured ? 'info' : 'neutral'}>
-                    {r.configured ? 'enabled' : 'disabled'}
+            <TableRow>
+              <TableCell className="font-medium">GitHub</TableCell>
+              <TableCell>
+                <Link href="/repositories" className="underline-offset-4 hover:underline">
+                  <StatusBadge tone={github.configured ? 'info' : 'neutral'}>
+                    {github.configured ? 'App configured' : 'Not configured'}
                   </StatusBadge>
-                </TableCell>
-                <TableCell>
-                  {'connection' in r ? (
-                    <Link href="/repositories" className="underline-offset-4 hover:underline">
-                      <StatusBadge tone={r.connection === 'app' ? 'info' : 'neutral'}>
-                        {r.connection === 'app' ? 'App configured' : 'Not configured'}
-                      </StatusBadge>
-                    </Link>
-                  ) : (
-                    <StatusBadge tone="planned">Not implemented</StatusBadge>
-                  )}
-                </TableCell>
-                <TableCell className="whitespace-normal text-muted-foreground">
-                  {r.detail}
-                </TableCell>
-              </TableRow>
-            ))}
+                </Link>
+              </TableCell>
+              <TableCell className="whitespace-normal text-muted-foreground">
+                Read-only repository checks through the GitHub App
+              </TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell className="font-medium">Linear</TableCell>
+              <TableCell>
+                <StatusBadge tone="planned">Not implemented</StatusBadge>
+              </TableCell>
+              <TableCell className="whitespace-normal text-muted-foreground">
+                Links between requirements and issues
+              </TableCell>
+            </TableRow>
           </TableBody>
         </Table>
       </div>
@@ -83,7 +70,8 @@ export default async function SettingsPage() {
           <StatusBadge>None configured</StatusBadge>
           <p className="mt-2 text-sm text-muted-foreground">
             Service models, BYOK and subscription connections each need a verified authentication
-            path. None is supported yet. Secrets never belong in <Mono>.spectrum/</Mono>.
+            path. None is supported yet, so discovery, drafting and review jobs cannot run. Secrets
+            never belong in <Mono>.spectrum/</Mono>.
           </p>
         </div>
       </Section>

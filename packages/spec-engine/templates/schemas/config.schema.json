@@ -82,46 +82,6 @@
         },
         "additionalProperties": false
       }
-    },
-    "integrations": {
-      "type": "object",
-      "properties": {
-        "github": {
-          "type": "object",
-          "required": ["enabled"],
-          "properties": {
-            "enabled": {
-              "type": "boolean"
-            }
-          },
-          "additionalProperties": false
-        },
-        "linear": {
-          "type": "object",
-          "required": ["enabled"],
-          "properties": {
-            "enabled": {
-              "type": "boolean"
-            }
-          },
-          "additionalProperties": false
-        }
-      },
-      "additionalProperties": false
-    },
-    "agents": {
-      "type": "object",
-      "required": ["enabled"],
-      "properties": {
-        "enabled": {
-          "type": "boolean"
-        },
-        "max_repair_attempts": {
-          "type": "integer",
-          "minimum": 0
-        }
-      },
-      "additionalProperties": false
     }
   },
   "additionalProperties": false

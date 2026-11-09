@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { test } from 'node:test';
@@ -20,6 +20,28 @@ test('self inventories and interaction specifications validate', async () => {
   );
   assert.ok(r.model.inventories.some((table) => table.kind === 'objects'));
   assert.ok(r.model.documents.some((doc) => doc.kind === 'engineering'));
+});
+test('retired integration and agent flags warn without changing the parsed configuration', async () => {
+  const root = resolve(import.meta.dirname, '../../..');
+  const current = JSON.parse(await readFile(join(root, '.spectrum/config.json'), 'utf8'));
+  const r = await checkRepository(root, {
+    config: {
+      ...current,
+      integrations: { github: { enabled: true }, linear: { enabled: true } },
+      agents: { enabled: true, max_repair_attempts: 2 },
+    },
+  });
+  assert.equal(r.ok, true);
+  assert.deepEqual(
+    r.findings.map((f) => [f.code, f.severity, f.message.split(' ')[0]]),
+    [
+      ['retired-config-key', 'warning', 'integrations'],
+      ['retired-config-key', 'warning', 'agents'],
+    ],
+  );
+  assert.ok(r.config);
+  assert.equal('integrations' in r.config, false);
+  assert.equal('agents' in r.config, false);
 });
 test('legacy feature-only configuration reports an explicit migration boundary', async () => {
   const dir = await mkdtemp(join(tmpdir(), 'spectrum-test-'));

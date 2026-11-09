@@ -18,7 +18,7 @@
 1. The user opens a dashboard route on the loopback-only local server.
 2. The server reads the configured repository (`SPECTRUM_REPOSITORY` or this monorepo), its Git revision and the shared model from `@spectrum/spec-engine`.
 3. Overview summarizes structural health; Specs lists interactions with shared contracts and flows; a spec detail shows one interaction's states, criteria, findings and linked documents.
-4. Rules shows rule files from the configured roots. Integrations shows declared flags beside a separate connection state.
+4. Rules shows rule files from the configured roots. Integrations shows each integration's connection state as reported by the server.
 5. Proposals, Runs and PR reviews show planned states. No page writes to the repository.
 
 ## Failure Handling

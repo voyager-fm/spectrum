@@ -16,9 +16,6 @@ export interface RepositoryState {
 export interface ConfigSummary {
   mode: string;
   canonicalSource: string;
-  github: boolean;
-  linear: boolean;
-  agents: boolean;
 }
 
 export interface SpecDocument {
@@ -109,9 +106,6 @@ export async function loadDashboard(root: string = repositoryRoot()): Promise<Da
     ? {
         mode: raw.mode,
         canonicalSource: raw.canonical_source,
-        github: raw.integrations?.github?.enabled === true,
-        linear: raw.integrations?.linear?.enabled === true,
-        agents: raw.agents?.enabled === true,
       }
     : null;
   const check = raw ? result : null;

@@ -29,3 +29,23 @@ test('runs remains planned while execution is unavailable', async ({ page }) => 
   await expect(plannedRuns.getByText('Not implemented', { exact: true })).toBeVisible();
   await expect(plannedRuns.getByRole('button')).toHaveCount(0);
 });
+
+test('integrations report connection state, not configuration flags', async ({ page }) => {
+  const response = await page.goto('/settings');
+
+  expect(response?.status()).toBe(200);
+  await expect(
+    page.getByRole('heading', { level: 1, name: 'Integrations', exact: true }),
+  ).toBeVisible();
+  const table = page.getByRole('table');
+  await expect(table.getByRole('columnheader')).toHaveText([
+    'Integration',
+    'Connection',
+    'Purpose',
+  ]);
+  const github = table.getByRole('row', { name: /^GitHub/ });
+  await expect(github.getByText(/^(App configured|Not configured)$/)).toBeVisible();
+  const linear = table.getByRole('row', { name: /^Linear/ });
+  await expect(linear.getByText('Not implemented', { exact: true })).toBeVisible();
+  await expect(page.getByText(/^(enabled|disabled)$/)).toHaveCount(0);
+});

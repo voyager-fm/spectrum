@@ -18,6 +18,7 @@ import {
   StatusBadge,
 } from '../components/dashboard.tsx';
 import { loadDashboard } from '../lib/dashboard.ts';
+import { githubAppStatus } from '../lib/github.ts';
 
 const loop = [
   { href: '/proposals', title: 'Proposals', detail: 'Spec change sets awaiting review' },
@@ -26,7 +27,7 @@ const loop = [
 ];
 
 export default async function OverviewPage() {
-  const data = await loadDashboard();
+  const [data, github] = await Promise.all([loadDashboard(), githubAppStatus()]);
   const { check, config } = data;
   const approved = check?.specs.filter((s) => s.status === 'approved').length ?? 0;
   return (
@@ -131,8 +132,8 @@ export default async function OverviewPage() {
                   <ArrowUpRight className="size-4 text-muted-foreground" aria-hidden />
                 </CardTitle>
                 <CardDescription>
-                  GitHub {config?.github ? 'enabled' : 'off'} · Linear{' '}
-                  {config?.linear ? 'enabled' : 'off'} · Agents {config?.agents ? 'enabled' : 'off'}
+                  GitHub App {github.configured ? 'configured' : 'not configured'} · Linear not
+                  implemented
                 </CardDescription>
               </CardHeader>
             </Card>

@@ -9,7 +9,14 @@ import type {
   SpecStatus,
 } from '@spectrum/core';
 import { parse as parseToml } from 'smol-toml';
-import { parseConfiguration, readConfiguration, strings, text } from './config.ts';
+import {
+  parseConfiguration,
+  readConfiguration,
+  readRawConfiguration,
+  retiredConfigurationKeys,
+  strings,
+  text,
+} from './config.ts';
 import {
   RepositoryFileError,
   readRepositoryText,
@@ -102,15 +109,24 @@ export async function checkRepository(
         : `Invalid ${fallback.replaceAll('invalid-', '')} at ${path}.`,
     );
   };
+  const configPath = options.configPath ?? '.spectrum/config.json';
   try {
-    result.config =
+    const raw =
       options.config !== undefined
-        ? parseConfiguration(options.config)
-        : await readConfiguration(base, options.configPath);
+        ? options.config
+        : await readRawConfiguration(base, options.configPath);
+    result.config = parseConfiguration(raw);
+    for (const key of retiredConfigurationKeys(raw))
+      add(
+        'retired-config-key',
+        configPath,
+        `${key} is no longer read and does not reflect any connection. Remove it; the dashboard reports connection state from the server.`,
+        'warning',
+      );
   } catch (error) {
     add(
       'invalid-config',
-      options.configPath ?? '.spectrum/config.json',
+      configPath,
       error instanceof RepositoryFileError
         ? error.message
         : error instanceof SyntaxError

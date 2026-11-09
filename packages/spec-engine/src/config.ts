@@ -73,32 +73,6 @@ export function parseConfiguration(raw: unknown): SpectrumConfig {
   });
   if (raw.overview !== undefined && !text(raw.overview))
     throw new Error('overview must be a repository-relative path.');
-  const integrations: NonNullable<SpectrumConfig['integrations']> = {};
-  if (raw.integrations !== undefined) {
-    if (!record(raw.integrations)) throw new Error('integrations must be a mapping.');
-    for (const name of ['github', 'linear'] as const) {
-      const value = raw.integrations[name];
-      if (value === undefined) continue;
-      if (!record(value) || typeof value.enabled !== 'boolean')
-        throw new Error(`${name}.enabled must be boolean.`);
-      integrations[name] = { enabled: value.enabled };
-    }
-  }
-  let agents: SpectrumConfig['agents'];
-  if (raw.agents !== undefined) {
-    if (!record(raw.agents) || typeof raw.agents.enabled !== 'boolean')
-      throw new Error('agents.enabled must be boolean.');
-    const attempts = raw.agents.max_repair_attempts;
-    if (
-      attempts !== undefined &&
-      (typeof attempts !== 'number' || !Number.isInteger(attempts) || attempts < 0)
-    )
-      throw new Error('max_repair_attempts must be a nonnegative integer.');
-    agents = {
-      enabled: raw.agents.enabled,
-      ...(attempts !== undefined ? { max_repair_attempts: attempts as number } : {}),
-    };
-  }
   return {
     schema_version: 2,
     name: raw.name,
@@ -107,14 +81,29 @@ export function parseConfiguration(raw: unknown): SpectrumConfig {
     inventories,
     documents,
     ...(raw.overview ? { overview: raw.overview as string } : {}),
-    integrations,
-    agents,
   };
+}
+
+/**
+ * Keys that earlier templates wrote but nothing ever read. Connection state comes from the
+ * server's verified connections, never from repository configuration.
+ */
+export const RETIRED_CONFIGURATION_KEYS = ['integrations', 'agents'] as const;
+
+export function retiredConfigurationKeys(raw: unknown): string[] {
+  return record(raw) ? RETIRED_CONFIGURATION_KEYS.filter((key) => raw[key] !== undefined) : [];
+}
+
+export async function readRawConfiguration(
+  root: string,
+  configPath = '.spectrum/config.json',
+): Promise<unknown> {
+  return JSON.parse(await readRepositoryText(root, configPath));
 }
 
 export async function readConfiguration(
   root: string,
   configPath = '.spectrum/config.json',
 ): Promise<SpectrumConfig> {
-  return parseConfiguration(JSON.parse(await readRepositoryText(root, configPath)));
+  return parseConfiguration(await readRawConfiguration(root, configPath));
 }

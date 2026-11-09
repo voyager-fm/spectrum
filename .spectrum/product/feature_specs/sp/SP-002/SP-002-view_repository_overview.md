@@ -29,7 +29,7 @@ The dashboard server runs locally and can read the configured repository. Extern
 
 ## Expected Outcome
 
-Summary cards show the structural check result and finding count, the number of interaction specifications and how many are marked approved, the number of rule files, and the configured mode and canonical source. Findings appear in a table with code, path and message. An Agent loop section links to Proposals, Runs and PR reviews as not implemented, and to Integrations with declared flags.
+Summary cards show the structural check result and finding count, the number of interaction specifications and how many are marked approved, the number of rule files, and the configured mode and canonical source. Findings appear in a table with code, path and message. An Agent loop section links to Proposals, Runs and PR reviews as not implemented, and to Integrations with the GitHub App connection state and Linear as not implemented.
 
 ## State Changes
 

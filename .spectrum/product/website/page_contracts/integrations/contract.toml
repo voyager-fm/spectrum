@@ -5,7 +5,7 @@ path = "/settings"
 implementation_status = "implemented"
 
 [responsibility]
-primary = "Inspect declared configuration independently of live connectivity."
+primary = "Inspect integration connection state reported by the server."
 
 [policy]
 read_only = true

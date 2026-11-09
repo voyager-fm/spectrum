@@ -5,5 +5,5 @@ Domain	interaction	Interaction	One stable product behavior with a detailed Markd
 Operation	change_set	Change set	Exact proposed edits against a repository revision and original file hashes.
 State	review_result	Review result	Findings bound to the reviewed repository revision.
 Rule	agent_rule	Agent rule	A project instruction with an explicit scope and application boundary.
-Domain	configuration	Repository configuration	A versioned source mapping with mode and declared integration flags.
+Domain	configuration	Repository configuration	A versioned source mapping with mode.
 Domain	source_profile	Source profile	An explicit configuration supplied at read time to map existing documentation paths.

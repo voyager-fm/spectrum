@@ -56,8 +56,6 @@ export interface SpectrumConfig {
   overview?: string;
   inventories: InventorySource[];
   documents: DocumentSource[];
-  integrations?: { github?: { enabled: boolean }; linear?: { enabled: boolean } };
-  agents?: { enabled: boolean; max_repair_attempts?: number };
 }
 export interface ColumnReference {
   table: string;

@@ -5,6 +5,6 @@ web	repository	overview	Overview	2	section	web.overview	Structural check health 
 web	repository	specs	Specifications	2	section	web.specs	Interaction list with shared contracts and flows.	SP-002-browse_specifications	implementing
 web	repository	spec_detail	Specification detail	2	section	web.spec_detail	One interaction with its states, criteria, findings and links.	SP-002-view_specification_detail	implementing
 web	repository	rules	Rules	2	section	web.rules	Rule files from the configured rule sources.	SP-006-read_rules|SP-003-propose_rule_change	implementing
-web	repository	integrations	Integrations	2	section	web.integrations	Declared integration flags and model provider state.	SP-006-inspect_integrations|SP-012-link_linear_issue|SP-013-connect_model_provider	implementing
+web	repository	integrations	Integrations	2	section	web.integrations	Integration connection state and model provider state.	SP-006-inspect_integrations|SP-012-link_linear_issue|SP-013-connect_model_provider	implementing
 web	repository	agent_loop	Agent loop	2	section	web.agent_loop	Proposals, runs and PR reviews; planned states until execution exists.	SP-007-show_planned_capabilities|SP-003-draft_proposal|SP-003-review_proposal|SP-003-apply_proposal|SP-009-run_discovery|SP-009-run_drafting|SP-010-review_pull_request|SP-010-publish_review	implementing
 plugin	-	spectrum	Spectrum skill	1	root	plugin.spectrum	The host skill invokes the same CLI contract.	SP-004-install_plugin|SP-004-run_plugin_checks|SP-008-follow_spec_guardrails	implementing
