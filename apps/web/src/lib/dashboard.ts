@@ -118,7 +118,10 @@ export async function loadDashboard(root: string = repositoryRoot()): Promise<Da
     documents,
     overview: documents.find((doc) => doc.kind === 'overview') ?? null,
     rules: documents.filter((doc) => doc.kind === 'rule'),
-    contracts: documents.filter((doc) => doc.kind === 'contract' || doc.kind === 'page_contract'),
+    contracts: documents.filter(
+      (doc) =>
+        doc.kind === 'contract' || doc.kind === 'page_contract' || doc.kind === 'surface_contract',
+    ),
     flows: documents.filter((doc) => doc.kind === 'flow'),
   };
 }

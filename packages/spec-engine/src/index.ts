@@ -76,6 +76,12 @@ function classify(
       return 'reference';
     return 'engineering';
   }
+  if (source === 'surface_bundle') {
+    if (basename(path) === 'contract.toml') return 'surface_contract';
+    if (basename(path) === 'layout.md') return 'layout';
+    if (basename(path) === 'flow.md') return 'flow';
+    if (basename(path) === 'spec.md') return 'surface_spec';
+  }
   if (source === 'page_bundle') {
     if (basename(path) === 'contract.toml') return 'page_contract';
     if (basename(path) === 'layout.md') return 'layout';
@@ -323,9 +329,23 @@ export async function checkRepository(
   const documents = new Map(model.documents.map((doc) => [doc.path, doc]));
   const contractIds = new Set<string>();
   const pageContracts = new Map<string, RepositoryDocument>();
+  const surfaceContracts = new Map<string, RepositoryDocument>();
   const routes = new Map(rows('routes').map((row) => [row.values.page_id, row]));
+  const regionKeys = new Set(
+    tables('regions').flatMap((t) =>
+      t.schema.primary_key.length === 1
+        ? t.rows.map((row) => row.values[t.schema.primary_key[0]])
+        : [],
+    ),
+  );
+  const requireBundleDocuments = (doc: RepositoryDocument, label: string) => {
+    for (const file of ['layout.md', 'flow.md'])
+      if (!documents.has(`${dirname(doc.path)}/${file}`))
+        add('missing-page-document', doc.path, `${label} requires ${file}.`);
+  };
   for (const doc of model.documents) {
-    if (doc.kind !== 'contract' && doc.kind !== 'page_contract') continue;
+    if (doc.kind !== 'contract' && doc.kind !== 'page_contract' && doc.kind !== 'surface_contract')
+      continue;
     const contract = record(doc.metadata.contract) ? doc.metadata.contract : {};
     if (!text(contract.id)) {
       add('invalid-contract', doc.path, 'TOML requires [contract].id.');
@@ -380,14 +400,45 @@ export async function checkRepository(
       if (pageContracts.has(id))
         add('duplicate-id', doc.path, `Duplicate page contract for ${id}.`);
       pageContracts.set(id, doc);
-      for (const file of ['layout.md', 'flow.md'])
-        if (!documents.has(`${dirname(doc.path)}/${file}`))
-          add('missing-page-document', doc.path, `Page bundle requires ${file}.`);
+      requireBundleDocuments(doc, 'Page bundle');
+    }
+    if (doc.kind === 'surface_contract') {
+      const region = contract.region;
+      if (!text(region)) {
+        add('invalid-contract', doc.path, 'A surface contract requires [contract].region.');
+        continue;
+      }
+      const routeFields = ['page_id', 'path', 'implementation_status'].filter(
+        (field) => contract[field] !== undefined,
+      );
+      if (routeFields.length)
+        add(
+          'invalid-contract',
+          doc.path,
+          `A surface contract binds by region; ${routeFields.join(', ')} belong to ROUTES.`,
+        );
+      if (!regionKeys.has(region)) add('invalid-reference', doc.path, `Unknown region ${region}.`);
+      else model.relationships.push({ kind: 'region_contract', source: region, target: doc.path });
+      if (surfaceContracts.has(region))
+        add('duplicate-id', doc.path, `Duplicate surface contract for ${region}.`);
+      surfaceContracts.set(region, doc);
     }
   }
-  for (const row of routes.values())
-    if ((!row.values.type || row.values.type === 'page') && !pageContracts.has(row.values.page_id))
+  for (const row of routes.values()) {
+    if (row.values.type && row.values.type !== 'page') continue;
+    const region = row.values.region;
+    if (region !== undefined && concrete(region)) {
+      const bundle = surfaceContracts.get(region);
+      if (bundle) requireBundleDocuments(bundle, `Page ${row.values.page_id}`);
+      else
+        add(
+          'missing-page-contract',
+          row.path,
+          `${row.values.page_id} needs a surface contract for region ${region}.`,
+        );
+    } else if (!pageContracts.has(row.values.page_id))
       add('missing-page-contract', row.path, `${row.values.page_id} needs a page contract bundle.`);
+  }
 
   for (const doc of model.documents) {
     const parsed = markdown.get(doc.path);

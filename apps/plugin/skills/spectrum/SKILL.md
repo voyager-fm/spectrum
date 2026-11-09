@@ -52,7 +52,7 @@ To pin a version for the whole team, suggest `npm install --save-dev @voyager-fm
 
 ## Read the specs
 
-Read `config.json` for the version 2 source mapping. TSV inventories and adjacent `schema.json` files own IA and FI. TOML contracts own policy, state vocabulary and read/write ownership; Markdown flows own interaction coverage and failure paths. One Markdown spec per interaction owns its ACs. Web routes connect to page contract/layout/flow bundles, and engineering documents keep technical knowledge separate. Existing paths outside `.spectrum/` can be mapped within the repository.
+Read `config.json` for the version 2 source mapping. TSV inventories, declared by a domain `schema.json` catalog, own IA and FI. TOML contracts own policy, state vocabulary and read/write ownership; Markdown flows own interaction coverage and failure paths. One Markdown spec per interaction owns its ACs. One surface bundle per screen-level region (contract, layout, flow) owns that screen, and web routes point at their region. Engineering documents keep technical knowledge separate. Existing paths outside `.spectrum/` can be mapped within the repository.
 
 - The result's `specs[].id` is the stable interaction ID. `featureId` and `categoryKey` identify its inventory owners. `links` are resolved repository-relative document paths.
 - `status` is the document review annotation; `implementationStatus` and `phase` come from FI. None is executed test evidence.

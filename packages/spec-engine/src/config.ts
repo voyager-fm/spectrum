@@ -21,6 +21,7 @@ export const inventoryKinds: InventoryKind[] = [
 ];
 const documentKinds: DocumentSourceKind[] = [
   'feature_bundle',
+  'surface_bundle',
   'page_bundle',
   'contracts',
   'flows',

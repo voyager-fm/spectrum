@@ -37,7 +37,7 @@ If \`.spectrum/config.json\` does not exist, Spectrum is not set up here. \`${bi
 
 ## Read the specs
 
-Read \`.spectrum/config.json\` for the version 2 source mapping. TSV inventories and adjacent \`schema.json\` files own IA and FI. TOML contracts own policy, state vocabulary and read/write ownership; Markdown flows own interaction coverage and failure paths. One Markdown spec per interaction owns its ACs.
+Read \`.spectrum/config.json\` for the version 2 source mapping. TSV inventories, declared by a domain \`schema.json\` catalog, own IA and FI. TOML contracts own policy, state vocabulary and read/write ownership; Markdown flows own interaction coverage and failure paths. One Markdown spec per interaction owns its ACs.
 
 - \`specs[].id\` is the stable interaction ID. \`featureId\` and \`categoryKey\` identify its inventory owners. \`links\` are resolved repository-relative document paths.
 - \`status\` is the document review annotation; \`implementationStatus\` and \`phase\` come from FI. None is executed test evidence.

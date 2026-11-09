@@ -2,7 +2,7 @@
 
 This guide defines how any repository writes specifications that `@spectrum/spec-engine` reads and checks. The engine owns this format. A client repository holds only its own records and refers to the format through `$schema` URLs and `extends` IDs; it never holds a copy of these definitions.
 
-The model connects TSV inventories, TOML policies, Markdown flows and interaction specs, web page bundles and engineering knowledge. There is one editable owner for each fact.
+The model connects TSV inventories, TOML policies, Markdown flows, interaction specs, surface bundles and engineering knowledge. There is one editable owner for each fact.
 
 ## Sources and ownership
 
@@ -10,18 +10,20 @@ Paths below are the default layout. `config.json` maps the actual sources, and p
 
 | Source | Owns | Derived consumers |
 | --- | --- | --- |
-| `product/information_architecture/{schema.json,*.tsv}` | Objects, surfaces, regions and optional menus | FI references, contracts and specs |
+| `product/feature_inventory/schema.json` | The domain catalog: each table's TSV file, kind, column order and added columns | Deterministic table validation |
+| `product/feature_inventory/{objects,surfaces,surface_structure}.tsv` | Objects, surfaces and their regions | FI references, contracts, specs and surface bundles |
 | `product/feature_inventory/feature_categories.tsv` | Category identity and title | Feature classification |
 | `product/feature_inventory/features.tsv` | Feature identity and category | Interaction grouping |
 | `product/feature_inventory/interactions.tsv` | Interaction identity, lifecycle, phase and summary | Spec frontmatter mirror |
+| `product/feature_inventory/routes.tsv` | Web route identity, path, region and declared implementation status | Surface bundle requirements |
 | Engine base schemas | FI table names, primary keys and the category, feature and interaction columns the engine checks | Catalog tables that `extends` them |
-| Domain `schema.json` catalog | Each table's TSV file, kind, column order and added columns | Deterministic table validation |
-| `product/feature_specs/<category>/contracts/*.toml` | Shared policy, vocabulary, state models, reads/writes | Flows and interaction specs |
-| `product/feature_specs/<category>/flows/*.md` | Interaction coverage, happy paths and failure handling | Interaction sources and review |
-| `product/feature_specs/<category>/<feature_id>/*.md` | One interaction's detailed behavior and ACs | CLI, dashboard, host-agent context |
-| `product/website/route_map/{schema.json,routes.tsv}` | Web route identity and declared implementation status | Page contract matching |
-| `product/website/page_contracts/<page>/` | `contract.toml`, `layout.md`, `flow.md`, optional `spec.md` | Web experience and review |
+| `product/feature_inventory/specs/<category>/contracts/*.toml` | Shared policy, vocabulary, state models, reads/writes | Flows and interaction specs |
+| `product/feature_inventory/specs/<category>/flows/*.md` | Interaction coverage, happy paths and failure handling | Interaction sources and review |
+| `product/feature_inventory/specs/<category>/<feature_id>/*.md` | One interaction's detailed behavior and ACs | CLI, dashboard, host-agent context |
+| `product/feature_inventory/surfaces/<surface>/<region>/` | One screen-level region: `contract.toml`, optional `layout.md`, `flow.md` and `spec.md` | Screen experience and review |
 | `engineering/<platform>/{architecture,guides,standards,decisions}/` | The project's technical knowledge and decisions | Development context |
+
+There are two units of specification. An interaction spec describes one behavior and is bound to an `INTERACTIONS` row. A surface bundle describes one screen-level region, such as a web page, a command output or an agent skill, and is bound to a `SURFACE_STRUCTURE` row. Every surface may have its own bundles.
 
 ## Schemas
 
@@ -90,6 +92,28 @@ The engine owns the base schemas of the three FI tables. Each base fixes the tab
 - Added columns carry a full definition. Examples are `description`, `related_ui`, `related_region`, `menu` and `entitlement_key`.
 - A catalog table cannot redefine or omit a base column. Its key must equal the base table name.
 - The engine merges the definition onto the base before validating rows.
+
+## Surface bundles
+
+A surface bundle is a directory with a `contract.toml` whose `[contract]` declares `id` and `region`. `region` names a row of the `regions` table, keyed by its single-column primary key. Map the bundle root as `{ "kind": "surface_bundle", "root": "<path>" }`; the directory names below it are free.
+
+```toml
+[contract]
+id = "web.overview"
+region = "web.overview"
+```
+
+- `layout.md`, `flow.md` and `spec.md` in the same directory are the bundle's layout, flow and screen spec. Only the contract is required.
+- Each region has at most one surface bundle.
+- A surface contract does not declare `page_id`, `path` or `implementation_status`. Route facts belong to the route table.
+- A route row whose `type` is empty or `page` and whose `region` is set needs a surface bundle for that region, and that bundle needs `layout.md` and `flow.md`.
+- Shared contract checks, such as unique contract IDs, categories, primary objects and ownership, apply to surface contracts too.
+
+A region can stand without a bundle. Describe a sub-section in its parent's `layout.md` instead.
+
+### Brownfield page bundles
+
+Existing repositories can keep `{ "kind": "page_bundle", "root": "<path>" }`. A page contract declares `page_id`, `path` and optionally `implementation_status`, which must match its route row. A route row without a `region` needs such a page contract.
 
 ## Brownfield single-table schemas
 

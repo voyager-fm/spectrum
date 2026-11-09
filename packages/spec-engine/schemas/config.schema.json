@@ -85,6 +85,7 @@
           "kind": {
             "enum": [
               "feature_bundle",
+              "surface_bundle",
               "page_bundle",
               "contracts",
               "flows",

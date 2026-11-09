@@ -44,6 +44,9 @@ export interface InventoryCatalogSource {
 export type InventoryEntry = InventorySource | InventoryCatalogSource;
 export type DocumentSourceKind =
   | 'feature_bundle'
+  /** Screen-level bundles bound to a surface region through `[contract].region`. */
+  | 'surface_bundle'
+  /** Brownfield web page bundles bound to a ROUTES row through `[contract].page_id`. */
   | 'page_bundle'
   | 'contracts'
   | 'flows'
@@ -100,6 +103,8 @@ export interface Inventory {
 export type DocumentKind =
   | 'interaction'
   | 'contract'
+  | 'surface_contract'
+  | 'surface_spec'
   | 'page_contract'
   | 'flow'
   | 'layout'
@@ -117,7 +122,13 @@ export interface RepositoryDocument {
   links: string[];
 }
 export interface Relationship {
-  kind: 'reference' | 'document_link' | 'specification' | 'ownership' | 'route_contract';
+  kind:
+    | 'reference'
+    | 'document_link'
+    | 'specification'
+    | 'ownership'
+    | 'region_contract'
+    | 'route_contract';
   source: string;
   target: string;
   field?: string;
