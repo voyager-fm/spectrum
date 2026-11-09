@@ -1,0 +1,16 @@
+{
+  "id": "SP-002",
+  "title": "Repository dashboard",
+  "status": "draft",
+  "acceptance": [
+    "Dashboard lists the same specs as the CLI.",
+    "Statuses are document approval states, not implementation verification.",
+    "Dashboard is loopback-only and read-only in this scaffold."
+  ],
+  "links": [
+    "overview.md",
+    "rules/agents.md",
+    "contracts/change-set.md",
+    "flows/spec-loop.md"
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "name": "Spectrum",
+  "specRoot": "features",
+  "mode": "proposal-only",
+  "canonicalSource": "git-files",
+  "integrations": {
+    "github": {
+      "enabled": false
+    },
+    "linear": {
+      "enabled": false
+    }
+  },
+  "agents": {
+    "enabled": false,
+    "maxRepairAttempts": 2
+  }
+}

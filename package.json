@@ -1,0 +1,22 @@
+{
+  "name": "spectrum",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.18"
+  },
+  "packageManager": "pnpm@10.20.0",
+  "scripts": {
+    "dev": "node apps/web/src/server.ts",
+    "cli": "node apps/cli/src/index.ts",
+    "spec:check": "node apps/cli/src/index.ts check",
+    "spec:list": "node apps/cli/src/index.ts list",
+    "test": "node --test tests/*.test.ts",
+    "typecheck": "tsc --noEmit",
+    "check": "pnpm typecheck && pnpm test && pnpm spec:check"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.9.0"
+  }
+}

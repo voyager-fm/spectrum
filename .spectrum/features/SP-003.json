@@ -1,0 +1,16 @@
+{
+  "id": "SP-003",
+  "title": "Review and improve Spectrum itself",
+  "status": "draft",
+  "acceptance": [
+    "A proposed change identifies its base revision and affected specs.",
+    "Only a human-approved exact change may be published after revision and file hash revalidation.",
+    "Validation failures produce proposed repairs; acceptance criteria are not silently weakened."
+  ],
+  "links": [
+    "overview.md",
+    "rules/agents.md",
+    "contracts/change-set.md",
+    "flows/spec-loop.md"
+  ]
+}

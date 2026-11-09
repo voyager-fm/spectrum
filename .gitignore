@@ -1,0 +1,8 @@
+node_modules/
+.env
+.env.*
+!.env.example
+.spectrum/runs/
+dist/
+coverage/
+.DS_Store
