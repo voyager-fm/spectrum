@@ -34,9 +34,3 @@ Follow actual callers, public exports and tests; this map is a starting point, n
 | `.apm/library/`, `apm.yml`, `apm.lock.yaml` | Development skill sources, selection and generated deployment lock; see [harness ownership](../../../../.apm/README.md) |
 
 When a public contract, parser or proposal rule changes, inspect the CLI, plugin and dashboard consumers even when their files are unchanged. A server ownership decision does not prove that its planned entry points exist.
-
-## Voyager as a source repository
-
-Spectrum's development harness adapts Voyager's separation of orchestration, specialist authority and verification. Voyager's native Swift/TCA rules, Common dependency, canonical-docs submodule procedure and deployment commands do not become Spectrum requirements.
-
-For a Voyager profile or compatibility task, locate the adoption guide through the configured engineering root and inspect the actual source repository guidance, canonical revision and consumer gitlinks. Report missing guidance as an input gap. A profile's existence does not prove successful adoption. Reading a customer repository does not authorize moving its documents, changing its pointers or publishing changes.

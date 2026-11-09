@@ -22,4 +22,4 @@ Load only the reference the task needs:
 5. Use semantic elements, labels and the primitives' focus rings. Check the layout under 768px and in dark mode.
 6. Verify per verification.md. Use spectrum-test-authoring for new loader tests.
 
-Return the affected routes, states covered, reuse decision, checks run with results, visual evidence or "visual inspection not performed", and unresolved UX decisions. Do not assume native macOS components, Voyager brand assets or an installed browser automation framework.
+Return the affected routes, states covered, reuse decision, checks run with results, visual evidence or "visual inspection not performed", and unresolved UX decisions. Do not assume native macOS components, external brand assets or an installed browser automation framework.
