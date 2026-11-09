@@ -58,10 +58,6 @@
     {
       "kind": "rules",
       "root": ".spectrum/rules"
-    },
-    {
-      "kind": "reference",
-      "root": ".spectrum/product/specification_structure.md"
     }
   ]
 }

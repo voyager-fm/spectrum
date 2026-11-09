@@ -168,10 +168,5 @@
     "id": "engineering.adr",
     "source": "engineering/adr.md",
     "output": ".spectrum/engineering/{{path:platform}}/decisions/{{path:decision_month}}/{{path:article_key}}.md"
-  },
-  {
-    "id": "repository.structure",
-    "source": "repository/structure.md",
-    "output": ".spectrum/product/specification_structure.md"
   }
 ]

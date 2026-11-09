@@ -26,5 +26,3 @@ The shared engine reads TSV with adjacent schemas, YAML-frontmatter Markdown and
 ## Planned capabilities
 
 Proposal generation/apply, digest-bound authenticated approvals, remote discovery, server APIs, GitHub/Linear connectivity, model adapters and persistent execution history remain unimplemented. These server capabilities belong to the Next.js application and shared packages. A Markdown checkbox is not evidence that these capabilities ran. The existing proposal guard checks approval state, revision and nonempty edits only.
-
-The [directory and scaffolding contract](product/specification_structure.md) defines the default structure and separates current template rendering from planned file initialization.

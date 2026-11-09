@@ -133,7 +133,7 @@ test('template substitutions escape structured values and reject unsafe output p
   await assert.rejects(loadTemplate('../outside'), /Unknown specification template/);
 });
 
-test('shipped schema and layout definitions match the self-repository installation', async () => {
+test('shipped JSON schema templates match the self-repository schema contract', async () => {
   for (const template of (await listTemplates()).filter((template) =>
     template.id.startsWith('schema.'),
   )) {
@@ -141,9 +141,4 @@ test('shipped schema and layout definitions match the self-repository installati
     const installed = await readFile(resolve(import.meta.dirname, '../../..', output.path), 'utf8');
     assert.deepEqual(JSON.parse(output.content), JSON.parse(installed));
   }
-  const layout = await renderTemplate('repository.structure', {});
-  assert.equal(
-    layout.content,
-    await readFile(resolve(import.meta.dirname, '../../..', layout.path), 'utf8'),
-  );
 });

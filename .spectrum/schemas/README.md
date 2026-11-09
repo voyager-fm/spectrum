@@ -76,7 +76,3 @@ Sources and Verification prose own engineering evidence. A runtime approval for 
 ## Migration
 
 Version 1 feature JSON and the standalone JSON draft model are retired. Spectrum's `SP-001` through `SP-004` feature IDs and their original acceptance statements are preserved in FI and interaction Markdown. Spectrum's own feature IDs stay product-scoped (`SP-<nnn>`); its category keys (`VAL`, `DSH`, `AGT`, `LOOP`, `INT`) classify features without renumbering them. No automatic customer-document migration or remote publication runs during validation.
-
-## Directory and scaffolding contract
-
-[The product-level contract](../product/specification_structure.md) defines the default layout and selected-module rules. Web route/page documents are nested under `product/website/`. The current template API renders paths and contents; an initializer and automatic file writer remain unimplemented.

@@ -38,33 +38,44 @@ export const SETUP_COMMANDS = {
   ],
 } as const;
 
-// Templates the starter bundle leaves out: optional tables need explicit configuration entries
-// and engineering knowledge has no fixed authoring template.
-const STARTER_EXCLUDED = /^(inventory\.(menus|custom)\.|engineering\.)/;
+export interface ScaffoldingDefinition {
+  schema_version: 1;
+  templates: string[];
+  defaults: Record<string, string>;
+  unresolved_value: string;
+  empty_document_roots: { kind: string; file: string; content: string }[];
+}
 
-const STARTER_VALUES: Readonly<Record<string, string>> = {
-  category_key: 'CORE',
-  category_title: 'Core',
-  feature_id: 'CORE-001',
-  feature_title: 'First feature',
-  interaction_id: 'CORE-001-first_interaction',
-  interaction_title: 'First interaction',
-  object_key: 'item',
-  object_label: 'Item',
-  surface_key: 'app',
-  structure_key: 'app.main',
-  region_label: 'Main',
-  contract_id: 'core.first',
-  initial_state: 'idle',
-  result_state: 'done',
-  read_state: 'item',
-  write_state: 'item',
-  page_id: 'HOME',
-  page_key: 'home',
-  page_title: 'Home',
-  route_path: '/',
-  page_contract_id: 'website.home',
-};
+/** Engine-owned package data. It is never copied into a customer repository. */
+export async function loadScaffoldingDefinition(): Promise<ScaffoldingDefinition> {
+  const { readTemplateFile } = await import('./template-files.ts');
+  const value: ScaffoldingDefinition = JSON.parse(await readTemplateFile('scaffolding.json'));
+  if (
+    value.schema_version !== 1 ||
+    !Array.isArray(value.templates) ||
+    !value.templates.length ||
+    !value.templates.every((id) => typeof id === 'string') ||
+    new Set(value.templates).size !== value.templates.length ||
+    !value.defaults ||
+    typeof value.defaults !== 'object' ||
+    Array.isArray(value.defaults) ||
+    !Object.values(value.defaults).every((item) => typeof item === 'string') ||
+    typeof value.unresolved_value !== 'string' ||
+    !value.unresolved_value ||
+    !Array.isArray(value.empty_document_roots) ||
+    !value.empty_document_roots.every(
+      (rule) =>
+        typeof rule.kind === 'string' &&
+        typeof rule.content === 'string' &&
+        typeof rule.file === 'string' &&
+        /^[a-zA-Z0-9_.-]+$/.test(rule.file) &&
+        !['.', '..'].includes(rule.file),
+    )
+  ) {
+    throw new Error('Invalid engine scaffolding definition.');
+  }
+  return value;
+}
 
 /**
  * Render the connected starter bundle for a new repository. Every value Spectrum cannot know is
@@ -76,10 +87,14 @@ export async function renderStarterBundle(projectName: string): Promise<Rendered
   // Loaded on demand so importing the setup table never touches template files, for example
   // inside a server bundle that only inspects repositories.
   const { listTemplates, renderTemplate } = await import('./templates.ts');
-  const templates = (await listTemplates()).filter(
-    (template) => !STARTER_EXCLUDED.test(template.id),
-  );
-  const values: Record<string, string> = { ...STARTER_VALUES, project_name: name };
+  const definition = await loadScaffoldingDefinition();
+  const catalog = await listTemplates();
+  const templates = definition.templates.map((id) => {
+    const template = catalog.find((entry) => entry.id === id);
+    if (!template) throw new Error(`Unknown scaffolding template: ${id}`);
+    return template;
+  });
+  const values: Record<string, string> = { ...definition.defaults, project_name: name };
   const rendered: RenderedTemplate[] = [];
   for (const template of templates) {
     // Fill each value the template asks for that the starter does not decide.
@@ -90,28 +105,21 @@ export async function renderStarterBundle(projectName: string): Promise<Rendered
       } catch (error) {
         const missing = /^Missing template value: (\w+)$/.exec((error as Error).message);
         if (!missing) throw error;
-        values[missing[1]] = 'TBD';
+        values[missing[1]] = definition.unresolved_value;
       }
     }
   }
-  // Engineering knowledge has no fixed template, but its configured root must exist.
   const config = rendered.find((file) => file.path === SETUP.config);
   const documents = config ? (JSON.parse(config.content).documents ?? []) : [];
   for (const document of documents as { kind?: string; root?: string }[]) {
-    if (document.kind !== 'engineering' || !document.root) continue;
-    const path = `${document.root}/README.md`;
-    if (rendered.some((file) => file.path.startsWith(`${document.root}/`))) continue;
-    rendered.push({
-      path,
-      content: [
-        '# Engineering',
-        '',
-        'Architecture, implementation, standards and decision records for this repository.',
-        'Add one Markdown article per topic with `doc_type`, `status` and',
-        '`implementation_state` frontmatter. See the Spectrum schema guide for the format.',
-        '',
-      ].join('\n'),
-    });
+    const rule = definition.empty_document_roots.find((rule) => rule.kind === document.kind);
+    if (
+      !rule ||
+      !document.root ||
+      rendered.some((file) => file.path.startsWith(`${document.root}/`))
+    )
+      continue;
+    rendered.push({ path: `${document.root}/${rule.file}`, content: rule.content });
   }
   return rendered;
 }
