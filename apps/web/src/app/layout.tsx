@@ -46,7 +46,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
               <AccountControl viewer={viewer} />
             </div>
           </aside>
-          <main className="mx-auto min-w-0 w-full max-w-5xl px-4 py-8 md:px-10 md:py-10">
+          <main className="mx-auto min-w-0 w-full max-w-5xl px-4 py-8 has-[[data-reader]]:max-w-7xl md:px-10 md:py-10">
             {children}
           </main>
         </div>

@@ -1,14 +1,15 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { EmptyNotice, LoadErrors, Mono, Section } from '../../../../../components/dashboard.tsx';
+import { EmptyNotice, LoadErrors, Mono } from '../../../../../components/dashboard.tsx';
 import {
   RepositoryFrame,
   RevisionLine,
   repositoryPath,
   targetQuery,
 } from '../../../../../components/repository.tsx';
-import { SpecTable } from '../../../../../components/specs.tsx';
-import { loadRepositoryCheck, parseTarget, type RemoteCheck } from '../../../../../lib/github.ts';
+import { createReader, SpecIndex } from '../../../../../components/spec-reader.tsx';
+import { loadRepositoryCheck, parseTarget } from '../../../../../lib/github.ts';
+import { remoteRoutes } from '../../../../../lib/reader.ts';
 
 type Props = {
   params: Promise<{ owner: string; repo: string }>;
@@ -35,7 +36,7 @@ export default async function RemoteSpecsPage({ params, searchParams }: Props) {
       view={view}
       tab="specs"
       query={query}
-      description="Interaction specs read from .spectrum/ at one pinned commit."
+      description="Interaction specs read from .spectrum/ at one pinned commit. Press ⌘K to search."
     >
       {view.status === 'ready' ? (
         view.check ? (
@@ -47,11 +48,16 @@ export default async function RemoteSpecsPage({ params, searchParams }: Props) {
                 htmlUrl={view.repository.htmlUrl}
               />
             </div>
-            <SpecTable
-              specs={view.check.result.specs}
-              hrefFor={(s) =>
-                `${repositoryPath(owner, repo, 'specs')}/${encodeURIComponent(s.id)}${query}`
-              }
+            <SpecIndex
+              reader={createReader(
+                view.check.result,
+                remoteRoutes(
+                  repositoryPath(owner, repo, 'specs'),
+                  query,
+                  view.repository.htmlUrl,
+                  view.check.sha,
+                ),
+              )}
               empty={
                 view.check.result.config ? (
                   'This commit declares no interaction specs.'
@@ -69,7 +75,6 @@ export default async function RemoteSpecsPage({ params, searchParams }: Props) {
                 )
               }
             />
-            <SharedDocuments check={view.check} />
           </>
         ) : (
           <>
@@ -79,27 +84,5 @@ export default async function RemoteSpecsPage({ params, searchParams }: Props) {
         )
       ) : null}
     </RepositoryFrame>
-  );
-}
-
-function SharedDocuments({ check }: { check: RemoteCheck }) {
-  const shared = check.result.model.documents.filter(
-    (d) => d.kind === 'contract' || d.kind === 'page_contract' || d.kind === 'flow',
-  );
-  return (
-    <Section title="Shared contracts and flows">
-      {shared.length ? (
-        <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-          {shared.map((d) => (
-            <li key={d.path} className="rounded-xl border px-4 py-3">
-              <div className="text-sm font-medium">{d.title}</div>
-              <div className="break-all font-mono text-xs text-muted-foreground">{d.path}</div>
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <EmptyNotice>No shared documents.</EmptyNotice>
-      )}
-    </Section>
   );
 }

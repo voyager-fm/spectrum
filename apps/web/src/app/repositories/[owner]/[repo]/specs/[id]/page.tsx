@@ -1,14 +1,15 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { EmptyNotice, LoadErrors, Mono } from '../../../../../../components/dashboard.tsx';
+import { EmptyNotice, LoadErrors } from '../../../../../../components/dashboard.tsx';
 import {
   RepositoryFrame,
   RevisionLine,
   repositoryPath,
   targetQuery,
 } from '../../../../../../components/repository.tsx';
-import { SourceLink, SpecDetail } from '../../../../../../components/specs.tsx';
+import { createReader, SpecPage } from '../../../../../../components/spec-reader.tsx';
 import { loadRepositoryCheck, parseTarget } from '../../../../../../lib/github.ts';
+import { remoteRoutes } from '../../../../../../lib/reader.ts';
 
 type Props = {
   params: Promise<{ owner: string; repo: string; id: string }>;
@@ -29,42 +30,29 @@ export default async function RemoteSpecPage({ params, searchParams }: Props) {
   const view = await loadRepositoryCheck(owner, repo, target, undefined, { refs: false });
   const query = targetQuery(target);
   const check = view.status === 'ready' ? view.check : null;
-  const spec = check?.result.specs.find((s) => s.id === id);
-  // A spec that the pinned commit does not contain is a missing page, not an empty one.
-  if (check && !spec) notFound();
+  const reader =
+    view.status === 'ready' && check
+      ? createReader(
+          check.result,
+          remoteRoutes(
+            repositoryPath(owner, repo, 'specs'),
+            query,
+            view.repository.htmlUrl,
+            check.sha,
+          ),
+        )
+      : null;
+  // An interaction that the pinned commit does not declare is a missing page, not an empty one.
+  if (reader && !reader.rows.some((r) => r.id === id)) notFound();
 
   return (
-    <RepositoryFrame
-      owner={owner}
-      repo={repo}
-      view={view}
-      tab="specs"
-      query={query}
-      title={spec?.title ?? id}
-      description={
-        spec ? (
-          <>
-            <Mono>{spec.id}</Mono> · <Mono className="break-all">{spec.path}</Mono>
-          </>
-        ) : (
-          <Mono>{id}</Mono>
-        )
-      }
-      back={{ href: `${repositoryPath(owner, repo, 'specs')}${query}`, label: 'Specs' }}
-    >
-      {view.status === 'ready' && check && spec ? (
+    <RepositoryFrame owner={owner} repo={repo} view={view} tab="specs" query={query}>
+      {view.status === 'ready' && check && reader ? (
         <>
-          <div className="mb-6 flex flex-wrap items-baseline justify-between gap-2">
+          <div className="mb-6">
             <RevisionLine sha={check.sha} label={check.ref} htmlUrl={view.repository.htmlUrl} />
-            <SourceLink href={`${view.repository.htmlUrl}/blob/${check.sha}/${spec.path}`} />
           </div>
-          <SpecDetail
-            spec={spec}
-            findings={check.result.findings.filter((f) => f.path === spec.path)}
-            documents={check.result.model.documents}
-            checkOk={check.result.ok}
-            sourceUrl={(path) => `${view.repository.htmlUrl}/blob/${check.sha}/${path}`}
-          />
+          <SpecPage reader={reader} id={id} titleLevel={2} />
         </>
       ) : view.status === 'ready' ? (
         <>
