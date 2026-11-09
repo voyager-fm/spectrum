@@ -1,5 +1,4 @@
-import { readFile } from 'node:fs/promises';
-import { resolve } from 'node:path';
+import { readTemplateFile } from './template-files.ts';
 
 export interface SpecificationTemplate {
   id: string;
@@ -12,11 +11,10 @@ export interface RenderedTemplate {
 }
 export type TemplateValues = Readonly<Record<string, string>>;
 
-const directory = resolve(import.meta.dirname, '../templates');
 const token = /\{\{(text|json|tsv|path):([a-z_]+)\}\}/g;
 
 export async function listTemplates(): Promise<SpecificationTemplate[]> {
-  return JSON.parse(await readFile(resolve(directory, 'catalog.json'), 'utf8'));
+  return JSON.parse(await readTemplateFile('catalog.json'));
 }
 
 export async function loadTemplate(
@@ -24,7 +22,7 @@ export async function loadTemplate(
 ): Promise<SpecificationTemplate & { content: string }> {
   const template = (await listTemplates()).find((template) => template.id === id);
   if (!template) throw new Error(`Unknown specification template: ${id}`);
-  return { ...template, content: await readFile(resolve(directory, template.source), 'utf8') };
+  return { ...template, content: await readTemplateFile(template.source) };
 }
 
 /** Returns bytes and an intended relative path; never writes or approves documents. */

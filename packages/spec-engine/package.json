@@ -5,7 +5,8 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
-    "./templates": "./src/templates.ts"
+    "./templates": "./src/templates.ts",
+    "./setup": "./src/setup.ts"
   },
   "dependencies": {
     "@global-torque/markdown-it-wikilinks": "0.2.0",
