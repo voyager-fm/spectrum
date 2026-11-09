@@ -6,6 +6,8 @@ type Context = { params: Promise<{ owner: string; repo: string }> };
 const STATUS = {
   ready: 200,
   'not-configured': 503,
+  'sign-in': 401,
+  misconfigured: 503,
   invalid: 400,
   'not-installed': 404,
   error: 502,

@@ -24,6 +24,7 @@ import {
   targetQuery,
 } from '../../../../components/repository.tsx';
 import { SetupChecklist } from '../../../../components/setup.tsx';
+import type { CheckHistoryRow } from '../../../../db/store.ts';
 import {
   type CheckTarget,
   loadRepositoryCheck,
@@ -109,6 +110,8 @@ function Ready({
       ) : (
         <EmptyNotice>Not assessed. No check result exists for this revision.</EmptyNotice>
       )}
+
+      {view.history ? <History rows={view.history} base={base} current={check?.sha} /> : null}
 
       <Section
         title="Revision"
@@ -364,5 +367,78 @@ function CheckSummary({
         )}
       </Section>
     </>
+  );
+}
+
+function History({
+  rows,
+  base,
+  current,
+}: {
+  rows: CheckHistoryRow[];
+  base: string;
+  current: string | undefined;
+}) {
+  return (
+    <Section
+      title="Check history"
+      description="Every commit checked in this workspace, newest first. A commit is analyzed once and reused."
+    >
+      {rows.length ? (
+        <div className="rounded-xl border">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-24">Commit</TableHead>
+                <TableHead>Ref</TableHead>
+                <TableHead className="w-24">Result</TableHead>
+                <TableHead className="text-right">Findings</TableHead>
+                <TableHead className="text-right">Specs</TableHead>
+                <TableHead>Checked</TableHead>
+                <TableHead>By</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {rows.map((row) => (
+                <TableRow key={row.sha}>
+                  <TableCell>
+                    {row.sha === current ? (
+                      <Mono>{short(row.sha)}</Mono>
+                    ) : (
+                      <Link
+                        href={`${base}?ref=${row.sha}`}
+                        className="font-mono text-xs underline-offset-4 hover:underline"
+                      >
+                        {short(row.sha)}
+                      </Link>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    <Mono>{row.ref}</Mono>
+                  </TableCell>
+                  <TableCell>
+                    <StatusBadge tone={row.ok ? 'ok' : 'bad'}>
+                      {row.ok ? 'Passed' : 'Failed'}
+                    </StatusBadge>
+                  </TableCell>
+                  <TableCell className="text-right tabular-nums">
+                    {row.errors + row.warnings}
+                  </TableCell>
+                  <TableCell className="text-right tabular-nums">{row.specs}</TableCell>
+                  <TableCell className="text-muted-foreground">
+                    <time dateTime={row.analyzedAt}>
+                      {row.analyzedAt.replace('T', ' ').slice(0, 16)} UTC
+                    </time>
+                  </TableCell>
+                  <TableCell className="text-muted-foreground">{row.triggeredBy ?? '—'}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      ) : (
+        <EmptyNotice>No checks are stored yet.</EmptyNotice>
+      )}
+    </Section>
   );
 }

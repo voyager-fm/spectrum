@@ -5,6 +5,7 @@ import { buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import type { CheckTarget, RepositoryView } from '../lib/github.ts';
 import { type RepositoryTab, repositoryPath } from '../lib/paths.ts';
+import { AccountsMisconfigured, SignInPrompt } from './account.tsx';
 import { EmptyNotice, LoadErrors, Mono, PageHead } from './dashboard.tsx';
 import { GitHubSetup } from './github.tsx';
 
@@ -59,6 +60,22 @@ export function RepositoryFrame({
     </>
   );
 
+  if (view.status === 'sign-in') {
+    return (
+      <>
+        {head}
+        <SignInPrompt next={`${repositoryPath(owner, repo, tab)}${query}`} />
+      </>
+    );
+  }
+  if (view.status === 'misconfigured') {
+    return (
+      <>
+        {head}
+        <AccountsMisconfigured missing={view.accountsMissing} />
+      </>
+    );
+  }
   if (view.status === 'not-configured') {
     return (
       <>
@@ -82,8 +99,8 @@ export function RepositoryFrame({
         <section className="rounded-xl border p-6">
           <h2 className="text-sm font-medium">The Spectrum App is not installed here</h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            GitHub reports no installation that covers <Mono>{view.fullName}</Mono>, or the
-            repository does not exist. Nothing was checked.
+            No installation you can access covers <Mono>{view.fullName}</Mono>, or the repository
+            does not exist. Nothing was checked.
           </p>
           {view.app.installUrl ? (
             <a

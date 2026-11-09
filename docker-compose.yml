@@ -1,0 +1,24 @@
+# Local services for the Spectrum dashboard (apps/web). Start with `pnpm db:up`.
+# The credentials below are for a database bound to this machine only; production uses a
+# managed Postgres and a DATABASE_URL from its secret store.
+name: spectrum
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: spectrum
+      POSTGRES_PASSWORD: spectrum
+      POSTGRES_DB: spectrum
+    ports:
+      - "127.0.0.1:54329:5432"
+    volumes:
+      - postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U spectrum -d spectrum"]
+      interval: 2s
+      timeout: 3s
+      retries: 20
+
+volumes:
+  postgres:

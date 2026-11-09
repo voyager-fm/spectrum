@@ -2,8 +2,10 @@ import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import type { ReactNode } from 'react';
 import { cn } from '@/lib/utils';
+import { AccountControl } from '../components/account.tsx';
 import { Nav } from '../components/nav.tsx';
 import { RepositorySwitcher } from '../components/repository-switcher.tsx';
+import { currentViewer } from '../lib/auth.ts';
 import { readRepositoryState, repositoryRoot } from '../lib/dashboard.ts';
 import { switcherRepositories } from '../lib/github.ts';
 import './globals.css';
@@ -19,9 +21,10 @@ export const metadata: Metadata = {
 export const dynamic = 'force-dynamic';
 
 export default async function RootLayout({ children }: { children: ReactNode }) {
-  const [repo, github] = await Promise.all([
+  const [repo, github, viewer] = await Promise.all([
     readRepositoryState(repositoryRoot()),
     switcherRepositories(),
+    currentViewer(),
   ]);
   return (
     <html lang="en" className={cn('font-sans antialiased', sans.variable, mono.variable)}>
@@ -39,6 +42,9 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
             </div>
             <RepositorySwitcher local={repo} github={github} />
             <Nav />
+            <div className="mt-auto">
+              <AccountControl viewer={viewer} />
+            </div>
           </aside>
           <main className="mx-auto min-w-0 w-full max-w-5xl px-4 py-8 md:px-10 md:py-10">
             {children}

@@ -8,6 +8,9 @@
   "packageManager": "pnpm@10.20.0",
   "scripts": {
     "dev": "pnpm --filter @spectrum/web dev",
+    "db:up": "docker compose up -d --wait postgres",
+    "db:down": "docker compose stop postgres",
+    "db:migrate": "pnpm --filter @spectrum/web db:migrate",
     "cli": "node apps/cli/src/index.ts",
     "spec:check": "node apps/cli/src/index.ts check",
     "spec:list": "node apps/cli/src/index.ts list",

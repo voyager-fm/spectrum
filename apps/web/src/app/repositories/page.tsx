@@ -12,6 +12,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { AccountsMisconfigured, SignInPrompt } from '../../components/account.tsx';
 import {
   EmptyNotice,
   LoadErrors,
@@ -44,6 +45,10 @@ export default async function RepositoriesPage({ searchParams }: Props) {
       <GettingStarted configured={data.status.configured} repositories={data.repositories.length} />
       {!data.status.configured ? (
         <GitHubSetup missing={data.status.missing} />
+      ) : data.viewer.mode === 'misconfigured' ? (
+        <AccountsMisconfigured missing={data.viewer.missing} />
+      ) : data.viewer.mode === 'accounts' && !data.viewer.user ? (
+        <SignInPrompt next="/repositories" />
       ) : (
         <>
           <LoadErrors errors={data.errors} />

@@ -15,6 +15,9 @@ import {
 } from '@spectrum/integrations/github';
 import { checkRepository } from '@spectrum/spec-engine';
 import { inspectRepositorySetup, type RepositorySetup } from '@spectrum/spec-engine/setup';
+import { type Database, database } from '../db/client.ts';
+import { type CheckHistoryRow, findCheck, listChecks, recordCheck } from '../db/store.ts';
+import { canRead, currentViewer, type Viewer } from './auth.ts';
 
 /**
  * Server-only GitHub App service. Credentials come from the server environment and never
@@ -71,8 +74,15 @@ export async function githubAppStatus(env: Env = process.env): Promise<GitHubApp
 
 export interface GitHubDependencies {
   /** Null when the App is not configured. */
-  app: Pick<GitHubApp, 'listInstallations' | 'listRepositories' | 'repositoryClient'> | null;
+  app: Pick<
+    GitHubApp,
+    'listInstallations' | 'listRepositories' | 'repositoryInstallation' | 'installationClient'
+  > | null;
   status: GitHubAppStatus;
+  /** Who is asking; decides which installations are readable. */
+  viewer: Viewer;
+  /** Service database for check history; set only when accounts are enabled. */
+  db: Database | null;
   extract: typeof extractSnapshot;
   check: (root: string) => Promise<CheckResult>;
   setup: (root: string) => Promise<RepositorySetup>;
@@ -141,9 +151,12 @@ export async function githubDependencies(env: Env = process.env): Promise<GitHub
     }
     app = shared.app;
   }
+  const viewer = await currentViewer(env);
   return {
     app,
     status,
+    viewer,
+    db: viewer.mode === 'accounts' ? database(env) : null,
     extract: extractSnapshot,
     check: (root) => checkRepository(root),
     setup: inspectRepositorySetup,
@@ -174,28 +187,37 @@ export interface ConnectedRepository extends Repository {
 
 export interface ConnectedRepositories {
   status: GitHubAppStatus;
+  viewer: Viewer;
+  /** Installations this viewer may read. */
   installations: Installation[];
   repositories: ConnectedRepository[];
   errors: string[];
 }
 
-export async function loadConnectedRepositories(
-  deps?: GitHubDependencies,
-): Promise<ConnectedRepositories> {
-  const d = deps ?? (await githubDependencies());
-  const empty = { status: d.status, installations: [], repositories: [], errors: [] };
-  if (!d.app) return empty;
+/** Everything the App can read, before access is applied. Cached briefly; never rendered as is. */
+interface AppInventory {
+  installations: Installation[];
+  repositories: ConnectedRepository[];
+  /** Installation-level failures keyed by installation id (0 for the installation list). */
+  errors: { installationId: number; message: string }[];
+}
+
+async function loadInventory(app: NonNullable<GitHubDependencies['app']>): Promise<AppInventory> {
   let installations: Installation[];
   try {
-    installations = await d.app.listInstallations();
+    installations = await app.listInstallations();
   } catch (error) {
-    return { ...empty, errors: [`Installations: ${describeError(error)}`] };
+    return {
+      installations: [],
+      repositories: [],
+      errors: [{ installationId: 0, message: `Installations: ${describeError(error)}` }],
+    };
   }
-  const errors: string[] = [];
+  const errors: AppInventory['errors'] = [];
   const repositories: ConnectedRepository[] = [];
   for (const installation of installations) {
     try {
-      for (const repo of await d.app.listRepositories(installation.id)) {
+      for (const repo of await app.listRepositories(installation.id)) {
         repositories.push({
           ...repo,
           installationId: installation.id,
@@ -203,33 +225,67 @@ export async function loadConnectedRepositories(
         });
       }
     } catch (error) {
-      errors.push(`Installation ${installation.account}: ${describeError(error)}`);
+      errors.push({
+        installationId: installation.id,
+        message: `Installation ${installation.account}: ${describeError(error)}`,
+      });
     }
   }
   repositories.sort((a, b) => a.fullName.localeCompare(b.fullName));
-  return { status: d.status, installations, repositories, errors };
+  return { installations, repositories, errors };
+}
+
+/** Keep only what this viewer may read, including which errors it may see. */
+function forViewer(d: GitHubDependencies, inventory: AppInventory): ConnectedRepositories {
+  const readable = (id: number) => canRead(d.viewer, id);
+  const listVisible =
+    d.viewer.mode === 'single-operator' || (d.viewer.mode === 'accounts' && d.viewer.user);
+  return {
+    status: d.status,
+    viewer: d.viewer,
+    installations: inventory.installations.filter((i) => readable(i.id)),
+    repositories: inventory.repositories.filter((r) => readable(r.installationId)),
+    errors: inventory.errors
+      .filter((e) => (e.installationId === 0 ? listVisible : readable(e.installationId)))
+      .map((e) => e.message),
+  };
+}
+
+export async function loadConnectedRepositories(
+  deps?: GitHubDependencies,
+): Promise<ConnectedRepositories> {
+  const d = deps ?? (await githubDependencies());
+  if (!d.app) return forViewer(d, { installations: [], repositories: [], errors: [] });
+  return forViewer(d, await loadInventory(d.app));
 }
 
 const CONNECTED_TTL_MS = 60_000;
-let connected: { at: number; value: Promise<ConnectedRepositories> } | null = null;
+let inventoryCache: { at: number; value: Promise<AppInventory> } | null = null;
 
 /**
- * The connected repository list for navigation, reused for a minute so every page render does
- * not call GitHub. Failed loads are not reused.
+ * The connected repository list for navigation. The App's inventory is reused for a minute so
+ * every page render does not call GitHub; access is applied per viewer on every call.
  */
-export async function cachedConnectedRepositories(): Promise<ConnectedRepositories> {
-  const deps = await githubDependencies();
-  if (!deps.app) return loadConnectedRepositories(deps);
-  if (connected && Date.now() - connected.at < CONNECTED_TTL_MS) return connected.value;
-  const value = loadConnectedRepositories(deps);
-  connected = { at: Date.now(), value };
-  const result = await value;
-  if (result.errors.length && connected?.value === value) connected = null;
-  return result;
+export async function cachedConnectedRepositories(
+  deps?: GitHubDependencies,
+): Promise<ConnectedRepositories> {
+  const d = deps ?? (await githubDependencies());
+  const app = d.app;
+  if (!app) return loadConnectedRepositories(d);
+  if (!inventoryCache || Date.now() - inventoryCache.at >= CONNECTED_TTL_MS) {
+    const value = loadInventory(app);
+    inventoryCache = { at: Date.now(), value };
+    value.then((inventory) => {
+      if (inventory.errors.length && inventoryCache?.value === value) inventoryCache = null;
+    });
+  }
+  return forViewer(d, await inventoryCache.value);
 }
 
 export interface SwitcherRepositories {
   configured: boolean;
+  /** False when sign-in is required and nobody is signed in. */
+  signedIn: boolean;
   repositories: { owner: string; name: string; fullName: string; private: boolean }[];
   /** True when GitHub failed or did not answer in time; the list is then incomplete. */
   unavailable: boolean;
@@ -246,9 +302,12 @@ export async function switcherRepositories(timeoutMs = 3000): Promise<SwitcherRe
   });
   try {
     const data = await Promise.race([cachedConnectedRepositories(), timeout]);
-    if (!data) return { configured: true, repositories: [], unavailable: true };
+    if (!data) return { configured: true, signedIn: true, repositories: [], unavailable: true };
     return {
       configured: data.status.configured,
+      signedIn:
+        data.viewer.mode === 'single-operator' ||
+        (data.viewer.mode === 'accounts' && Boolean(data.viewer.user)),
       repositories: data.repositories.map((r) => ({
         owner: r.owner,
         name: r.name,
@@ -258,7 +317,7 @@ export async function switcherRepositories(timeoutMs = 3000): Promise<SwitcherRe
       unavailable: data.errors.length > 0,
     };
   } catch {
-    return { configured: true, repositories: [], unavailable: true };
+    return { configured: true, signedIn: true, repositories: [], unavailable: true };
   } finally {
     clearTimeout(timer);
   }
@@ -320,6 +379,8 @@ export interface RemoteCheck {
 
 export type RepositoryView =
   | { status: 'not-configured'; app: GitHubAppStatus }
+  | { status: 'sign-in'; app: GitHubAppStatus }
+  | { status: 'misconfigured'; app: GitHubAppStatus; accountsMissing: string[] }
   | { status: 'invalid'; app: GitHubAppStatus; message: string }
   | { status: 'not-installed'; app: GitHubAppStatus; fullName: string }
   | {
@@ -331,6 +392,8 @@ export type RepositoryView =
       check: RemoteCheck | null;
       /** Why `check` is null: the requested revision does not exist, or a later step failed. */
       failure?: 'invalid-target' | 'revision-not-found' | 'failed';
+      /** Stored analyses of this repository, newest first; null when history is not kept. */
+      history: CheckHistoryRow[] | null;
       errors: string[];
     }
   | { status: 'error'; app: GitHubAppStatus; fullName: string; errors: string[] };
@@ -351,6 +414,10 @@ export async function loadRepositoryCheck(
   const d = deps ?? (await githubDependencies());
   const fullName = `${owner}/${repo}`;
   if (!d.app) return { status: 'not-configured', app: d.status };
+  if (d.viewer.mode === 'misconfigured') {
+    return { status: 'misconfigured', app: d.status, accountsMissing: d.viewer.missing };
+  }
+  if (d.viewer.mode === 'accounts' && !d.viewer.user) return { status: 'sign-in', app: d.status };
   if (!validRepositoryName(owner, repo)) {
     return {
       status: 'invalid',
@@ -358,13 +425,18 @@ export async function loadRepositoryCheck(
       message: 'Repository must be written as owner/name.',
     };
   }
-  let client: Awaited<ReturnType<GitHubApp['repositoryClient']>>;
+  let installationId: number | null;
+  let client: Awaited<ReturnType<GitHubApp['installationClient']>>;
   try {
-    client = await d.app.repositoryClient(owner, repo);
+    installationId = await d.app.repositoryInstallation(owner, repo);
+    // An installation this viewer cannot read looks the same as no installation.
+    if (installationId === null || !canRead(d.viewer, installationId)) {
+      return { status: 'not-installed', app: d.status, fullName };
+    }
+    client = await d.app.installationClient(owner, repo, installationId);
   } catch (error) {
     return { status: 'error', app: d.status, fullName, errors: [describeError(error)] };
   }
-  if (!client) return { status: 'not-installed', app: d.status, fullName };
 
   let repository: Repository;
   let branches: Branch[];
@@ -379,7 +451,14 @@ export async function loadRepositoryCheck(
   } catch (error) {
     return { status: 'error', app: d.status, fullName, errors: [describeError(error)] };
   }
-  const ready = { status: 'ready' as const, app: d.status, repository, branches, pullRequests };
+  const ready = {
+    status: 'ready' as const,
+    app: d.status,
+    repository,
+    branches,
+    pullRequests,
+    history: null,
+  };
   if (target.kind === 'invalid') {
     return { ...ready, check: null, failure: 'invalid-target', errors: [target.message] };
   }
@@ -405,22 +484,55 @@ export async function loadRepositoryCheck(
     };
   }
 
+  const db = d.db;
+  const viewer = d.viewer;
+  const workspaceId =
+    viewer.mode === 'accounts'
+      ? viewer.installations.find((i) => i.installationId === installationId)?.workspaceId
+      : undefined;
+  const notes: string[] = [];
+  let analysis: SnapshotAnalysis;
   try {
-    const analysis = await d.cache.get(`${repository.fullName}@${sha}`, async () => {
+    analysis = await d.cache.get(`${repository.fullName}@${sha}`, async () => {
+      // A stored analysis survives restarts; the commit's content cannot have changed.
+      const stored = db ? await findCheck(db, repository.id, sha).catch(() => null) : null;
+      if (stored) return stored;
       const snapshot = await d.extract(await client.downloadTarball(sha));
+      let fresh: SnapshotAnalysis;
       try {
         const [result, setup] = await Promise.all([d.check(snapshot.root), d.setup(snapshot.root)]);
-        return { result, setup, checkedAt: d.now().toISOString() };
+        fresh = { result, setup, checkedAt: d.now().toISOString() };
       } finally {
         await snapshot.dispose();
       }
+      if (db && workspaceId) {
+        await recordCheck(db, {
+          workspaceId,
+          installationId,
+          repositoryId: repository.id,
+          repository: repository.fullName,
+          sha,
+          ref: label,
+          triggeredBy: viewer.mode === 'accounts' ? (viewer.user?.id ?? null) : null,
+          analysis: fresh,
+        }).catch(() => notes.push('This check could not be saved to the history.'));
+      }
+      return fresh;
     });
-    return {
-      ...ready,
-      check: { repository: repository.fullName, ref: label, target, sha, ...analysis },
-      errors: [],
-    };
   } catch (error) {
     return { ...ready, check: null, failure: 'failed', errors: [describeError(error)] };
   }
+  let history: CheckHistoryRow[] | null = null;
+  if (db && withRefs) {
+    history = await listChecks(db, repository.id).catch(() => {
+      notes.push('The check history could not be read.');
+      return null;
+    });
+  }
+  return {
+    ...ready,
+    check: { repository: repository.fullName, ref: label, target, sha, ...analysis },
+    history,
+    errors: notes,
+  };
 }

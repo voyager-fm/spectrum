@@ -1,6 +1,14 @@
 'use client';
 
-import { Check, ChevronsUpDown, FolderGit2, GitCommitHorizontal, Lock, Plus } from 'lucide-react';
+import {
+  Check,
+  ChevronsUpDown,
+  FolderGit2,
+  GitCommitHorizontal,
+  Lock,
+  LogIn,
+  Plus,
+} from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
@@ -81,7 +89,12 @@ export function RepositorySwitcher({
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
           <DropdownMenuLabel>GitHub</DropdownMenuLabel>
-          {!github.configured ? (
+          {github.configured && !github.signedIn ? (
+            <DropdownMenuItem render={<a href="/sign-in" />}>
+              <LogIn aria-hidden />
+              Sign in to see repositories
+            </DropdownMenuItem>
+          ) : !github.configured ? (
             <DropdownMenuItem render={<Link href="/repositories" />}>
               <Plus aria-hidden />
               Connect GitHub

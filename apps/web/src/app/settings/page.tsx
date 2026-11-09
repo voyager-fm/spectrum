@@ -9,13 +9,18 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { LoadErrors, Mono, PageHead, Section, StatusBadge } from '../../components/dashboard.tsx';
+import { currentViewer } from '../../lib/auth.ts';
 import { loadDashboard } from '../../lib/dashboard.ts';
 import { githubAppStatus } from '../../lib/github.ts';
 
 export const metadata: Metadata = { title: 'Integrations' };
 
 export default async function SettingsPage() {
-  const [data, github] = await Promise.all([loadDashboard(), githubAppStatus()]);
+  const [data, github, viewer] = await Promise.all([
+    loadDashboard(),
+    githubAppStatus(),
+    currentViewer(),
+  ]);
   return (
     <>
       <PageHead
@@ -50,6 +55,39 @@ export default async function SettingsPage() {
               </TableCell>
               <TableCell className="whitespace-normal text-muted-foreground">
                 Read-only repository checks through the GitHub App
+              </TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell className="font-medium">Accounts</TableCell>
+              <TableCell>
+                {viewer.mode === 'accounts' ? (
+                  <StatusBadge tone="info">Sign-in with GitHub</StatusBadge>
+                ) : viewer.mode === 'misconfigured' ? (
+                  <StatusBadge tone="bad">Misconfigured</StatusBadge>
+                ) : (
+                  <StatusBadge tone="neutral">Single-operator</StatusBadge>
+                )}
+              </TableCell>
+              <TableCell className="whitespace-normal text-muted-foreground">
+                {viewer.mode === 'accounts' ? (
+                  'Workspaces follow GitHub installation access; check history is stored in Postgres'
+                ) : viewer.mode === 'misconfigured' ? (
+                  <>
+                    Missing{' '}
+                    {viewer.missing.map((name, i) => (
+                      <span key={name}>
+                        {i ? ', ' : ''}
+                        <Mono>{name}</Mono>
+                      </span>
+                    ))}
+                  </>
+                ) : (
+                  <>
+                    No sign-in and no stored history. Set <Mono>DATABASE_URL</Mono>,{' '}
+                    <Mono>GITHUB_APP_CLIENT_ID</Mono> and <Mono>GITHUB_APP_CLIENT_SECRET</Mono> to
+                    enable accounts
+                  </>
+                )}
               </TableCell>
             </TableRow>
             <TableRow>

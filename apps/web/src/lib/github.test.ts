@@ -10,6 +10,9 @@ import type { CheckResult } from '@spectrum/core';
 import { extractSnapshot, GitHubError, type Repository } from '@spectrum/integrations/github';
 import { checkRepository } from '@spectrum/spec-engine';
 import { inspectRepositorySetup, type RepositorySetup } from '@spectrum/spec-engine/setup';
+import { accessibleInstallations, syncMemberships, upsertUser } from '../db/store.ts';
+import { testDatabase } from '../db/testing.ts';
+import type { Viewer } from './auth.ts';
 import {
   AnalysisCache,
   type GitHubDependencies,
@@ -23,6 +26,7 @@ import {
 const SHA = 'd'.repeat(40);
 const PR_SHA = 'e'.repeat(40);
 const repository: Repository = {
+  id: 1450780976,
   owner: 'voyager-fm',
   name: 'spectrum',
   fullName: 'voyager-fm/spectrum',
@@ -79,10 +83,15 @@ function fakeDependencies(overrides: Partial<GitHubDependencies> = {}) {
   const deps: GitHubDependencies = {
     status,
     app: {
-      listInstallations: async () => [{ id: 1, account: 'voyager-fm', targetType: 'Organization' }],
+      listInstallations: async () => [
+        { id: 1, account: 'voyager-fm', accountId: 99, targetType: 'Organization' },
+      ],
       listRepositories: async () => [repository],
-      repositoryClient: async (owner: string) => (owner === 'voyager-fm' ? client : null) as never,
+      repositoryInstallation: async (owner: string) => (owner === 'voyager-fm' ? 1 : null),
+      installationClient: async () => client as never,
     },
+    viewer: { mode: 'single-operator' },
+    db: null,
     extract: (async () => ({
       root: '/snapshot',
       dispose: async () => {
@@ -294,7 +303,7 @@ describe('loadRepositoryCheck', () => {
   it('reports a missing revision separately from a failed check', async () => {
     const { deps } = fakeDependencies();
     const app = deps.app as NonNullable<GitHubDependencies['app']>;
-    const client = (await app.repositoryClient('voyager-fm', 'spectrum')) as unknown as {
+    const client = (await app.installationClient('voyager-fm', 'spectrum', 1)) as unknown as {
       resolveCommit: (ref: string) => Promise<string>;
     };
     client.resolveCommit = async () => {
@@ -342,7 +351,7 @@ describe('remote snapshot with the real spec engine', () => {
       check: (root) => checkRepository(root),
     });
     const app = deps.app as NonNullable<GitHubDependencies['app']>;
-    const client = (await app.repositoryClient('voyager-fm', 'spectrum')) as unknown as {
+    const client = (await app.installationClient('voyager-fm', 'spectrum', 1)) as unknown as {
       downloadTarball: (sha: string) => Promise<Readable>;
     };
     client.downloadTarball = async () => createReadStream(archive);
@@ -374,7 +383,7 @@ describe('remote snapshot with the real spec engine', () => {
       setup: inspectRepositorySetup,
     });
     const app = deps.app as NonNullable<GitHubDependencies['app']>;
-    const client = (await app.repositoryClient('voyager-fm', 'spectrum')) as unknown as {
+    const client = (await app.installationClient('voyager-fm', 'spectrum', 1)) as unknown as {
       downloadTarball: (sha: string) => Promise<Readable>;
     };
     client.downloadTarball = async () => createReadStream(archive);
@@ -388,5 +397,108 @@ describe('remote snapshot with the real spec engine', () => {
     assert.equal(setup?.skills.claude.state, 'ok');
     assert.equal(setup?.skills.claude.detail, '0.1.0');
     assert.equal(setup?.skills.codex.state, 'missing');
+  });
+});
+
+describe('access in accounts mode', () => {
+  const member = (installationId: number): Viewer => ({
+    mode: 'accounts',
+    user: {
+      id: 'u1',
+      githubId: 5,
+      login: 'octo',
+      name: null,
+      avatarUrl: '',
+      createdAt: new Date(),
+      lastSignedInAt: new Date(),
+    },
+    installations: [{ installationId, workspaceId: 'w1', account: 'voyager-fm' }],
+  });
+
+  it('asks for sign-in before touching GitHub', async () => {
+    const { deps, log } = fakeDependencies({
+      viewer: { mode: 'accounts', user: null, installations: [] },
+    });
+    const view = await loadRepositoryCheck('voyager-fm', 'spectrum', { kind: 'default' }, deps);
+    assert.equal(view.status, 'sign-in');
+    assert.deepEqual(log, []);
+    const list = await loadConnectedRepositories(deps);
+    assert.deepEqual(list.repositories, []);
+    assert.deepEqual(list.installations, []);
+  });
+
+  it('withholds data when account settings are incomplete', async () => {
+    const { deps } = fakeDependencies({
+      viewer: { mode: 'misconfigured', missing: ['GITHUB_APP_CLIENT_SECRET'] },
+    });
+    const view = await loadRepositoryCheck('voyager-fm', 'spectrum', { kind: 'default' }, deps);
+    assert.deepEqual(view.status === 'misconfigured' && view.accountsMissing, [
+      'GITHUB_APP_CLIENT_SECRET',
+    ]);
+    assert.deepEqual((await loadConnectedRepositories(deps)).repositories, []);
+  });
+
+  it('treats an installation outside the user workspaces as not installed', async () => {
+    const { deps, log } = fakeDependencies({ viewer: member(2) });
+    const view = await loadRepositoryCheck('voyager-fm', 'spectrum', { kind: 'default' }, deps);
+    assert.equal(view.status, 'not-installed');
+    assert.deepEqual(log, [], 'no token is used for a repository the user cannot read');
+    assert.deepEqual((await loadConnectedRepositories(deps)).repositories, []);
+  });
+
+  it('lists and checks repositories of the user installations', async () => {
+    const { deps } = fakeDependencies({ viewer: member(1) });
+    const list = await loadConnectedRepositories(deps);
+    assert.deepEqual(
+      list.repositories.map((r) => r.fullName),
+      ['voyager-fm/spectrum'],
+    );
+    const view = await loadRepositoryCheck('voyager-fm', 'spectrum', { kind: 'default' }, deps);
+    assert.equal(view.status, 'ready');
+  });
+
+  it('stores each commit once and reuses it after a restart', async () => {
+    const { db, close } = await testDatabase();
+    try {
+      const user = await upsertUser(
+        db,
+        { id: 5, login: 'octo', name: null, avatarUrl: '' },
+        new Date(),
+      );
+      await syncMemberships(
+        db,
+        user.id,
+        [{ id: 1, account: 'voyager-fm', accountId: 99, targetType: 'Organization' }],
+        new Date(),
+      );
+      const viewer: Viewer = {
+        mode: 'accounts',
+        user,
+        installations: await accessibleInstallations(db, user.id),
+      };
+      const first = fakeDependencies({ viewer, db });
+      const view = await loadRepositoryCheck(
+        'voyager-fm',
+        'spectrum',
+        { kind: 'default' },
+        first.deps,
+      );
+      assert.equal(view.status === 'ready' && view.history?.length, 1);
+      assert.equal(view.status === 'ready' && view.history?.[0]?.triggeredBy, 'octo');
+
+      // A new process: empty memory cache, same database. Nothing is downloaded again.
+      const restarted = fakeDependencies({ viewer, db, cache: new AnalysisCache() });
+      const again = await loadRepositoryCheck(
+        'voyager-fm',
+        'spectrum',
+        { kind: 'default' },
+        restarted.deps,
+      );
+      assert.equal(again.status === 'ready' && again.check?.sha, SHA);
+      assert.equal(again.status === 'ready' && again.check?.checkedAt, '2026-11-09T00:00:00.000Z');
+      assert.ok(!restarted.log.some((line) => line.startsWith('tarball')));
+    } finally {
+      await close();
+    }
   });
 });
