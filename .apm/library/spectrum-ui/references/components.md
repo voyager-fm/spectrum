@@ -21,10 +21,10 @@ shadcn files import `cn` from the `cn` package (published by shadcn) and use the
 | `EmptyNotice` | Successful load with zero items. |
 | `Planned({ title, upcoming, children })` | The only way to show an unimplemented capability. Dashed container, "Not implemented" badge, reason and planned items. |
 
-## StatusBadge tones (monotone)
+## StatusBadge tones (ink)
 | Tone | Style | Meaning | Current uses |
 | --- | --- | --- | --- |
-| `ok` | solid (primary) | verified good state | check passed, no findings |
+| `ok` | solid ink (`bg-foreground`) | verified good state | check passed, no findings |
 | `bad` | destructive (only color) | failure needing action | check failed, finding codes, could not run |
 | `planned` | dashed outline, muted | not implemented, not run, stale | Not implemented, AC "Not run" |
 | `info` | secondary fill | configuration fact | mode, integration enabled, rule in repository |
@@ -36,8 +36,8 @@ Do not use `ok` for something that was not checked, such as a document marked ap
 Wrap `Table` in `<div className="rounded-xl border">`. Right-align numeric columns with `tabular-nums`. Use `whitespace-normal` on free-text cells. Link the identifier cell (`font-mono text-xs`) to the detail page.
 
 ## Tokens and theme
-- Colors come from shadcn CSS variables in `src/app/globals.css` (`--background`, `--foreground`, `--muted(-foreground)`, `--border`, `--primary`, `--destructive`, `--sidebar-*`). Use Tailwind classes that reference them (`bg-muted`, `text-muted-foreground`). Never write literal colors.
-- Every color except `--destructive` has zero chroma. Keep it that way; see design.md.
+- Colors come from shadcn CSS variables in `src/app/globals.css` (`--background`, `--foreground`, `--muted(-foreground)`, `--border`, `--brand`, `--primary`, `--destructive`, `--warning`, `--sidebar-*`). Use Tailwind classes that reference them (`bg-muted`, `text-muted-foreground`, `bg-brand`). Never write literal colors; the `BrandMark` gradient is the one exception.
+- Only `--brand` (and the tokens that follow it: `--primary`, `--ring`, `--sidebar-primary`, `--chart-*`), `--destructive` and `--warning` carry chroma. Keep every other token at zero chroma; see design.md.
 - Dark mode follows `prefers-color-scheme` through `@custom-variant dark`. There is no `.dark` class or theme toggle.
 - Fonts: Geist (`--font-sans`) and Geist Mono (`--font-mono`) via `next/font/google` in `layout.tsx`.
 - Focus rings come from shadcn primitives and `focus-visible:ring-*` on custom links. Do not remove them.

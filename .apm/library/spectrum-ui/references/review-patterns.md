@@ -1,6 +1,6 @@
 # Review UI patterns
 
-Observed on 2026-11-09 in public pull-request comments and public product documentation of two AI code-review tools (Greptile and CodeRabbit). Their logged-in dashboards were not inspected. Use these as structure for the PR reviews, Proposals and Runs pages, translated into Spectrum's monotone system (design.md). Do not copy wording, icons, emoji, colors or layouts.
+Observed on 2026-11-09 in public pull-request comments and public product documentation of two AI code-review tools (Greptile and CodeRabbit). Their logged-in dashboards were not inspected. Use these as structure for the PR reviews, Proposals and Runs pages, translated into Spectrum's neutral, one-accent system (design.md). Do not copy wording, icons, emoji, colors or layouts.
 
 None of these pages are implemented. Build one only when its contract in `.spectrum/` is approved and an adapter supplies real data; until then the route stays `<Planned>`.
 
@@ -20,7 +20,7 @@ For Spectrum:
 
 ## Findings
 - **Separate axes.** Severity, kind (defect, refactor, nitpick), area (correctness, security, data, performance, maintainability) and fix effort are independent labels. Do not fold them into one ladder. Filter by severity only; read the other labels on the row.
-- **Ordinal severity.** Use short codes (`P0`, `P1`, `P2`) in `font-mono`. Monotone mapping: `P0` uses `destructive`, `P1` a solid badge, `P2` an outline badge. Add a `SeverityBadge` composition when the first findings page needs it; do not reuse the `ok` tone for severity.
+- **Ordinal severity.** Use short codes (`P0`, `P1`, `P2`) in `font-mono`. Ink mapping: `P0` uses `destructive`, `P1` a solid badge, `P2` an outline badge. Add a `SeverityBadge` composition when the first findings page needs it; do not reuse the `ok` tone for severity.
 - **Group by what blocks a merge**, not by severity: Blockers, High priority, Pending (waiting on checks or reviews), Advisory. Hide empty groups.
 - **Finding anatomy:** severity badge and a one-line title (inline code allowed) → explanation → suggested change as a monospace diff (`+`/`-` prefixes, no colored fill) → header with the file path and line range (`src/a.ts` Lines 12-18) → resolution state (Open, Resolved, Outdated).
 - In Spectrum a finding also names the affected spec ID and acceptance criterion. Link both.

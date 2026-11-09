@@ -29,7 +29,7 @@ The "dev tool" feel comes from making the UI look like it came out of code. Thes
 | Monospace | IDs, paths, SHAs, commands, step numbers and eyebrow labels in Geist Mono |
 | Machine labels | `[ SPECS ]`, `[0]`, `01`, `STEP 02`; uppercase, small, tracked, muted |
 | Code syntax | `+`/`-` diff prefixes, `$` before commands, file paths, `//` for asides |
-| Terminal palette | Background and foreground only; `destructive` for failures |
+| Terminal palette | Background and foreground, one indigo accent for selection and emphasis; `destructive` for failures |
 | Grid and hairlines | 1px borders and strict alignment instead of shadows or gradients |
 | Real output as visuals | Review comments, ChangeSet diffs, feature records; no illustrations |
 | Density | Tables, aligned columns, `tabular-nums` |
@@ -45,18 +45,18 @@ A small dose of pixel art reinforces the terminal feel. Keep it a display accent
 - **Font:** Geist Pixel (Vercel, Feb 2026; Square, Grid, Circle, Triangle and Line styles, also a variable `--font-geist-pixel`) extends the Geist family we already use. Use it for the wordmark, large landing headlines, step numbers or a CLI banner. Never for body text, tables, labels, badges or anything users must read quickly. It is not installed; confirm its license in `vercel/geist-pixel-font` before adding it.
 - **Motifs:** 1-bit monochrome only: pixel-grid icons or logo marks, dithered (Bayer/ordered) fills on brand imagery, block characters (`█ ▓ ▒ ░`) for meters or dividers in CLI and docs, ASCII art for a CLI banner.
 - **Character-grid hero:** On brand surfaces, the strongest visual is a Spectrum concept drawn in text: for example the spec loop or a ChangeSet moving through draft → review → approved as a character grid with a legend. If it animates, it respects `prefers-reduced-motion` and stays legible as a static frame. If the grid shows states, label it "Example" unless it reads real data.
-- **Limits:** Grayscale like everything else. No multicolor sprites, game characters or mascots. Pixel motifs are decoration; they never encode state (no pixel "success" icon), and they never replace a status word.
+- **Limits:** Ink or the single accent, like everything else. No multicolor sprites, game characters or mascots. Pixel motifs are decoration; they never encode state (no pixel "success" icon), and they never replace a status word.
 
 ## How the tone applies per surface
 | Surface | Expression |
 | --- | --- |
-| Dashboard (`apps/web`) | Most restrained. Follow design.md: monotone, dense tables, quiet chrome. The brand shows through mono identifiers, precise descriptions, real keyboard hints and honest planned states. Pixel: the sidebar wordmark at most. No box drawing, ASCII or dithering. |
+| Dashboard (`apps/web`) | Most restrained. Follow design.md: neutral surfaces with the one indigo accent, dense tables, quiet chrome. The spectrum gradient appears only in the sidebar logo mark. The brand shows through mono identifiers, precise descriptions, real keyboard hints and honest planned states. Pixel: the sidebar wordmark at most. No box drawing, ASCII or dithering. |
 | CLI (`apps/cli`) | OpenCode-like. Plain lines, aligned columns, box-drawing trees, status words (`passed`, `failed`, `not run`) that still read without color. An optional ASCII or block-character banner on `--help` or `init` only, never on every command and never in machine-readable output. No spinners or emoji that imply work the CLI is not doing. |
-| README, docs, future landing page | The most room for brand. Allowed: Geist Pixel headline or wordmark, bracketed mono eyebrows (`[ SPECS ]`, `[ REVIEW ]`), numbered steps, `fig.` captions, `$` command blocks, dithered or pixel-grid monochrome motifs, an ASCII/character-grid hero, and a real spec diff or finding as a visual. Still monotone. |
+| README, docs, future landing page | The most room for brand. Allowed: Geist Pixel headline or wordmark, bracketed mono eyebrows (`[ SPECS ]`, `[ REVIEW ]`), numbered steps, `fig.` captions, `$` command blocks, dithered or pixel-grid monochrome motifs, an ASCII/character-grid hero, and a real spec diff or finding as a visual. Still neutral with the one accent; the spectrum gradient stays in the logo mark. |
 
 ## Visual vocabulary
 - **Type:** Geist for prose, Geist Mono for IDs, paths, SHAs, commands, step numbers and eyebrow labels, Geist Pixel for display only (see above). Mono eyebrows are uppercase, small (`text-xs`), muted, with tracking; headings stay sentence case.
-- **Color:** Grayscale with `destructive` as the only hue (see design.md). The references use orange or green accents; Spectrum deliberately does not.
+- **Color:** Neutral, one indigo accent, `destructive` for failures and amber `warning` for warning marks (see design.md). The references use orange or green accents; Spectrum uses indigo and keeps it to selection, primary actions, focus and chart emphasis. The multi-hue spectrum gradient is the logo mark only.
 - **Structure:** Hairline borders and grid alignment instead of shadows, gradients or glow. Numbering (`01`, `02`) for sequences such as the spec loop or setup steps.
 - **Imagery:** Only real or clearly labeled sample artifacts: a `.spectrum/` feature record, a ChangeSet diff, a finding linked to an acceptance criterion. Sample content is labeled "Example" on screen. The only decorative exception is the monochrome pixel/dither accent above. No stock illustrations, 3D shapes, mascots or AI sparkles.
 
@@ -69,7 +69,7 @@ A small dose of pixel art reinforces the terminal feel. Keep it a display accent
 
 ## Checklist for a branded surface
 - Could a reviewer mistake it for OpenCode, CodeRabbit or Greptile? If yes, it copies too much: change layout, wording or visual.
-- Is every color either neutral or `destructive`?
+- Is every color neutral, the indigo accent, `destructive` or `warning`, each in its own role?
 - Is every visual a Spectrum artifact (or labeled example), apart from a monochrome pixel accent?
 - Is pixel type limited to display text, and does every status still read as a word?
 - Does every capability claim match what is implemented today (`.spectrum/overview.md`, "Current boundary")?
