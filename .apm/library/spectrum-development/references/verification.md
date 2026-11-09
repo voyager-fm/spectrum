@@ -32,4 +32,13 @@ Repair within the approved scope and rerun the failed boundary. Stop bounded rep
 
 Return the changed paths and affected consumers, exact checks and results, unimplemented capabilities and unresolved decisions. Keep enough context in the existing task record for a continuation: scope, revision, accepted decisions, completed work, evidence and next action. A separate receipt system is unnecessary.
 
+## Shared working tree
+
+Other agents may edit, rebase and autostash in the same working tree. Their `git pull --rebase --autostash` can move your tracked edits into a stash for a while. Do not touch their rebase, stash, index or files. Wait until the rebase finishes, then confirm your edits came back.
+
+- Verify the exact content you will commit in a clean export instead of the shared tree or a worktree. Extract `git archive HEAD` into the scratchpad and copy only your changed paths over it. When a file such as `pnpm-lock.yaml` also holds other agents' edits, apply only your hunk to the `HEAD` version. Then run `pnpm install --frozen-lockfile`, `pnpm check` and the affected builds there.
+- Commit with explicit paths, for example `git add -- <paths>` followed by `git commit -m ... -- <paths>`, so another agent's staged changes stay out of your commit.
+- Before pushing, fetch and confirm that `origin/main` is an ancestor of your commits. Check `git log origin/main..HEAD` so you do not publish another agent's unpushed commits by accident.
+- Use a different port for your own servers when another agent's dev server is running. Do not restart or stop their processes.
+
 Apply the session's actual authorization and current `AGENTS.md` workflow to commits, pushes and external actions. Implementation alone grants no additional permission; an active repository exception may already authorize a specific operation. Stage only the authorized change and do not infer publication, deployment, issue creation or review resolution from a code push.

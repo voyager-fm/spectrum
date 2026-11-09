@@ -20,6 +20,7 @@ Load the reference for the work at hand:
 | Establish scope, specification authority and affected owners | [Authority map](references/authority-map.md) |
 | Implement across the plugin, CLI, Next.js application or shared packages | [Implementation](references/implementation.md) |
 | Select checks, investigate failures and deliver evidence | [Verification](references/verification.md) |
+| Connect, register or verify an external service (GitHub, Linear, model providers) | [External integrations](references/external-integrations.md) |
 
 Load [spectrum-ui](../spectrum-ui/SKILL.md) for UI behavior, copy and visual review, or [spectrum-test-authoring](../spectrum-test-authoring/SKILL.md) before changing tests and fixtures. Load only the applicable guidance and return to the calling task.
 
