@@ -7456,7 +7456,7 @@ var init_templates = __esm({
 import { spawnSync as spawnSync2 } from "node:child_process";
 
 // apps/cli/src/main.ts
-import { readFile as readFile4 } from "node:fs/promises";
+import { readFile as readFile5 } from "node:fs/promises";
 
 // packages/spec-engine/src/index.ts
 import { realpath as realpath2 } from "node:fs/promises";
@@ -10754,6 +10754,155 @@ async function inspectRepositorySetup(root) {
   return { config, package: pkg, skills, plugin };
 }
 
+// apps/cli/src/new-command.ts
+init_templates();
+import { lstat as lstat3, readFile as readFile4, realpath as realpath5 } from "node:fs/promises";
+import { isAbsolute as isAbsolute3, join as join3, resolve as resolve5, win32 } from "node:path";
+
+// apps/cli/src/files.ts
+import { lstat as lstat2, mkdir, readFile as readFile3, realpath as realpath4, writeFile } from "node:fs/promises";
+import { dirname as dirname2, isAbsolute as isAbsolute2, join as join2, relative as relative3, resolve as resolve4, sep as sep3 } from "node:path";
+function insideRoot(root, path) {
+  if (isAbsolute2(path) || path.split("/").some((part) => part === ".." || part === ""))
+    throw new Error(`Refusing to write outside the repository: ${path}`);
+  return join2(root, path);
+}
+async function inspectFile(root, path) {
+  const target = insideRoot(root, path);
+  try {
+    const stat2 = await lstat2(target);
+    if (!stat2.isFile()) return { kind: "other" };
+    return { kind: "file", content: await readFile3(target, "utf8") };
+  } catch (error) {
+    if (error.code === "ENOENT") return { kind: "missing" };
+    throw error;
+  }
+}
+async function assertContained(root, target) {
+  const base = await realpath4(root);
+  let ancestor = dirname2(target);
+  for (; ; ) {
+    try {
+      const real = await realpath4(ancestor);
+      const rel = relative3(base, real);
+      if (rel === "" || !rel.startsWith(`..${sep3}`) && rel !== ".." && !isAbsolute2(rel)) return;
+      throw new Error(`Refusing to write through a link outside the repository: ${target}`);
+    } catch (error) {
+      if (error.code !== "ENOENT") throw error;
+      const parent = dirname2(ancestor);
+      if (parent === ancestor) throw error;
+      ancestor = parent;
+    }
+  }
+}
+async function writePlannedFile(root, file, mode) {
+  const target = insideRoot(resolve4(root), file.path);
+  await assertContained(root, target);
+  await mkdir(dirname2(target), { recursive: true });
+  await assertContained(root, target);
+  if (mode === "replace" && (await inspectFile(root, file.path)).kind === "other")
+    throw new Error(`Refusing to replace a link or directory: ${file.path}`);
+  await writeFile(target, file.content, { flag: mode === "create" ? "wx" : "w" });
+}
+
+// apps/cli/src/new-command.ts
+var aliases = /* @__PURE__ */ new Map([
+  ["interaction", ["feature.interaction"]],
+  ["contract", ["feature.contract"]],
+  ["flow", ["feature.flow"]],
+  ["adr", ["engineering.adr"]],
+  ["feature", ["feature.interaction", "feature.contract", "feature.flow"]]
+]);
+async function describeDraft(kind) {
+  const templates = await Promise.all((aliases.get(kind) ?? [kind]).map((id) => loadTemplate(id)));
+  const requiredValues = /* @__PURE__ */ new Set();
+  for (const template of templates)
+    for (const match of `${template.output}
+${template.content}`.matchAll(
+      /\{\{(?:text|json|tsv|path):([a-z_]+)\}\}/g
+    ))
+      requiredValues.add(match[1]);
+  return { templates, requiredValues: [...requiredValues].sort(), writes: false };
+}
+function stringValues(value) {
+  if (value === null || typeof value !== "object" || Array.isArray(value) || ![Object.prototype, null].includes(Object.getPrototypeOf(value)) || !Object.values(value).every((entry) => typeof entry === "string"))
+    throw new Error("Template values must be a JSON object containing only string values.");
+  return Object.fromEntries(Object.entries(value));
+}
+async function readTemplateValues(path) {
+  const source = await readFile4(path, "utf8");
+  let values;
+  try {
+    values = JSON.parse(source);
+  } catch {
+    throw new Error(`Template values file must contain valid JSON: ${path}`);
+  }
+  return stringValues(values);
+}
+function pathParts(path) {
+  const parts = path.split("/");
+  if (!path || path.includes("\0") || path.includes("\\") || isAbsolute3(path) || win32.isAbsolute(path) || parts.some((part) => part === "" || part === "." || part === ".."))
+    throw new Error(`Draft output must be a normalized repository-relative file path: ${path}`);
+  return parts;
+}
+async function hasConflict(root, file) {
+  let ancestor = root;
+  for (const part of pathParts(file.path).slice(0, -1)) {
+    ancestor = join3(ancestor, part);
+    try {
+      const stat2 = await lstat3(ancestor);
+      if (!stat2.isDirectory()) return true;
+    } catch (error) {
+      if (error.code === "ENOENT") return false;
+      throw error;
+    }
+  }
+  return (await inspectFile(root, file.path)).kind !== "missing";
+}
+async function createDraft(root, kind, options) {
+  const templates = [...aliases.get(kind) ?? [kind]];
+  if (templates.length > 1 && options.out !== void 0)
+    throw new Error("--out is supported only for a single template, not a feature draft bundle.");
+  const values = stringValues(options.values);
+  const files2 = [];
+  for (const id of templates) {
+    const rendered = await renderTemplate(id, values);
+    const file = { path: options.out ?? rendered.path, content: rendered.content };
+    pathParts(file.path);
+    files2.push(file);
+  }
+  if (new Set(files2.map((file) => file.path)).size !== files2.length)
+    throw new Error("Canonical templates produced duplicate draft destinations.");
+  const base = await realpath5(resolve5(root));
+  if (!(await lstat3(base)).isDirectory())
+    throw new Error("The repository root must be a directory.");
+  const conflicts = [];
+  for (const file of files2) if (await hasConflict(base, file)) conflicts.push(file.path);
+  const dryRun = Boolean(options.dryRun);
+  const created = [];
+  if (!dryRun && !conflicts.length) {
+    for (const file of files2) {
+      await writePlannedFile(base, file, "create");
+      created.push(file.path);
+    }
+  }
+  return {
+    ok: conflicts.length === 0,
+    dryRun,
+    templates,
+    files: files2,
+    created,
+    conflicts,
+    check: null,
+    next: [
+      ...conflicts.length ? ["Choose unused destinations; existing files and links are never overwritten."] : [],
+      "These are draft documents, not an approved or implemented feature; no validation was run.",
+      "Review the supplied values and related inventory records; generation does not update inventories or configuration.",
+      "Reconcile catalog destinations and document links with your actual configuration/profile mappings before running spectrum check."
+    ]
+  };
+}
+
 // apps/cli/src/output.ts
 function parseOutputFormat(value = "json", allowGithub = false) {
   if (value === "json" || value === "text") return value;
@@ -10836,52 +10985,6 @@ function formatSpecList(result, format = "json") {
     }
   }
   return lines.join("\n");
-}
-
-// apps/cli/src/files.ts
-import { lstat as lstat2, mkdir, readFile as readFile3, realpath as realpath4, writeFile } from "node:fs/promises";
-import { dirname as dirname2, isAbsolute as isAbsolute2, join as join2, relative as relative3, resolve as resolve4, sep as sep3 } from "node:path";
-function insideRoot(root, path) {
-  if (isAbsolute2(path) || path.split("/").some((part) => part === ".." || part === ""))
-    throw new Error(`Refusing to write outside the repository: ${path}`);
-  return join2(root, path);
-}
-async function inspectFile(root, path) {
-  const target = insideRoot(root, path);
-  try {
-    const stat2 = await lstat2(target);
-    if (!stat2.isFile()) return { kind: "other" };
-    return { kind: "file", content: await readFile3(target, "utf8") };
-  } catch (error) {
-    if (error.code === "ENOENT") return { kind: "missing" };
-    throw error;
-  }
-}
-async function assertContained(root, target) {
-  const base = await realpath4(root);
-  let ancestor = dirname2(target);
-  for (; ; ) {
-    try {
-      const real = await realpath4(ancestor);
-      const rel = relative3(base, real);
-      if (rel === "" || !rel.startsWith(`..${sep3}`) && rel !== ".." && !isAbsolute2(rel)) return;
-      throw new Error(`Refusing to write through a link outside the repository: ${target}`);
-    } catch (error) {
-      if (error.code !== "ENOENT") throw error;
-      const parent = dirname2(ancestor);
-      if (parent === ancestor) throw error;
-      ancestor = parent;
-    }
-  }
-}
-async function writePlannedFile(root, file, mode) {
-  const target = insideRoot(resolve4(root), file.path);
-  await assertContained(root, target);
-  await mkdir(dirname2(target), { recursive: true });
-  await assertContained(root, target);
-  if (mode === "replace" && (await inspectFile(root, file.path)).kind === "other")
-    throw new Error(`Refusing to replace a link or directory: ${file.path}`);
-  await writeFile(target, file.content, { flag: mode === "create" ? "wx" : "w" });
 }
 
 // apps/cli/src/skill.ts
@@ -11055,13 +11158,17 @@ Commands:
   skills install [path] [--agent claude|codex|all] [--force] [--dry-run]
                                           Install the Spectrum agent skill into the repository
   status [path]                           Report configuration, package and agent skill setup
+  new <kind> [path] --values values.json [--out relative-path] [--dry-run]
+                                          Create drafts from canonical templates; never overwrite
+  new <kind> --describe                    List required template inputs without writing
   --version                               Print the package name and installed version`;
 var COMMANDS = {
   check: { "--profile": true, "--format": true },
   list: { "--profile": true, "--format": true },
   init: { "--name": true, "--dry-run": false },
   "skills install": { "--agent": true, "--force": false, "--dry-run": false },
-  status: {}
+  status: {},
+  new: { "--values": true, "--out": true, "--dry-run": false, "--describe": false }
 };
 var UsageError = class extends Error {
 };
@@ -11087,6 +11194,11 @@ function parse3(argv) {
     const value = rest[++index];
     if (value === void 0 || value.startsWith("-")) throw new Error(`${arg} requires a value.`);
     options.set(arg, value);
+  }
+  if (command === "new") {
+    if (!positional.length || positional.length > 2)
+      throw new Error("Expected a template kind and at most one repository path.");
+    return { command, kind: positional[0], path: positional[1], options };
   }
   if (positional.length > 1) throw new Error("Expected at most one repository path.");
   return { command, path: positional[0], options };
@@ -11114,11 +11226,28 @@ async function run(argv) {
   const { command, options } = parsed;
   const root = parsed.path ?? process.cwd();
   const value = (name) => options.get(name);
+  if (command === "new") {
+    if (!parsed.kind) throw new Error("Expected a template kind.");
+    if (options.has("--describe")) {
+      if (options.size !== 1) throw new Error("--describe cannot be combined with write options.");
+      print(await describeDraft(parsed.kind));
+      return 0;
+    }
+    const valuesPath = value("--values");
+    if (!valuesPath) throw new Error("new requires --values with a JSON string-map file.");
+    const result2 = await createDraft(root, parsed.kind, {
+      values: await readTemplateValues(valuesPath),
+      out: value("--out"),
+      dryRun: options.has("--dry-run")
+    });
+    print(result2);
+    return result2.ok ? 0 : 1;
+  }
   if (command === "check" || command === "list") {
     const checkFormat = command === "check" ? parseOutputFormat(value("--format"), true) : void 0;
     const listFormat = command === "list" ? parseOutputFormat(value("--format")) : void 0;
     const profilePath = value("--profile");
-    const profile = profilePath ? JSON.parse(await readFile4(profilePath, "utf8")) : void 0;
+    const profile = profilePath ? JSON.parse(await readFile5(profilePath, "utf8")) : void 0;
     const result2 = await checkRepository(root, { config: profile });
     console.log(
       command === "list" ? formatSpecList(result2, listFormat) : formatCheckResult(result2, checkFormat)
@@ -11150,7 +11279,7 @@ async function run(argv) {
 // apps/plugin/src/resolve.ts
 import { spawnSync } from "node:child_process";
 import { existsSync, readFileSync, realpathSync, statSync } from "node:fs";
-import { delimiter, dirname as dirname3, join as join3, relative as relative4, resolve as resolve5 } from "node:path";
+import { delimiter, dirname as dirname3, join as join4, relative as relative4, resolve as resolve6 } from "node:path";
 var PACKAGE_NAME = "@voyager-fm/spectrum";
 var BIN = "spectrum";
 function parseVersion(value) {
@@ -11184,25 +11313,25 @@ function isFile(path) {
   }
 }
 function packageScript(directory) {
-  const manifest = readJson(join3(directory, "package.json"));
+  const manifest = readJson(join4(directory, "package.json"));
   if (manifest?.name !== PACKAGE_NAME) return null;
   const bin = manifest.bin;
   const target = typeof bin === "string" ? bin : typeof bin === "object" && bin !== null ? bin[BIN] : void 0;
   if (typeof target !== "string") return null;
-  const script = resolve5(directory, target);
+  const script = resolve6(directory, target);
   if (!isFile(script)) return null;
   return { script, version: typeof manifest.version === "string" ? manifest.version : null };
 }
 function repositoryDirectories(cwd) {
   const directories = [];
-  for (let directory = resolve5(cwd); ; directory = dirname3(directory)) {
+  for (let directory = resolve6(cwd); ; directory = dirname3(directory)) {
     directories.push(directory);
-    if (existsSync(join3(directory, ".git"))) return directories;
-    if (dirname3(directory) === directory) return [resolve5(cwd)];
+    if (existsSync(join4(directory, ".git"))) return directories;
+    if (dirname3(directory) === directory) return [resolve6(cwd)];
   }
 }
 function declaresPackage(directory) {
-  const manifest = readJson(join3(directory, "package.json"));
+  const manifest = readJson(join4(directory, "package.json"));
   return ["dependencies", "devDependencies", "optionalDependencies"].some((field) => {
     const deps = manifest?.[field];
     return typeof deps === "object" && deps !== null && Object.hasOwn(deps, PACKAGE_NAME);
@@ -11221,20 +11350,20 @@ function findRepositoryCli(options, notes = []) {
   const execPath = options.execPath ?? process.execPath;
   for (const directory of repositoryDirectories(options.cwd)) {
     for (const modules of [
-      join3(directory, "node_modules"),
-      join3(directory, "node_modules", ".pnpm", "node_modules")
+      join4(directory, "node_modules"),
+      join4(directory, "node_modules", ".pnpm", "node_modules")
     ]) {
-      const found = packageScript(join3(modules, PACKAGE_NAME));
+      const found = packageScript(join4(modules, PACKAGE_NAME));
       if (found)
         return {
           source: "repository",
           version: found.version,
           command: execPath,
           args: [found.script],
-          location: display(options.cwd, join3(modules, PACKAGE_NAME))
+          location: display(options.cwd, join4(modules, PACKAGE_NAME))
         };
     }
-    if (isFile(join3(directory, ".pnp.cjs")) && declaresPackage(directory)) {
+    if (isFile(join4(directory, ".pnp.cjs")) && declaresPackage(directory)) {
       const yarn = options.platform === "win32" ? "yarn.cmd" : "yarn";
       const probe = spawnSync(yarn, ["run", BIN, "--version"], {
         cwd: options.cwd,
@@ -11264,9 +11393,9 @@ function findGlobalCli(options, notes = []) {
   const pathValue = options.env.PATH ?? options.env.Path ?? "";
   for (const entry of pathValue.split(windows ? ";" : delimiter)) {
     if (!entry) continue;
-    const shim = join3(entry, windows ? `${BIN}.cmd` : BIN);
+    const shim = join4(entry, windows ? `${BIN}.cmd` : BIN);
     if (!isFile(shim)) continue;
-    const candidates = windows ? [join3(entry, "node_modules", PACKAGE_NAME)] : (() => {
+    const candidates = windows ? [join4(entry, "node_modules", PACKAGE_NAME)] : (() => {
       const real = dirname3(realpathSync(shim));
       return [real, dirname3(real), dirname3(dirname3(real))];
     })();

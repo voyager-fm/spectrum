@@ -1,6 +1,7 @@
 import { readFile } from 'node:fs/promises';
 import { checkRepository } from '@spectrum/spec-engine';
 import { SETUP } from '@spectrum/spec-engine/setup';
+import { createDraft, describeDraft, readTemplateValues } from './new-command.ts';
 import { formatCheckResult, formatSpecList, parseOutputFormat } from './output.ts';
 import { initRepository, installSkills, parseAgents, repositoryStatus } from './setup-commands.ts';
 import { VERSION } from './version.ts';
@@ -17,6 +18,9 @@ Commands:
   skills install [path] [--agent claude|codex|all] [--force] [--dry-run]
                                           Install the Spectrum agent skill into the repository
   status [path]                           Report configuration, package and agent skill setup
+  new <kind> [path] --values values.json [--out relative-path] [--dry-run]
+                                          Create drafts from canonical templates; never overwrite
+  new <kind> --describe                    List required template inputs without writing
   --version                               Print the package name and installed version`;
 
 /** Options each command accepts; `true` takes a value, `false` is a boolean flag. */
@@ -26,6 +30,7 @@ const COMMANDS: Record<string, Record<string, boolean>> = {
   init: { '--name': true, '--dry-run': false },
   'skills install': { '--agent': true, '--force': false, '--dry-run': false },
   status: {},
+  new: { '--values': true, '--out': true, '--dry-run': false, '--describe': false },
 };
 
 class UsageError extends Error {}
@@ -33,6 +38,7 @@ class UsageError extends Error {}
 function parse(argv: string[]): {
   command: string;
   path: string | undefined;
+  kind?: string;
   options: Map<string, string | true>;
 } {
   const command = argv[0] === 'skills' ? `skills ${argv[1] ?? ''}`.trim() : (argv[0] ?? '');
@@ -56,6 +62,11 @@ function parse(argv: string[]): {
     const value = rest[++index];
     if (value === undefined || value.startsWith('-')) throw new Error(`${arg} requires a value.`);
     options.set(arg, value);
+  }
+  if (command === 'new') {
+    if (!positional.length || positional.length > 2)
+      throw new Error('Expected a template kind and at most one repository path.');
+    return { command, kind: positional[0], path: positional[1], options };
   }
   if (positional.length > 1) throw new Error('Expected at most one repository path.');
   return { command, path: positional[0], options };
@@ -86,6 +97,23 @@ export async function run(argv: string[]): Promise<number> {
   const { command, options } = parsed;
   const root = parsed.path ?? process.cwd();
   const value = (name: string) => options.get(name) as string | undefined;
+  if (command === 'new') {
+    if (!parsed.kind) throw new Error('Expected a template kind.');
+    if (options.has('--describe')) {
+      if (options.size !== 1) throw new Error('--describe cannot be combined with write options.');
+      print(await describeDraft(parsed.kind));
+      return 0;
+    }
+    const valuesPath = value('--values');
+    if (!valuesPath) throw new Error('new requires --values with a JSON string-map file.');
+    const result = await createDraft(root, parsed.kind, {
+      values: await readTemplateValues(valuesPath),
+      out: value('--out'),
+      dryRun: options.has('--dry-run'),
+    });
+    print(result);
+    return result.ok ? 0 : 1;
+  }
   if (command === 'check' || command === 'list') {
     const checkFormat =
       command === 'check' ? parseOutputFormat(value('--format'), true) : undefined;

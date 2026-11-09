@@ -35,6 +35,19 @@ Neither command writes outside the repository root or through a symbolic link th
 
 ## Output formats
 
+## Create specification drafts
+
+`spectrum new <kind> --describe` lists the canonical template inputs without writes.
+Create a JSON object of string values, then run
+`spectrum new <kind> [path] --values values.json [--out drafts/file.md] [--dry-run]`.
+Kinds include interaction, contract, flow, adr, feature (three companion documents),
+and explicit engine catalog IDs. `--out` is for single templates only. Dry runs
+return the complete plan; existing files and links are never overwritten. Creation
+does not update inventories/configuration or imply validation or approval. Review
+configured document mappings and run `spectrum check` afterward.
+
+### Check and list output
+
 JSON remains the default and preserves the existing result object (`check`) or raw
 spec array (`list`). Use `--format text` for structural summaries and readable findings
 or spec/acceptance summaries. Document review states and checked AC annotations are
