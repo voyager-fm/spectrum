@@ -17,6 +17,8 @@ These are instructions for agents developing Spectrum, not implementation of the
 Inspected local sources on 2026-11-09:
 - voyager-app/AGENTS.md: scope, owner/caller inspection, evidence and protected actions.
 - voyager-app/.apm/library/voyager-dev-orchestration/SKILL.md: scope/discover/decide/implement/verify/deliver and narrow specialist routing.
+- voyager-app/.apm/library/voyager-dev-orchestration/references/authority-map.md and references/task-handoff.md: conditional authority lookup and continuation context in the existing task record.
+- voyager-app/.apm/library/code-tooling/references/verification-coverage-review.md: select evidence from the final diff and affected consumers, with distinct proof boundaries.
 - voyager-app/.apm/library/voyager-dev-test-authoring/SKILL.md: assertion ownership and actual nonzero execution evidence.
 - voyager-web/AGENTS.md and .apm/library/voyager-web-workflow/SKILL.md: product contracts before behavior changes, reuse before abstraction and proportional verification.
 - voyager-app/apm_modules/voyager-common/internal/pr-review/SKILL.md: review the current snapshot and distinguish deterministic routing from semantic findings.
@@ -37,4 +39,6 @@ Static file/frontmatter/link checks establish structure only. No model-run skill
 
 Security checks are integrated into test authoring and review where they have a behavior owner; no standalone scanner or generic security agent was added. No UI framework, client configuration, MCP server, service credential, CI workflow or external review bot was enabled. Source project licensing and event reuse eligibility remain separate questions for any future verbatim code reuse.
 
-Removed on 2026-11-09 as redundant for the current scaffold: spectrum-review-feedback (overlapped verification and client-native review), references/delegation.md (its single-integration-owner rule remains in spectrum-development) and the never-run evals.json. spectrum-spec-authoring was also removed because it encoded the provisional document model; reintroduce it after the model's canonical serialization and IDs are frozen. spectrum-verification was folded into spectrum-development's verify step and spectrum-ui's references/verification.md to keep the harness small during the build window.
+Removed on 2026-11-09 as redundant for the current scaffold: spectrum-review-feedback (overlapped verification and client-native review), references/delegation.md (its single-integration-owner rule remains in spectrum-development) and the never-run evals.json. spectrum-spec-authoring was also removed because it encoded the provisional document model; reintroduce it after the model's canonical serialization and IDs are frozen. spectrum-verification was folded into spectrum-development and spectrum-ui's verification guidance to keep the harness small during the build window.
+
+`spectrum-development/SKILL.md` owns outcome selection and specialist routing. Its `references/authority-map.md`, `implementation.md` and `verification.md` hold the Spectrum-specific ownership, implementation and evidence details. Read them for the current phase rather than loading the entire harness. This adapts Voyager's reference routing to the plugin/CLI/Next.js/shared-package layout; it does not add a Common dependency or import native tooling.
