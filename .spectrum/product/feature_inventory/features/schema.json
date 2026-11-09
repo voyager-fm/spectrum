@@ -1,38 +1,12 @@
 {
-  "$schema": "../../../schemas/inventory.schema.json",
+  "$schema": "../../../schemas/inventory-extension.schema.json",
   "schema_version": "1.0",
-  "name": "FEATURES",
-  "primary_key": ["feature_id"],
-  "null_values": ["-"],
+  "extends": "spectrum:features",
   "columns": [
-    {
-      "name": "feature_category",
-      "type": "string",
-      "required": true,
-      "ref": {
-        "table": "FEATURE_CATEGORIES",
-        "column": "category_title"
-      }
-    },
-    {
-      "name": "category_key",
-      "type": "string",
-      "required": true,
-      "ref": {
-        "table": "FEATURE_CATEGORIES",
-        "column": "category_key"
-      }
-    },
-    {
-      "name": "feature_title",
-      "type": "string",
-      "required": true
-    },
-    {
-      "name": "feature_id",
-      "type": "string",
-      "required": true
-    },
+    { "name": "feature_category" },
+    { "name": "category_key" },
+    { "name": "feature_title" },
+    { "name": "feature_id" },
     {
       "name": "description",
       "type": "string",

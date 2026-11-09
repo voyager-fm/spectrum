@@ -10,7 +10,8 @@ The canonical representation follows the document relationships used by Voyager 
 | `feature_inventory/feature_categories/data.tsv` | Category identity and title | Feature classification |
 | `feature_inventory/features/data.tsv` | Feature identity and category | Interaction grouping |
 | `feature_inventory/interactions/data.tsv` | Interaction identity, lifecycle, phase and summary | Spec frontmatter mirror |
-| Adjacent `schema.json` | Columns, types, required values, enums, primary keys and foreign keys | Deterministic table validation |
+| Engine base schemas (`@spectrum/spec-engine`) | FI table names, primary keys and the category, feature and interaction columns the engine checks | Repository schema extensions |
+| Adjacent `schema.json` | Added columns and their order, or a complete standalone table contract | Deterministic table validation |
 | `feature_specs/<category>/contracts/*.toml` | Shared policy, vocabulary, state models, reads/writes | Flows and interaction specs |
 | `feature_specs/<category>/flows/*.md` | Interaction coverage, happy paths and failure handling | Interaction sources and review |
 | `feature_specs/<category>/<feature_id>/*.md` | One interaction's detailed behavior and ACs | CLI, dashboard, host-agent context |
@@ -24,10 +25,25 @@ The canonical representation follows the document relationships used by Voyager 
 
 - [config.schema.json](config.schema.json): versioned source mapping, mode and declared flags.
 - [inventory.schema.json](inventory.schema.json): the adjacent TSV schema vocabulary, including scalar and composite `ref` metadata.
+- [inventory-extension.schema.json](inventory-extension.schema.json): an adjacent schema that extends an engine-owned FI base schema.
 - [interaction.schema.json](interaction.schema.json): YAML frontmatter mirror and optional document review annotation.
 - [engineering.schema.json](engineering.schema.json): descriptive document and implementation lifecycle.
 
 These JSON Schemas describe JSON objects and frontmatter mappings. The shared engine parses the actual TSV, Markdown and TOML and performs reference and coverage checks. It does not infer semantic agreement from file presence or run customer tests. It does not execute arbitrary JSON Schema extensions from customer documents.
+
+## FI base schemas
+
+The engine owns the base schemas of the three FI tables. Each base fixes the table name, primary key, `-` null value and the columns whose meaning the engine checks:
+
+| `extends` | Table | Primary key | Base columns |
+| --- | --- | --- | --- |
+| `spectrum:feature_categories` | `FEATURE_CATEGORIES` | `category_key` | `category_title`, `category_key` |
+| `spectrum:features` | `FEATURES` | `feature_id` | `feature_category`, `category_key`, `feature_title`, `feature_id` |
+| `spectrum:interactions` | `INTERACTIONS` | `interaction_id` | `interaction_title`, `interaction_id`, `interaction_type`, `feature`, `category_key`, `feature_id`, `status`, `phase`, `summary` |
+
+An adjacent extension declares `extends` and lists every TSV column in header order. A base column appears by name, optionally with a `description`; its type, requiredness, enum and reference stay engine-owned. Added columns, such as `description`, `related_ui`, `related_region`, `menu` or `entitlement_key`, carry a full column definition. An extension cannot set `name`, `primary_key` or `null_values`, cannot redefine or omit a base column, and must extend the base for its configured inventory kind. The engine merges the extension onto the base before validating rows.
+
+A schema without `extends` remains a complete standalone contract, so existing brownfield tables such as Voyager's keep validating unchanged. The read-only table query API and `compat/python` read the adjacent file as written; they do not merge extensions.
 
 ## Table conventions
 

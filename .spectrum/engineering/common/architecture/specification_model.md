@@ -46,6 +46,8 @@ The engine uses `yaml` for frontmatter, `marked` for Markdown token structure an
 
 The version 2 engine returns configuration, inventories, documents, relationships, interaction specs and findings. Errors fail `ok`; unresolved values remain warnings. It checks primary/foreign keys, composite parents, pipe-separated references, FI/spec mirrors, unique AC IDs, contract IDs/ownership, flow coverage, page contracts and local path containment. Profiles map existing repository paths without moving files.
 
+The engine owns base schemas for `FEATURE_CATEGORIES`, `FEATURES` and `INTERACTIONS`: table names, primary keys and the columns behind its category, feature and mirror checks. A repository `schema.json` declaring `extends` lists its header order and adds only its own columns; the engine merges it onto the base before row validation. Schemas without `extends` remain standalone contracts for brownfield tables.
+
 The TypeScript checker reads the current working tree. The preserved snapshot helpers are an explicit compatibility API; a normal check does not acquire an immutable repository snapshot automatically.
 
 Engineering metadata preserves document type, lifecycle and descriptive implementation state. Sources and Verification stay in prose. Document review annotations, FI lifecycle and Markdown checkboxes never synthesize successful test evidence.
