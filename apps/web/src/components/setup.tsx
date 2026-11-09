@@ -1,6 +1,8 @@
 import type { SetupItem } from '@spectrum/spec-engine/setup';
 import { Check, CircleAlert, CircleDashed } from 'lucide-react';
+import { buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { setOnboardingSkipped } from '../app/onboarding-actions.ts';
 import type {
   AgentSetup,
   EvidenceRow,
@@ -50,10 +52,13 @@ export function SetupChecklist({
   onboarding,
   sha,
   sourceUrl,
+  skipKey,
 }: {
   onboarding: Onboarding;
   sha: string;
   sourceUrl: (path: string) => string;
+  /** When set and setup is incomplete, the checklist offers to skip it for this repository. */
+  skipKey?: string;
 }) {
   return (
     <section aria-labelledby="setup-heading" className="rounded-xl border">
@@ -67,9 +72,16 @@ export function SetupChecklist({
             command in a clone and push the result.
           </p>
         </div>
-        <span className="text-sm tabular-nums text-muted-foreground">
-          {onboarding.done} of {onboarding.steps.length} done
-        </span>
+        <div className="flex items-center gap-3">
+          <span className="text-sm tabular-nums text-muted-foreground">
+            {onboarding.done} of {onboarding.steps.length} done
+          </span>
+          {skipKey && !onboarding.complete ? (
+            <SkipButton guide={skipKey} skipped>
+              Skip for now
+            </SkipButton>
+          ) : null}
+        </div>
       </div>
       <ol className="flex flex-col">
         {onboarding.steps.map((step, index) => (
@@ -203,5 +215,39 @@ function Evidence({
         </li>
       ))}
     </ul>
+  );
+}
+
+/** A form button that skips or restores an onboarding guide in this browser. */
+export function SkipButton({
+  guide,
+  skipped,
+  children,
+}: {
+  guide: string;
+  skipped: boolean;
+  children: React.ReactNode;
+}) {
+  return (
+    <form action={setOnboardingSkipped.bind(null, guide, skipped)}>
+      <button type="submit" className={buttonVariants({ variant: 'ghost', size: 'sm' })}>
+        {children}
+      </button>
+    </form>
+  );
+}
+
+/** What remains of a skipped checklist: its progress and a way back. */
+export function SetupSkipped({ onboarding, skipKey }: { onboarding: Onboarding; skipKey: string }) {
+  return (
+    <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-dashed px-5 py-3">
+      <p className="text-sm text-muted-foreground">
+        Setup skipped in this browser: {onboarding.done} of {onboarding.steps.length} steps done.
+        Checks still run without it.
+      </p>
+      <SkipButton guide={skipKey} skipped={false}>
+        Show setup
+      </SkipButton>
+    </div>
   );
 }

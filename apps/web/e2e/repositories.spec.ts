@@ -83,3 +83,27 @@ test('the agent step switches commands per coding agent and remembers the choice
     page.getByRole('tablist', { name: 'Coding agent' }).getByRole('tab', { name: /Codex/ }),
   ).toHaveAttribute('aria-selected', 'true', { timeout: 30_000 });
 });
+
+test('onboarding guides can be skipped and shown again', async ({ page }) => {
+  await page.goto('/repositories');
+  const strip = page.getByRole('list', { name: 'Getting started' });
+  await expect(strip).toBeVisible({ timeout: 20_000 });
+  await page.getByRole('button', { name: 'Skip for now' }).click();
+  await expect(strip).toHaveCount(0);
+  await page.reload();
+  await expect(page.getByRole('heading', { level: 1, name: 'Repositories' })).toBeVisible();
+  await expect(strip).toHaveCount(0);
+
+  await page.goto('/repositories/voyager-fm/spectrum');
+  const configure = page.getByRole('heading', { name: 'Connect a GitHub App' });
+  const checklist = page.getByRole('heading', { name: 'Set up Spectrum in this repository' });
+  const complete = page.getByRole('heading', { name: 'Spectrum is set up' });
+  await expect(configure.or(checklist).or(complete)).toBeVisible({ timeout: 30_000 });
+  if (!(await checklist.isVisible())) return;
+
+  await page.getByRole('button', { name: 'Skip for now' }).click();
+  await expect(page.getByText(/Setup skipped in this browser: \d of 4 steps done/)).toBeVisible();
+  await expect(checklist).toHaveCount(0);
+  await page.getByRole('button', { name: 'Show setup' }).click();
+  await expect(checklist).toBeVisible();
+});

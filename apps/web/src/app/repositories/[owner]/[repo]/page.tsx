@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { cookies } from 'next/headers';
 import Link from 'next/link';
 import { buttonVariants } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -29,7 +30,7 @@ import {
   repositoryPath,
   targetQuery,
 } from '../../../../components/repository.tsx';
-import { SetupChecklist } from '../../../../components/setup.tsx';
+import { SetupChecklist, SetupSkipped } from '../../../../components/setup.tsx';
 import type { CheckHistoryRow } from '../../../../db/store.ts';
 import {
   type CheckTarget,
@@ -39,6 +40,7 @@ import {
   type RepositoryView,
 } from '../../../../lib/github.ts';
 import { onboardingSteps } from '../../../../lib/onboarding.ts';
+import { parseSkipped, repositoryGuide, SKIP_COOKIE } from '../../../../lib/onboarding-skip.ts';
 import {
   acceptanceCoverage,
   categoryBreakdown,
@@ -87,6 +89,8 @@ export default async function RepositoryPage({ params, searchParams }: Props) {
   const findingView = parseFindingView(query);
   const view = await loadRepositoryCheck(owner, repo, target);
   const base = repositoryPath(owner, repo);
+  const guide = repositoryGuide(owner, repo);
+  const skipped = parseSkipped((await cookies()).get(SKIP_COOKIE)?.value).has(guide);
 
   return (
     <RepositoryFrame
@@ -97,7 +101,14 @@ export default async function RepositoryPage({ params, searchParams }: Props) {
       query={targetQuery(target)}
     >
       {view.status === 'ready' ? (
-        <Ready view={view} base={base} target={target} findingView={findingView} />
+        <Ready
+          view={view}
+          base={base}
+          target={target}
+          findingView={findingView}
+          guide={guide}
+          skipped={skipped}
+        />
       ) : null}
     </RepositoryFrame>
   );
@@ -108,11 +119,16 @@ function Ready({
   base,
   target,
   findingView,
+  guide,
+  skipped,
 }: {
   view: Extract<RepositoryView, { status: 'ready' }>;
   base: string;
   target: ReturnType<typeof parseTarget>;
   findingView: FindingView;
+  /** Skip key of this repository's setup checklist, and whether this browser skipped it. */
+  guide: string;
+  skipped: boolean;
 }) {
   const { repository, branches, pullRequests, check } = view;
   const source = (path: string) => `${repository.htmlUrl}/blob/${check?.sha}/${path}`;
@@ -122,9 +138,14 @@ function Ready({
       <LoadErrors errors={view.errors} />
       {check && onboarding ? (
         <>
-          {onboarding.complete ? null : (
+          {onboarding.complete || skipped ? null : (
             <div className="mb-10">
-              <SetupChecklist onboarding={onboarding} sha={check.sha} sourceUrl={source} />
+              <SetupChecklist
+                onboarding={onboarding}
+                sha={check.sha}
+                sourceUrl={source}
+                skipKey={guide}
+              />
             </div>
           )}
           <CheckSummary
@@ -136,6 +157,10 @@ function Ready({
           {onboarding.complete ? (
             <Section title="Setup">
               <SetupChecklist onboarding={onboarding} sha={check.sha} sourceUrl={source} />
+            </Section>
+          ) : skipped ? (
+            <Section title="Setup">
+              <SetupSkipped onboarding={onboarding} skipKey={guide} />
             </Section>
           ) : null}
         </>

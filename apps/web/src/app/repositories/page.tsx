@@ -1,5 +1,6 @@
 import { ExternalLink } from 'lucide-react';
 import type { Metadata } from 'next';
+import { cookies } from 'next/headers';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { buttonVariants } from '@/components/ui/button';
@@ -22,7 +23,9 @@ import {
   StatusBadge,
 } from '../../components/dashboard.tsx';
 import { GitHubSetup } from '../../components/github.tsx';
+import { SkipButton } from '../../components/setup.tsx';
 import { loadConnectedRepositories, parseRepositoryInput } from '../../lib/github.ts';
+import { parseSkipped, REPOSITORIES_GUIDE, SKIP_COOKIE } from '../../lib/onboarding-skip.ts';
 import { repositoryPath } from '../../lib/paths.ts';
 
 export const metadata: Metadata = { title: 'Repositories' };
@@ -36,17 +39,22 @@ export default async function RepositoriesPage({ searchParams }: Props) {
   if (parsed) redirect(repositoryPath(parsed.owner, parsed.repo));
 
   const data = await loadConnectedRepositories();
+  const guideSkipped = parseSkipped((await cookies()).get(SKIP_COOKIE)?.value).has(
+    REPOSITORIES_GUIDE,
+  );
   return (
     <>
       <PageHead
         title="Repositories"
         description="GitHub repositories this server can read through the Spectrum GitHub App. Checks are read-only and run the deterministic spec check at one pinned commit."
       />
-      <GettingStarted
-        configured={data.status.configured}
-        repositories={data.repositories.length}
-        signedOut={data.viewer.mode === 'accounts' && !data.viewer.user}
-      />
+      {guideSkipped ? null : (
+        <GettingStarted
+          configured={data.status.configured}
+          repositories={data.repositories.length}
+          signedOut={data.viewer.mode === 'accounts' && !data.viewer.user}
+        />
+      )}
       {!data.status.configured ? (
         <GitHubSetup missing={data.status.missing} />
       ) : data.viewer.mode === 'misconfigured' ? (
@@ -189,17 +197,25 @@ function GettingStarted({
     },
   ];
   return (
-    <ol aria-label="Getting started" className="mb-8 grid grid-cols-1 gap-3 sm:grid-cols-3">
-      {steps.map((step, index) => (
-        <li key={step.title} className="flex flex-col gap-1 rounded-xl border p-4">
-          <div className="flex items-center justify-between gap-2">
-            <span className="text-xs tabular-nums text-muted-foreground">Step {index + 1}</span>
-            {step.done ? <StatusBadge tone="ok">Done</StatusBadge> : null}
-          </div>
-          <span className="text-sm font-medium">{step.title}</span>
-          <span className="text-sm text-muted-foreground">{step.detail}</span>
-        </li>
-      ))}
-    </ol>
+    <div className="mb-8 flex flex-col gap-2">
+      <div className="flex items-center justify-between gap-2">
+        <h2 className="text-sm font-medium">Getting started</h2>
+        <SkipButton guide={REPOSITORIES_GUIDE} skipped>
+          Skip for now
+        </SkipButton>
+      </div>
+      <ol aria-label="Getting started" className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+        {steps.map((step, index) => (
+          <li key={step.title} className="flex flex-col gap-1 rounded-xl border p-4">
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-xs tabular-nums text-muted-foreground">Step {index + 1}</span>
+              {step.done ? <StatusBadge tone="ok">Done</StatusBadge> : null}
+            </div>
+            <span className="text-sm font-medium">{step.title}</span>
+            <span className="text-sm text-muted-foreground">{step.detail}</span>
+          </li>
+        ))}
+      </ol>
+    </div>
   );
 }
