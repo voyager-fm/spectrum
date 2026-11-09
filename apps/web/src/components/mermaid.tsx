@@ -87,6 +87,8 @@ function themeVariables(dark: boolean) {
     activationBkgColor: c['--muted'],
     activationBorderColor: c['--brand'],
     sequenceNumberColor: c['--background'],
+    // Flat shapes like the dashboard's bordered surfaces; the default shadow glows on dark.
+    dropShadow: 'none',
   };
 }
 
