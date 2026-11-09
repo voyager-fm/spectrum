@@ -2,5 +2,12 @@
   "name": "@spectrum/spec-engine",
   "version": "0.0.0",
   "private": true,
-  "type": "module"
+  "type": "module",
+  "dependencies": {
+    "@global-torque/markdown-it-wikilinks": "0.2.0",
+    "js-yaml": "4.1.1",
+    "markdown-it": "14.3.0",
+    "markdown-it-anchor": "10.0.0",
+    "markdown-it-front-matter": "0.2.4"
+  }
 }
