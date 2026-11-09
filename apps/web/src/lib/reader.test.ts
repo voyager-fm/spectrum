@@ -176,6 +176,19 @@ test('readerTree groups interactions under categories and features, documents by
   ]);
 });
 
+test('surface bundle documents are listed with pages', () => {
+  const result = fixture();
+  const docs = [
+    doc('surface_contract', '.spectrum/surfaces/web/specs/contract.toml', 'Specs contract'),
+    doc('surface_spec', '.spectrum/surfaces/web/specs/spec.md', 'Specs surface'),
+  ];
+  const tree = readerTree(interactionRows(result), docs, LOCAL);
+  assert.deepEqual(
+    tree.groups.map((g) => [g.label, g.documents.map((d) => d.title)]),
+    [['Pages', ['Specs contract', 'Specs surface']]],
+  );
+});
+
 test('resolveLink maps written links to reader pages, sources or nothing', () => {
   const result = fixture();
   const local = linkContext(result, LOCAL);

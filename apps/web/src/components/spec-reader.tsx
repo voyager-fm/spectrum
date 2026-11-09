@@ -467,6 +467,8 @@ const KIND_LABEL: Record<RepositoryDocument['kind'], string> = {
   flow: 'Flow',
   layout: 'Layout',
   page_spec: 'Page spec',
+  surface_contract: 'Surface contract',
+  surface_spec: 'Surface spec',
   engineering: 'Engineering',
   rule: 'Rule',
   reference: 'Reference',

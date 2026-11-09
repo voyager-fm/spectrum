@@ -166,7 +166,10 @@ const GROUPS: { label: string; kinds: DocumentKind[] }[] = [
   { label: 'Overview', kinds: ['overview'] },
   { label: 'Flows', kinds: ['flow'] },
   { label: 'Contracts', kinds: ['contract'] },
-  { label: 'Pages', kinds: ['page_contract', 'layout', 'page_spec'] },
+  {
+    label: 'Pages',
+    kinds: ['page_contract', 'surface_contract', 'layout', 'page_spec', 'surface_spec'],
+  },
   { label: 'Engineering', kinds: ['engineering'] },
   { label: 'Rules', kinds: ['rule'] },
   { label: 'Reference', kinds: ['reference'] },
