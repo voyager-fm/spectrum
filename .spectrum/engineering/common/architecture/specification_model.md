@@ -13,9 +13,9 @@ Spectrum represents a repository's product, website and engineering documentatio
 ## Canonical traceability
 
 - [Document ownership and schemas](../../../schemas/README.md)
-- [Validation contract](../../../product/feature_specs/sp/contracts/validation.toml)
-- [Dashboard contract](../../../product/feature_specs/sp/contracts/dashboard.toml)
-- [Proposal contract](../../../product/feature_specs/sp/contracts/proposal.toml)
+- [Validation contract](../../../product/feature_specs/val/contracts/validation.toml)
+- [Dashboard contract](../../../product/feature_specs/dsh/contracts/dashboard.toml)
+- [Proposal contract](../../../product/feature_specs/loop/contracts/proposal.toml)
 - [Distribution architecture](../../../contracts/distribution.md)
 - [Application runtime](application_runtime.md)
 

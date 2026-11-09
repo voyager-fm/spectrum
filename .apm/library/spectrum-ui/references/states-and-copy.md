@@ -23,7 +23,7 @@ A failed load and an empty result look different. Show `—` or "Could not run" 
 ## Copy
 - English. Sentence case for headings, buttons and badges ("PR reviews", "Not implemented").
 - Do not use color words or color alone to carry meaning; the UI is monotone (design.md). Pair a failure badge with text.
-- The audience is developers. Spec IDs (`SP-001`), repository paths, short revisions (7 characters) and finding codes are useful. Show them with `<Mono>`.
+- The audience is developers. Spec IDs (`VAL-001`), repository paths, short revisions (7 characters) and finding codes are useful. Show them with `<Mono>`.
 - A description says what the page shows and what it is not evidence of. Example: "Specification health for this repository. Document status is not implementation or test evidence."
 - An error or empty state names what was read and what to do next. Do not apologize or blame the user.
 - Never show secrets, tokens, absolute home paths or raw stack traces. `LoadErrors` shows the error message only.

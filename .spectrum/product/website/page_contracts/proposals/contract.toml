@@ -13,4 +13,4 @@ capability = "planned"
 declared_status_is_execution_evidence = false
 
 [policy_refs]
-specification = ["../../../feature_specs/sp/contracts/dashboard.toml"]
+specification = ["../../../feature_specs/dsh/contracts/dashboard.toml"]

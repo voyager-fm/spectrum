@@ -1,19 +1,20 @@
 feature_category	category_key	feature_title	feature_id	description	related_ui
-Specification validation	VAL	Repository specification validation	SP-001	Read and validate a rich repository document model.	cli.output
-Specification validation	VAL	Source profiles	SP-005	Read existing documentation paths through an explicit source mapping without moving files.	cli.output
-Specification dashboard	DSH	Specification browsing	SP-002	Inspect repository-native specifications, their health and their relationships.	web.specs
-Specification dashboard	DSH	Repository context	SP-006	Read repository rules and declared configuration alongside the specifications.	web.repository
-Specification dashboard	DSH	Planned capability states	SP-007	Show unimplemented capabilities as explicit planned states without controls or sample results.	web.agent_loop
-Agent plugin	AGT	Distribute Spectrum as an agent plugin	SP-004	Distribute deterministic tools through an agent-host plugin.	plugin.spectrum
-Agent plugin	AGT	Spec-grounded agent guidance	SP-008	Keep host-agent work aligned with repository specifications and human authority.	plugin.spectrum
-Agent loop	LOOP	Change proposals	SP-003	Propose, review and revalidate changes with explicit human authority.	web.agent_loop
-Agent loop	LOOP	Agent runs	SP-009	Run discovery and drafting against a pinned repository revision.	web.agent_loop
-Agent loop	LOOP	Pull request review	SP-010	Review pull requests against the specifications and rules they affect.	web.agent_loop
-Connections	INT	GitHub repository connection	SP-011	Read hosted GitHub repositories at a pinned commit through a GitHub App installation.	web.repository
-Connections	INT	Linear connection	SP-012	Link specification requirements to Linear issues.	web.integrations
-Connections	INT	Model provider connection	SP-013	Connect a verified model authentication path for server-side runs.	web.integrations
-Connections	INT	Connected repositories	SP-018	Browse a connected hosted repository's specifications at a pinned commit and switch between repositories.	web.repository
-Repository setup	SET	Installable command-line package	SP-014	Ship the deterministic CLI as one package a client repository pins and runs from its own binary.	cli.output
-Repository setup	SET	Repository initialization	SP-015	Create a connected starter specification bundle in a repository that has none.	cli.output
-Repository setup	SET	Repository agent skills	SP-016	Install the Spectrum agent skill into a repository so agents run the repository's pinned CLI.	skill.spectrum
-Repository setup	SET	Repository onboarding	SP-017	Show a connected repository's setup state and the command that completes each missing step.	web.repository
+Specification validation	VAL	Repository specification validation	VAL-001	Read and validate a rich repository document model.	cli.output
+Specification validation	VAL	Source profiles	VAL-002	Read existing documentation paths through an explicit source mapping without moving files.	cli.output
+Specification dashboard	DSH	Specification browsing	DSH-001	Inspect repository-native specifications, their health and their relationships.	web.specs
+Specification dashboard	DSH	Repository context	DSH-002	Read repository rules and declared configuration alongside the specifications.	web.repository
+Specification dashboard	DSH	Planned capability states	DSH-003	Show unimplemented capabilities as explicit planned states without controls or sample results.	web.agent_loop
+Agent plugin	AGT	Distribute Spectrum as an agent plugin	AGT-001	Distribute deterministic tools through an agent-host plugin.	plugin.spectrum
+Agent plugin	AGT	Spec-grounded agent guidance	AGT-002	Keep host-agent work aligned with repository specifications and human authority.	plugin.spectrum
+Agent loop	LOOP	Change proposals	LOOP-001	Propose, review and revalidate changes with explicit human authority.	web.agent_loop
+Agent loop	LOOP	Agent runs	LOOP-002	Run discovery and drafting against a pinned repository revision.	web.agent_loop
+Agent loop	LOOP	Pull request review	LOOP-003	Review pull requests against the specifications and rules they affect.	web.agent_loop
+Connections	INT	GitHub repository connection	INT-001	Read hosted GitHub repositories at a pinned commit through a GitHub App installation.	web.repository
+Connections	INT	Linear connection	INT-002	Link specification requirements to Linear issues.	web.integrations
+Connections	INT	Model provider connection	INT-003	Connect a verified model authentication path for server-side runs.	web.integrations
+Connections	INT	Connected repositories	INT-004	Browse a connected hosted repository's specifications at a pinned commit and switch between repositories.	web.repository
+Repository setup	SET	Installable command-line package	SET-001	Ship the deterministic CLI as one package a client repository pins and runs from its own binary.	cli.output
+Repository setup	SET	Repository initialization	SET-002	Create a connected starter specification bundle in a repository that has none.	cli.output
+Repository setup	SET	Repository agent skills	SET-003	Install the Spectrum agent skill into a repository so agents run the repository's pinned CLI.	skill.spectrum
+Repository setup	SET	Repository onboarding	SET-004	Show a connected repository's setup state and the command that completes each missing step.	web.repository
+Implementation traceability	TRC	Specification implementation links	TRC-001	Resolve and inspect explicitly declared implementation source links without claiming behavioral correctness.	web.spec_implementation

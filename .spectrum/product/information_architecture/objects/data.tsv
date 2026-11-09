@@ -9,3 +9,4 @@ Domain	configuration	Repository configuration	A versioned source mapping with mo
 Domain	source_profile	Source profile	An explicit configuration supplied at read time to map existing documentation paths.
 Domain	cli_package	CLI package	The packaged deterministic CLI a repository pins as a development dependency.
 Domain	agent_skill	Agent skill	A generated Spectrum skill file installed in a repository for one host agent.
+Domain	implementation_link	Implementation link	An explicit specification-to-file reference with an optional line range, observed source context and resolution state.

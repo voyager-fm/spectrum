@@ -11,6 +11,8 @@ primary = "Read one interaction, its acceptance criteria and linked sources."
 read_only = true
 capability = "ready"
 declared_status_is_execution_evidence = false
+implementation_links_capability = "planned"
+implementation_links_region = "web.spec_implementation"
 
 [policy_refs]
-specification = ["../../../feature_specs/sp/contracts/dashboard.toml"]
+specification = ["../../../feature_specs/dsh/contracts/dashboard.toml", "../../../feature_specs/trc/contracts/implementation_links.toml"]

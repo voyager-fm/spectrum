@@ -49,7 +49,7 @@ A schema without `extends` remains a complete standalone contract, so existing b
 
 ## Table conventions
 
-Use a header and a fixed column count with no blank rows. `-` means intentionally absent. `TBD` means undecided and produces a warning; primary keys require decided values. `<<AI>>` marks draft human-readable text and grants no approval. IDs are opaque, stable customer keys; there is no Spectrum-specific `SP-` ID requirement.
+Use a header and a fixed column count with no blank rows. `-` means intentionally absent. `TBD` means undecided and produces a warning; primary keys require decided values. `<<AI>>` marks draft human-readable text and grants no approval. IDs are opaque, stable customer keys; the engine does not require Spectrum's own category prefixes.
 
 `ref.table` resolves a configured table name. `ref.column` targets one column and accepts `|`-separated references. Composite references use `columns` for the local tuple and `references` for the target tuple. The triggering column's absent value skips an optional parent reference. No menu or entitlement inventory is mandatory.
 
@@ -75,4 +75,23 @@ Sources and Verification prose own engineering evidence. A runtime approval for 
 
 ## Migration
 
-Version 1 feature JSON and the standalone JSON draft model are retired. Spectrum's `SP-001` through `SP-004` feature IDs and their original acceptance statements are preserved in FI and interaction Markdown. Spectrum's own feature IDs stay product-scoped (`SP-<nnn>`); its category keys (`VAL`, `DSH`, `AGT`, `LOOP`, `INT`) classify features without renumbering them. No automatic customer-document migration or remote publication runs during validation.
+Version 1 feature JSON and the standalone JSON draft model are retired. Spectrum uses category-scoped feature IDs (VAL, DSH, AGT, LOOP, INT, SET and TRC) and category-local feature bundles. The explicit SP-to-category migration and historical ID mapping are recorded in [feature identity](../engineering/common/standards/feature_identity.md). Customer IDs remain opaque; no automatic customer-document migration or remote publication runs during validation.
+
+## Planned implementation links
+
+The planned [implementation-link contract](../product/feature_specs/trc/contracts/implementation_links.toml) defines an optional `### Implementation` subsection within an interaction's `## Source`. Ordinary Markdown links there declare implementation files and optional `#L<n>` or `#L<start>-L<end>` locations. They supplement, rather than replace, Source contract and flow links. Inline-code paths and prose are not declarations. Existing specs without implementation links remain valid. Resolution states, code navigation and the Connected code section are planned; neither a declared link nor file existence establishes executed AC evidence.
+
+For example, a specification at `.spectrum/specs/APP-001.md` could declare the following target. This is a planned declaration format, not a generated file or a claim that the example implementation exists:
+
+```markdown
+## Source
+
+- [Contract](../contracts/example.toml)
+- [Flow](../flows/example.md)
+
+### Implementation
+
+- [Implementation](../../src/example.ts#L10-L24)
+```
+
+The two Source links retain document ownership. The Implementation link is an explicitly declared code relationship; it is not inferred from its label or file extension and does not establish implemented behavior.

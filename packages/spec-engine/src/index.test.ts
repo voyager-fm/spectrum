@@ -9,29 +9,39 @@ test('self inventories and interaction specifications validate', async () => {
   const r = await checkRepository(resolve(import.meta.dirname, '../../..'));
   assert.deepEqual(r.findings, []);
   assert.equal(r.ok, true);
-  assert.deepEqual(
-    [...new Set(r.specs.map((s) => s.featureId))],
-    [
-      'SP-001',
-      'SP-002',
-      'SP-003',
-      'SP-004',
-      'SP-005',
-      'SP-006',
-      'SP-007',
-      'SP-008',
-      'SP-014',
-      'SP-015',
-      'SP-016',
-      'SP-017',
-      'SP-018',
-    ],
-  );
+  const featureIds = new Set(r.specs.map((s) => s.featureId));
+  for (const id of [
+    'VAL-001',
+    'DSH-001',
+    'LOOP-001',
+    'AGT-001',
+    'VAL-002',
+    'DSH-002',
+    'DSH-003',
+    'AGT-002',
+    'TRC-001',
+  ])
+    assert.ok(featureIds.has(id), `Missing canonical feature ${id}`);
+  const features = r.model.inventories.find((table) => table.kind === 'features');
+  assert.ok(features);
+  for (const row of features.rows) {
+    assert.match(row.values.feature_id, new RegExp(`^${row.values.category_key}-[0-9]{3}$`));
+  }
   const categories = r.model.inventories.find((table) => table.kind === 'categories');
   assert.deepEqual(
     categories?.rows.map((row) => row.values.category_key),
-    ['VAL', 'DSH', 'AGT', 'LOOP', 'INT', 'SET'],
+    ['VAL', 'DSH', 'AGT', 'LOOP', 'INT', 'SET', 'TRC'],
   );
+  for (const suffix of [
+    'resolve_implementation_links',
+    'inspect_linked_implementation',
+    'open_implementation_source',
+  ]) {
+    const spec = r.specs.find((item) => item.id === `TRC-001-${suffix}`);
+    assert.ok(spec);
+    assert.equal(spec.implementationStatus, 'planned');
+    assert.equal(spec.phase, 'next');
+  }
   assert.ok(r.model.inventories.some((table) => table.kind === 'objects'));
   assert.ok(r.model.documents.some((doc) => doc.kind === 'engineering'));
 });
@@ -69,7 +79,7 @@ test('legacy feature-only configuration reports an explicit migration boundary',
       await writeFile(
         join(dir, `.spectrum/features/${name}.json`),
         JSON.stringify({
-          id: 'SP-001',
+          id: 'VAL-001',
           title: 'Test',
           status: 'draft',
           acceptance: ['Works'],

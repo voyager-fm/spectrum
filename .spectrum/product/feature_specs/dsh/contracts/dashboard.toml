@@ -1,0 +1,42 @@
+[contract]
+id = "spectrum.dashboard"
+category = "DSH"
+primary_object_key = "spec_bundle"
+display_region = "web.repository"
+
+[policy]
+read_only = true
+loopback_only = true
+shared_engine = "@spectrum/spec-engine"
+configuration_is_connection_evidence = false
+review_status_is_implementation_evidence = false
+checkboxes_are_execution_evidence = false
+load_failures_use_sample_data = false
+unimplemented_actions = "Show a planned state."
+planned_states_offer_execution_controls = false
+planned_states_show_sample_history = false
+settings_editable = false
+
+[ownership."DSH-001-view_repository_overview"]
+reads = ["repository", "configuration", "spec_bundle", "agent_rule"]
+writes = []
+
+[ownership."DSH-001-browse_specifications"]
+reads = ["repository", "spec_bundle", "agent_rule"]
+writes = []
+
+[ownership."DSH-001-view_specification_detail"]
+reads = ["spec_bundle", "interaction"]
+writes = []
+
+[ownership."DSH-002-read_rules"]
+reads = ["agent_rule"]
+writes = []
+
+[ownership."DSH-002-inspect_integrations"]
+reads = ["configuration"]
+writes = []
+
+[ownership."DSH-003-show_planned_capabilities"]
+reads = []
+writes = []

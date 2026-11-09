@@ -11,7 +11,7 @@ test('dashboard snapshot reads the repository own specs, rules and config', asyn
   const data = await loadDashboard(repoRoot);
   assert.deepEqual(data.errors, []);
   assert.equal(data.check?.ok, true);
-  assert.ok(data.check?.specs.some((s) => s.id === 'SP-001-check_repository'));
+  assert.ok(data.check?.specs.some((s) => s.id === 'VAL-001-check_repository'));
   assert.ok(data.contracts.some((d) => d.path.endsWith('/contracts/validation.toml')));
   assert.ok(data.flows.some((d) => d.path.endsWith('/flows/validation.md')));
   assert.ok(data.documents.some((d) => d.path.endsWith('/page_contracts/specs/contract.toml')));

@@ -5,3 +5,4 @@ order	category_title	category_key	description
 4	Agent loop	LOOP	Propose, run and review specification changes under explicit human authority.
 5	Connections	INT	Connect hosted repositories, issue trackers and model providers to the shared model.
 6	Repository setup	SET	Install Spectrum into a client repository and guide it from an empty repository to a working agent setup.
+7	Implementation traceability	TRC	Connect canonical interaction specifications to explicitly declared implementation files and source locations.

@@ -1,0 +1,65 @@
+[contract]
+id = "spectrum.implementation_links"
+category = "TRC"
+primary_object_key = "implementation_link"
+display_region = "web.spec_implementation"
+
+[vocabulary]
+implementation_link = "An explicitly authored Source link to an implementation file, not proof that code satisfies a requirement."
+source_context = "The selected repository and pinned commit, or explicitly labeled local working-tree observation."
+resolution_state = "not_linked, resolved, missing_file, invalid_location, blocked_path or unavailable."
+
+[policy]
+capability = "planned"
+read_only = true
+authoritative_owner = "The interaction Markdown specification."
+declaration_heading = "Source"
+implementation_subheading = "Implementation"
+declaration_syntax = "Normal Markdown file links in the optional Implementation subsection."
+links_are_optional = true
+inline_code_paths_create_links = false
+prose_mentions_create_links = false
+image_destinations_create_links = false
+preserve_declaration_order = true
+same_file_different_ranges_are_distinct = true
+file_extensions_infer_implementation_role = false
+paths_resolve_from = "The declaring specification directory within the selected repository."
+absolute_paths_allowed = false
+external_implementation_targets = "Report blocked_path without fetching; external references outside Implementation retain their ordinary meaning."
+symlink_escape_allowed = false
+directories_are_implementation_files = false
+supported_fragments = ["none", "L<positive integer>", "L<start>-L<end>"]
+range_end_must_not_precede_start = true
+range_must_fit_observed_file = true
+invalid_range_falls_back_to_whole_file = false
+preserve_link_label = true
+preserve_declaring_spec_path = true
+preserve_line_fragment = true
+source_context_is_required = true
+local_context_label = "Working tree"
+dirty_worktree_claims_HEAD_contents = false
+remote_context_uses_checked_SHA = true
+remote_open_uses_declared_URL = false
+local_open_action = "Copy the repository-relative path and optional line range."
+remote_open_action = "Open the selected repository's GitHub blob URL at the checked SHA and optional line range."
+missing_or_blocked_targets_offer_open_action = false
+public_output_exposes_temporary_paths = false
+source_code_is_executed = false
+link_presence_is_implementation_evidence = false
+link_presence_is_test_evidence = false
+link_changes_approval_or_lifecycle = false
+automatic_code_discovery = false
+symbol_resolution = false
+code_preview = false
+
+[ownership."TRC-001-resolve_implementation_links"]
+reads = ["interaction", "repository", "implementation_link"]
+writes = []
+
+[ownership."TRC-001-inspect_linked_implementation"]
+reads = ["interaction", "implementation_link"]
+writes = []
+
+[ownership."TRC-001-open_implementation_source"]
+reads = ["repository", "implementation_link"]
+writes = []

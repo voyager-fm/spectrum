@@ -23,7 +23,7 @@ test('the standalone plugin bundle runs document parsers without workspace depen
   assert.equal(check.ok, true);
   assert.equal(check.config.schema_version, 2);
   assert.ok(check.model.documents.some((doc: { kind: string }) => doc.kind === 'contract'));
-  assert.ok(check.specs.some((spec: { id: string }) => spec.id === 'SP-001-check_repository'));
+  assert.ok(check.specs.some((spec: { id: string }) => spec.id === 'VAL-001-check_repository'));
 });
 
 test('the standalone bundle initializes a repository from its embedded templates', async (t) => {

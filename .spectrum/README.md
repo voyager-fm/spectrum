@@ -7,3 +7,5 @@
 Product objects and behavior live in `product/`. Web route and page contracts are product specifications under `product/website/`. Engineering knowledge lives in `engineering/`; scoped agent instructions live in `rules/`. The source mapping in `config.json` lets existing repositories preserve their own paths.
 
 Run `pnpm spec:check` to validate the configured repository model and `pnpm spec:list` to list interaction specifications. These commands read only. Planning, document approval, declared implementation and executed test evidence have separate meanings.
+
+Spectrum feature identity uses category-local IDs and bundles; see [the namespace standard and migration crosswalk](engineering/common/standards/feature_identity.md). The planned [implementation-link feature](product/feature_specs/trc/TRC-001/TRC-001-inspect_linked_implementation.md) defines Connected code in specification detail; this specification does not claim the resolver or UI is implemented.
