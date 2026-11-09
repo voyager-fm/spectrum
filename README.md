@@ -61,7 +61,7 @@ The Next.js application is the single server entry point. Shared packages own do
 Read the [schema guide](.spectrum/schemas/README.md) and [architecture](.spectrum/engineering/common/architecture/specification_model.md). Existing repositories can keep their current paths with a profile:
 
 ```sh
-pnpm cli check /path/to/voyager-documentation --profile .spectrum/profiles/voyager.json
+pnpm cli check /path/to/voyager-documentation --profile /path/to/profile.json
 ```
 
 The checker writes no files. It reports structural errors and unresolved warnings; it does not approve requirements or run customer tests. Legacy feature-only JSON configuration reports an explicit migration boundary. [The migration guide](.spectrum/engineering/common/guides/voyager_migration.md) describes source mapping, preservation and recovery.

@@ -13,7 +13,6 @@ Use a source profile to connect Voyager's existing canonical files before consid
 ## Canonical traceability
 
 - [Document model](../../../schemas/README.md)
-- [Voyager profile](../../../profiles/voyager.json)
 - [Architecture](../architecture/specification_model.md)
 
 ## Engineering scope
@@ -26,8 +25,8 @@ Use Node 22.18+ and this repository's locked workspace dependencies. Inspect cur
 
 ## Procedure
 
-1. Review `profiles/voyager.json`. Its inventory paths target the existing `PRODUCT` IA/FI tables and `WEBSITE` routes. Its document roots target feature specs, page bundles, engineering and repository rules.
-2. Run `pnpm cli check /path/to/voyager-documentation --profile /path/to/spectrum/.spectrum/profiles/voyager.json`.
+1. Write a schema_version 2 profile for the documentation repository. Point its inventory paths at the existing `PRODUCT` IA/FI tables and `WEBSITE` routes, and its document roots at feature specs, page bundles, engineering and repository rules. Spectrum ships no Voyager profile.
+2. Run `pnpm cli check /path/to/voyager-documentation --profile /path/to/profile.json`.
 3. Inspect findings by owner. Distinguish malformed source, a stale reference, an undecided requirement and a new validator assumption. Do not weaken product ACs to make the import pass.
 4. For a permanent connection, install the reviewed profile as `.spectrum/config.json` in the selected repository through its normal authorized review workflow. The source files can remain at their current paths.
 5. If physical relocation is separately approved, update inbound Markdown/Wikilinks, schema references and consumer pointers together. Preserve IDs, optional domain columns, contract policy, AC IDs and all original statements.
