@@ -107,7 +107,7 @@ test('schema is header/metadata description, not row/value/key validation', asyn
     ],
     primary_key: ['id'],
   };
-  await writeFile(join(root, 'billing/items/schema.json'), '\uFEFF' + JSON.stringify(contract));
+  await writeFile(join(root, 'billing/items/schema.json'), `\uFEFF${JSON.stringify(contract)}`);
   assert.deepEqual((await query.schema('items')).contract, contract);
   await writeFile(
     join(root, 'billing/items/data.tsv'),
