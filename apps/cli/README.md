@@ -46,6 +46,16 @@ return the complete plan; existing files and links are never overwritten. Creati
 does not update inventories/configuration or imply validation or approval. Review
 configured document mappings and run `spectrum check` afterward.
 
+## Diagnose local setup
+
+`spectrum status [path]` retains its existing setup JSON and readiness exit code.
+`spectrum doctor [path] [--format json|text]` additionally checks local package/skill
+evidence and runs the real structural checker when configuration can be read.
+Missing/blocked checks are reported explicitly. It never repairs files, installs
+packages, executes customer binaries or calls a network service. Observed manifest
+versions and declared package ranges remain separate; active CLI origin stays unknown
+unless a caller supplies evidence. Errors fail the command; warnings remain visible.
+
 ### Check and list output
 
 JSON remains the default and preserves the existing result object (`check`) or raw

@@ -4013,10 +4013,10 @@ var require_resolve_block_map = __commonJS({
       let offset = bm.offset;
       let commentEnd = null;
       for (const collItem of bm.items) {
-        const { start, key, sep: sep4, value } = collItem;
+        const { start, key, sep: sep5, value } = collItem;
         const keyProps = resolveProps.resolveProps(start, {
           indicator: "explicit-key-ind",
-          next: key ?? sep4?.[0],
+          next: key ?? sep5?.[0],
           offset,
           onError,
           parentIndent: bm.indent,
@@ -4030,7 +4030,7 @@ var require_resolve_block_map = __commonJS({
             else if ("indent" in key && key.indent !== bm.indent)
               onError(offset, "BAD_INDENT", startColMsg);
           }
-          if (!keyProps.anchor && !keyProps.tag && !sep4) {
+          if (!keyProps.anchor && !keyProps.tag && !sep5) {
             commentEnd = keyProps.end;
             if (keyProps.comment) {
               if (map.comment)
@@ -4054,7 +4054,7 @@ var require_resolve_block_map = __commonJS({
         ctx.atKey = false;
         if (utilMapIncludes.mapIncludes(ctx, map.items, keyNode))
           onError(keyStart, "DUPLICATE_KEY", "Map keys must be unique");
-        const valueProps = resolveProps.resolveProps(sep4 ?? [], {
+        const valueProps = resolveProps.resolveProps(sep5 ?? [], {
           indicator: "map-value-ind",
           next: value,
           offset: keyNode.range[2],
@@ -4070,7 +4070,7 @@ var require_resolve_block_map = __commonJS({
             if (ctx.options.strict && keyProps.start < valueProps.found.offset - 1024)
               onError(keyNode.range, "KEY_OVER_1024_CHARS", "The : indicator must be at most 1024 chars after the start of an implicit block mapping key");
           }
-          const valueNode = value ? composeNode(ctx, value, valueProps, onError) : composeEmptyNode(ctx, offset, sep4, null, valueProps, onError);
+          const valueNode = value ? composeNode(ctx, value, valueProps, onError) : composeEmptyNode(ctx, offset, sep5, null, valueProps, onError);
           if (ctx.schema.compat)
             utilFlowIndentCheck.flowIndentCheck(bm.indent, value, onError);
           offset = valueNode.range[2];
@@ -4161,7 +4161,7 @@ var require_resolve_end = __commonJS({
       let comment = "";
       if (end) {
         let hasSpace = false;
-        let sep4 = "";
+        let sep5 = "";
         for (const token2 of end) {
           const { source, type } = token2;
           switch (type) {
@@ -4175,13 +4175,13 @@ var require_resolve_end = __commonJS({
               if (!comment)
                 comment = cb;
               else
-                comment += sep4 + cb;
-              sep4 = "";
+                comment += sep5 + cb;
+              sep5 = "";
               break;
             }
             case "newline":
               if (comment)
-                sep4 += source;
+                sep5 += source;
               hasSpace = true;
               break;
             default:
@@ -4224,18 +4224,18 @@ var require_resolve_flow_collection = __commonJS({
       let offset = fc.offset + fc.start.source.length;
       for (let i = 0; i < fc.items.length; ++i) {
         const collItem = fc.items[i];
-        const { start, key, sep: sep4, value } = collItem;
+        const { start, key, sep: sep5, value } = collItem;
         const props = resolveProps.resolveProps(start, {
           flow: fcName,
           indicator: "explicit-key-ind",
-          next: key ?? sep4?.[0],
+          next: key ?? sep5?.[0],
           offset,
           onError,
           parentIndent: fc.indent,
           startOnNewline: false
         });
         if (!props.found) {
-          if (!props.anchor && !props.tag && !sep4 && !value) {
+          if (!props.anchor && !props.tag && !sep5 && !value) {
             if (i === 0 && props.comma)
               onError(props.comma, "UNEXPECTED_TOKEN", `Unexpected , in ${fcName}`);
             else if (i < fc.items.length - 1)
@@ -4289,8 +4289,8 @@ var require_resolve_flow_collection = __commonJS({
             }
           }
         }
-        if (!isMap && !sep4 && !props.found) {
-          const valueNode = value ? composeNode(ctx, value, props, onError) : composeEmptyNode(ctx, props.end, sep4, null, props, onError);
+        if (!isMap && !sep5 && !props.found) {
+          const valueNode = value ? composeNode(ctx, value, props, onError) : composeEmptyNode(ctx, props.end, sep5, null, props, onError);
           coll.items.push(valueNode);
           offset = valueNode.range[2];
           if (isBlock(value))
@@ -4302,7 +4302,7 @@ var require_resolve_flow_collection = __commonJS({
           if (isBlock(key))
             onError(keyNode.range, "BLOCK_IN_FLOW", blockMsg);
           ctx.atKey = false;
-          const valueProps = resolveProps.resolveProps(sep4 ?? [], {
+          const valueProps = resolveProps.resolveProps(sep5 ?? [], {
             flow: fcName,
             indicator: "map-value-ind",
             next: value,
@@ -4313,8 +4313,8 @@ var require_resolve_flow_collection = __commonJS({
           });
           if (valueProps.found) {
             if (!isMap && !props.found && ctx.options.strict) {
-              if (sep4)
-                for (const st2 of sep4) {
+              if (sep5)
+                for (const st2 of sep5) {
                   if (st2 === valueProps.found)
                     break;
                   if (st2.type === "newline") {
@@ -4331,7 +4331,7 @@ var require_resolve_flow_collection = __commonJS({
             else
               onError(valueProps.start, "MISSING_CHAR", `Missing , or : between ${fcName} items`);
           }
-          const valueNode = value ? composeNode(ctx, value, valueProps, onError) : valueProps.found ? composeEmptyNode(ctx, valueProps.end, sep4, null, valueProps, onError) : null;
+          const valueNode = value ? composeNode(ctx, value, valueProps, onError) : valueProps.found ? composeEmptyNode(ctx, valueProps.end, sep5, null, valueProps, onError) : null;
           if (valueNode) {
             if (isBlock(value))
               onError(valueNode.range, "BLOCK_IN_FLOW", blockMsg);
@@ -4511,7 +4511,7 @@ var require_resolve_block_scalar = __commonJS({
           chompStart = i + 1;
       }
       let value = "";
-      let sep4 = "";
+      let sep5 = "";
       let prevMoreIndented = false;
       for (let i = 0; i < contentStart; ++i)
         value += lines[i][0].slice(trimIndent) + "\n";
@@ -4528,24 +4528,24 @@ var require_resolve_block_scalar = __commonJS({
           indent = "";
         }
         if (type === Scalar.Scalar.BLOCK_LITERAL) {
-          value += sep4 + indent.slice(trimIndent) + content;
-          sep4 = "\n";
+          value += sep5 + indent.slice(trimIndent) + content;
+          sep5 = "\n";
         } else if (indent.length > trimIndent || content[0] === "	") {
-          if (sep4 === " ")
-            sep4 = "\n";
-          else if (!prevMoreIndented && sep4 === "\n")
-            sep4 = "\n\n";
-          value += sep4 + indent.slice(trimIndent) + content;
-          sep4 = "\n";
+          if (sep5 === " ")
+            sep5 = "\n";
+          else if (!prevMoreIndented && sep5 === "\n")
+            sep5 = "\n\n";
+          value += sep5 + indent.slice(trimIndent) + content;
+          sep5 = "\n";
           prevMoreIndented = true;
         } else if (content === "") {
-          if (sep4 === "\n")
+          if (sep5 === "\n")
             value += "\n";
           else
-            sep4 = "\n";
+            sep5 = "\n";
         } else {
-          value += sep4 + content;
-          sep4 = " ";
+          value += sep5 + content;
+          sep5 = " ";
           prevMoreIndented = false;
         }
       }
@@ -4728,25 +4728,25 @@ var require_resolve_flow_scalar = __commonJS({
         trimBoth = /^[ \t]+|[ \t]+$/g;
       }
       let res = match[1].replace(trimEnd, "");
-      let sep4 = " ";
+      let sep5 = " ";
       let pos = line.lastIndex;
       while (match = line.exec(source)) {
         const lm = match[1].replace(trimBoth, "");
         if (lm === "") {
-          if (sep4 === "\n")
-            res += sep4;
+          if (sep5 === "\n")
+            res += sep5;
           else
-            sep4 = "\n";
+            sep5 = "\n";
         } else {
-          res += sep4 + lm;
-          sep4 = " ";
+          res += sep5 + lm;
+          sep5 = " ";
         }
         pos = line.lastIndex;
       }
       const last = /[ \t]*(.*)/sy;
       last.lastIndex = pos;
       match = last.exec(source);
-      return res + sep4 + (match?.[1] ?? "");
+      return res + sep5 + (match?.[1] ?? "");
     }
     function doubleQuotedValue(source, onError) {
       let res = "";
@@ -5556,14 +5556,14 @@ var require_cst_stringify = __commonJS({
         }
       }
     }
-    function stringifyItem({ start, key, sep: sep4, value }) {
+    function stringifyItem({ start, key, sep: sep5, value }) {
       let res = "";
       for (const st2 of start)
         res += st2.source;
       if (key)
         res += stringifyToken(key);
-      if (sep4)
-        for (const st2 of sep4)
+      if (sep5)
+        for (const st2 of sep5)
           res += st2.source;
       if (value)
         res += stringifyToken(value);
@@ -6730,18 +6730,18 @@ var require_parser = __commonJS({
         if (this.type === "map-value-ind") {
           const prev = getPrevProps(this.peek(2));
           const start = getFirstKeyStartProps(prev);
-          let sep4;
+          let sep5;
           if (scalar.end) {
-            sep4 = scalar.end;
-            sep4.push(this.sourceToken);
+            sep5 = scalar.end;
+            sep5.push(this.sourceToken);
             delete scalar.end;
           } else
-            sep4 = [this.sourceToken];
+            sep5 = [this.sourceToken];
           const map = {
             type: "block-map",
             offset: scalar.offset,
             indent: scalar.indent,
-            items: [{ start, key: scalar, sep: sep4 }]
+            items: [{ start, key: scalar, sep: sep5 }]
           };
           this.onKeyLine = true;
           this.stack[this.stack.length - 1] = map;
@@ -6894,15 +6894,15 @@ var require_parser = __commonJS({
                 } else if (isFlowToken(it2.key) && !includesToken(it2.sep, "newline")) {
                   const start2 = getFirstKeyStartProps(it2.start);
                   const key = it2.key;
-                  const sep4 = it2.sep;
-                  sep4.push(this.sourceToken);
+                  const sep5 = it2.sep;
+                  sep5.push(this.sourceToken);
                   delete it2.key;
                   delete it2.sep;
                   this.stack.push({
                     type: "block-map",
                     offset: this.offset,
                     indent: this.indent,
-                    items: [{ start: start2, key, sep: sep4 }]
+                    items: [{ start: start2, key, sep: sep5 }]
                   });
                 } else if (start.length > 0) {
                   it2.sep = it2.sep.concat(start, this.sourceToken);
@@ -7096,13 +7096,13 @@ var require_parser = __commonJS({
             const prev = getPrevProps(parent);
             const start = getFirstKeyStartProps(prev);
             fixFlowSeqItems(fc);
-            const sep4 = fc.end.splice(1, fc.end.length);
-            sep4.push(this.sourceToken);
+            const sep5 = fc.end.splice(1, fc.end.length);
+            sep5.push(this.sourceToken);
             const map = {
               type: "block-map",
               offset: fc.offset,
               indent: fc.indent,
-              items: [{ start, key: fc, sep: sep4 }]
+              items: [{ start, key: fc, sep: sep5 }]
             };
             this.onKeyLine = true;
             this.stack[this.stack.length - 1] = map;
@@ -7456,7 +7456,7 @@ var init_templates = __esm({
 import { spawnSync as spawnSync2 } from "node:child_process";
 
 // apps/cli/src/main.ts
-import { readFile as readFile5 } from "node:fs/promises";
+import { readFile as readFile6 } from "node:fs/promises";
 
 // packages/spec-engine/src/index.ts
 import { realpath as realpath2 } from "node:fs/promises";
@@ -10754,51 +10754,285 @@ async function inspectRepositorySetup(root) {
   return { config, package: pkg, skills, plugin };
 }
 
+// apps/cli/src/diagnostics.ts
+import { lstat as lstat2, readFile as readFile3, realpath as realpath4 } from "node:fs/promises";
+import { dirname as dirname2, isAbsolute as isAbsolute2, join as join2, relative as relative3, resolve as resolve4, sep as sep3 } from "node:path";
+async function boundedFile(root, path) {
+  try {
+    const target = join2(root, path);
+    const stat2 = await lstat2(target);
+    if (!stat2.isFile() || stat2.size > 1024 * 1024)
+      return { state: "invalid", detail: "not a bounded regular file (links are not followed)" };
+    const rel = relative3(await realpath4(root), await realpath4(target));
+    if (isAbsolute2(rel) || rel === ".." || rel.startsWith(`..${sep3}`))
+      return { state: "invalid", detail: "resolves outside the repository root" };
+    return { state: "file", content: await readFile3(target, "utf8") };
+  } catch (error) {
+    return error.code === "ENOENT" ? { state: "missing", detail: "file not found" } : { state: "invalid", detail: "file cannot be inspected" };
+  }
+}
+function object(text2) {
+  try {
+    const value = JSON.parse(text2);
+    return value !== null && typeof value === "object" && !Array.isArray(value) ? value : null;
+  } catch {
+    return null;
+  }
+}
+async function repositoryDiagnostics(root, options = {}) {
+  root = resolve4(root);
+  const setup = await inspectRepositorySetup(root);
+  const installedPath = `node_modules/${SETUP.packageName}/package.json`;
+  const result = {
+    root,
+    mode: options.mode ?? "status",
+    cli: {
+      version: options.cliVersion ?? null,
+      path: options.cliPath ?? null,
+      source: options.cliSource ?? "unknown"
+    },
+    setup,
+    package: {
+      declaredRange: setup.package.state === "ok" ? setup.package.detail : null,
+      installedVersion: null,
+      installedPath,
+      state: "missing"
+    },
+    evidence: [],
+    issues: [],
+    check: {
+      status: "notRun",
+      reason: "Status does not run repository checks.",
+      errors: 0,
+      warnings: 0
+    },
+    ready: false,
+    next: []
+  };
+  const issue = (code, severity, path, message) => result.issues.push({ code, severity, path, message });
+  const next = (command) => {
+    if (!result.next.includes(command)) result.next.push(command);
+  };
+  try {
+    if (!(await lstat2(root)).isDirectory()) throw new Error("Not a directory");
+  } catch {
+    issue("invalid-root", "error", root, "Repository root must be an existing directory.");
+  }
+  const config = await boundedFile(root, SETUP.config);
+  if (config.state === "invalid") {
+    setup.config.state = "invalid";
+    setup.config.detail = config.detail;
+  }
+  if (setup.config.state !== "ok") {
+    issue(
+      "config-unavailable",
+      "error",
+      SETUP.config,
+      setup.config.detail ?? "Configuration is missing."
+    );
+    if (setup.config.state === "missing") next(SETUP_COMMANDS.init);
+  } else {
+    result.evidence.push({
+      path: SETUP.config,
+      description: "JSON configuration declares schema_version 2; status does not validate its source mappings."
+    });
+  }
+  const installed = await boundedFile(root, installedPath);
+  if (installed.state === "file") {
+    const manifest = object(installed.content);
+    if (manifest?.name === SETUP.packageName && typeof manifest.version === "string" && /^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$/.test(manifest.version)) {
+      result.package.state = "observed";
+      result.package.installedVersion = manifest.version;
+      result.evidence.push({
+        path: installedPath,
+        description: `Package manifest reports ${manifest.version}; the local binary was not executed or verified.`
+      });
+      if (options.cliVersion && manifest.version !== options.cliVersion)
+        issue(
+          "installed-cli-version-mismatch",
+          "warning",
+          installedPath,
+          `Installed manifest reports ${manifest.version}; active CLI reports ${options.cliVersion}.`
+        );
+    } else result.package.state = "invalid";
+  } else result.package.state = installed.state;
+  if (setup.package.state === "ok")
+    result.evidence.push({
+      path: setup.package.path,
+      description: `Declared package range: ${setup.package.detail}. This is not an observed installed version.`
+    });
+  if (result.package.state !== "observed") {
+    issue(
+      "local-package-unverified",
+      options.cliSource === "plugin" ? "warning" : "error",
+      installedPath,
+      result.package.state === "missing" ? "Repository-local package manifest is missing; no installed version was observed." : "Repository-local package manifest is invalid, unsafe, or unreadable."
+    );
+    if (options.cliSource !== "plugin") next(SETUP_COMMANDS.install);
+  }
+  if (setup.package.state !== "ok") {
+    issue(
+      "package-declaration-unavailable",
+      "warning",
+      setup.package.path,
+      setup.package.detail ?? "Package declaration is unavailable."
+    );
+    if (options.cliSource !== "plugin") next(SETUP_COMMANDS.install);
+  }
+  if (setup.config.state === "ok" && result.package.state === "observed")
+    next(SETUP_COMMANDS.check);
+  let managedSkill = false;
+  for (const [agent, path] of Object.entries(SETUP.skills)) {
+    const file = await boundedFile(root, path);
+    if (file.state === "missing") continue;
+    if (file.state === "invalid") {
+      issue("skill-unreadable", "warning", path, file.detail);
+      continue;
+    }
+    const version = skillVersion(file.content);
+    if (!file.content.includes(SETUP.skillMarker)) {
+      issue(
+        "skill-unmanaged",
+        "warning",
+        path,
+        "Existing skill has no Spectrum provenance marker; review ownership before replacing it."
+      );
+      continue;
+    }
+    managedSkill = true;
+    result.evidence.push({
+      path,
+      description: `${agent} skill marker reports ${version ?? "no parseable version"}; file presence does not prove host loading.`
+    });
+    if (!version || options.cliVersion && version !== options.cliVersion) {
+      issue(
+        "skill-version-mismatch",
+        "warning",
+        path,
+        `Skill marker version ${version ?? "unknown"} differs from active CLI ${options.cliVersion ?? "unknown"}.`
+      );
+      next(SETUP_COMMANDS.skills);
+    }
+  }
+  if (setup.plugin.state === "ok")
+    result.evidence.push({
+      path: SETUP.claudeSettings,
+      description: "Repository settings declare the plugin enabled; installation, loading, and bundled CLI version are not verified."
+    });
+  else if (setup.plugin.state === "invalid")
+    issue(
+      "plugin-settings-invalid",
+      "warning",
+      SETUP.claudeSettings,
+      setup.plugin.detail ?? "Invalid plugin settings."
+    );
+  if (!managedSkill && setup.plugin.state !== "ok" && options.cliSource !== "plugin") {
+    issue(
+      "agent-integration-unobserved",
+      "warning",
+      dirname2(SETUP.skills.claude),
+      "No managed repository skill or plugin enablement declaration was observed."
+    );
+    next(SETUP_COMMANDS.skills);
+  }
+  if (options.cliSource === "plugin")
+    result.evidence.push({
+      path: options.cliPath ?? "(not supplied)",
+      description: "Caller identifies the active CLI as plugin-bundled; repository-local package is optional on this path. Host loading is not independently verified."
+    });
+  if (result.mode === "doctor") {
+    if (setup.config.state !== "ok") {
+      result.check.reason = "Configuration is missing, invalid, or unsafe; repository check was not run.";
+    } else {
+      try {
+        const checked = await checkRepository(root);
+        result.check = {
+          status: checked.ok ? "passed" : "failed",
+          reason: null,
+          errors: checked.findings.filter((finding) => finding.severity === "error").length,
+          warnings: checked.findings.filter((finding) => finding.severity === "warning").length
+        };
+        for (const finding of checked.findings)
+          issue(finding.code, finding.severity, finding.path, finding.message);
+      } catch {
+        result.check = {
+          status: "blocked",
+          reason: "Repository checker could not inspect the root.",
+          errors: 0,
+          warnings: 0
+        };
+        issue("check-blocked", "error", root, result.check.reason ?? "Repository check blocked.");
+      }
+    }
+  }
+  result.ready = !result.issues.some((entry) => entry.severity === "error");
+  return result;
+}
+function diagnosticsExitCode(result) {
+  return result.ready && !["failed", "blocked"].includes(result.check.status) ? 0 : 1;
+}
+function renderDiagnostics(result) {
+  const lines = [
+    `Spectrum ${result.mode}: ${result.ready ? "ready" : "attention required"}`,
+    `Root: ${result.root}`,
+    `Active CLI: ${result.cli.version ?? "unknown"} (${result.cli.source})${result.cli.path ? ` at ${result.cli.path}` : ""}`,
+    `Package: declared ${result.package.declaredRange ?? "none"}; observed installed ${result.package.installedVersion ?? "not verified"}`,
+    `Configuration: ${result.setup.config.state}`,
+    `Repository check: ${result.check.status}${result.check.reason ? ` \u2014 ${result.check.reason}` : ""}`,
+    ...result.evidence.map((entry) => `Evidence: ${entry.path} \u2014 ${entry.description}`),
+    ...result.issues.map(
+      (entry) => `${entry.severity.toUpperCase()} ${entry.code}: ${entry.path} \u2014 ${entry.message}`
+    ),
+    ...result.next.map((command) => `Next: ${command}`)
+  ];
+  return lines.join("\n");
+}
+
 // apps/cli/src/new-command.ts
 init_templates();
-import { lstat as lstat3, readFile as readFile4, realpath as realpath5 } from "node:fs/promises";
-import { isAbsolute as isAbsolute3, join as join3, resolve as resolve5, win32 } from "node:path";
+import { lstat as lstat4, readFile as readFile5, realpath as realpath6 } from "node:fs/promises";
+import { isAbsolute as isAbsolute4, join as join4, resolve as resolve6, win32 } from "node:path";
 
 // apps/cli/src/files.ts
-import { lstat as lstat2, mkdir, readFile as readFile3, realpath as realpath4, writeFile } from "node:fs/promises";
-import { dirname as dirname2, isAbsolute as isAbsolute2, join as join2, relative as relative3, resolve as resolve4, sep as sep3 } from "node:path";
+import { lstat as lstat3, mkdir, readFile as readFile4, realpath as realpath5, writeFile } from "node:fs/promises";
+import { dirname as dirname3, isAbsolute as isAbsolute3, join as join3, relative as relative4, resolve as resolve5, sep as sep4 } from "node:path";
 function insideRoot(root, path) {
-  if (isAbsolute2(path) || path.split("/").some((part) => part === ".." || part === ""))
+  if (isAbsolute3(path) || path.split("/").some((part) => part === ".." || part === ""))
     throw new Error(`Refusing to write outside the repository: ${path}`);
-  return join2(root, path);
+  return join3(root, path);
 }
 async function inspectFile(root, path) {
   const target = insideRoot(root, path);
   try {
-    const stat2 = await lstat2(target);
+    const stat2 = await lstat3(target);
     if (!stat2.isFile()) return { kind: "other" };
-    return { kind: "file", content: await readFile3(target, "utf8") };
+    return { kind: "file", content: await readFile4(target, "utf8") };
   } catch (error) {
     if (error.code === "ENOENT") return { kind: "missing" };
     throw error;
   }
 }
 async function assertContained(root, target) {
-  const base = await realpath4(root);
-  let ancestor = dirname2(target);
+  const base = await realpath5(root);
+  let ancestor = dirname3(target);
   for (; ; ) {
     try {
-      const real = await realpath4(ancestor);
-      const rel = relative3(base, real);
-      if (rel === "" || !rel.startsWith(`..${sep3}`) && rel !== ".." && !isAbsolute2(rel)) return;
+      const real = await realpath5(ancestor);
+      const rel = relative4(base, real);
+      if (rel === "" || !rel.startsWith(`..${sep4}`) && rel !== ".." && !isAbsolute3(rel)) return;
       throw new Error(`Refusing to write through a link outside the repository: ${target}`);
     } catch (error) {
       if (error.code !== "ENOENT") throw error;
-      const parent = dirname2(ancestor);
+      const parent = dirname3(ancestor);
       if (parent === ancestor) throw error;
       ancestor = parent;
     }
   }
 }
 async function writePlannedFile(root, file, mode) {
-  const target = insideRoot(resolve4(root), file.path);
+  const target = insideRoot(resolve5(root), file.path);
   await assertContained(root, target);
-  await mkdir(dirname2(target), { recursive: true });
+  await mkdir(dirname3(target), { recursive: true });
   await assertContained(root, target);
   if (mode === "replace" && (await inspectFile(root, file.path)).kind === "other")
     throw new Error(`Refusing to replace a link or directory: ${file.path}`);
@@ -10830,7 +11064,7 @@ function stringValues(value) {
   return Object.fromEntries(Object.entries(value));
 }
 async function readTemplateValues(path) {
-  const source = await readFile4(path, "utf8");
+  const source = await readFile5(path, "utf8");
   let values;
   try {
     values = JSON.parse(source);
@@ -10841,16 +11075,16 @@ async function readTemplateValues(path) {
 }
 function pathParts(path) {
   const parts = path.split("/");
-  if (!path || path.includes("\0") || path.includes("\\") || isAbsolute3(path) || win32.isAbsolute(path) || parts.some((part) => part === "" || part === "." || part === ".."))
+  if (!path || path.includes("\0") || path.includes("\\") || isAbsolute4(path) || win32.isAbsolute(path) || parts.some((part) => part === "" || part === "." || part === ".."))
     throw new Error(`Draft output must be a normalized repository-relative file path: ${path}`);
   return parts;
 }
 async function hasConflict(root, file) {
   let ancestor = root;
   for (const part of pathParts(file.path).slice(0, -1)) {
-    ancestor = join3(ancestor, part);
+    ancestor = join4(ancestor, part);
     try {
-      const stat2 = await lstat3(ancestor);
+      const stat2 = await lstat4(ancestor);
       if (!stat2.isDirectory()) return true;
     } catch (error) {
       if (error.code === "ENOENT") return false;
@@ -10873,8 +11107,8 @@ async function createDraft(root, kind, options) {
   }
   if (new Set(files2.map((file) => file.path)).size !== files2.length)
     throw new Error("Canonical templates produced duplicate draft destinations.");
-  const base = await realpath5(resolve5(root));
-  if (!(await lstat3(base)).isDirectory())
+  const base = await realpath6(resolve6(root));
+  if (!(await lstat4(base)).isDirectory())
     throw new Error("The repository root must be a directory.");
   const conflicts = [];
   for (const file of files2) if (await hasConflict(base, file)) conflicts.push(file.path);
@@ -11158,6 +11392,7 @@ Commands:
   skills install [path] [--agent claude|codex|all] [--force] [--dry-run]
                                           Install the Spectrum agent skill into the repository
   status [path]                           Report configuration, package and agent skill setup
+  doctor [path] [--format json|text]       Inspect local evidence and run structural checks; no repairs
   new <kind> [path] --values values.json [--out relative-path] [--dry-run]
                                           Create drafts from canonical templates; never overwrite
   new <kind> --describe                    List required template inputs without writing
@@ -11168,6 +11403,7 @@ var COMMANDS = {
   init: { "--name": true, "--dry-run": false },
   "skills install": { "--agent": true, "--force": false, "--dry-run": false },
   status: {},
+  doctor: { "--format": true },
   new: { "--values": true, "--out": true, "--dry-run": false, "--describe": false }
 };
 var UsageError = class extends Error {
@@ -11226,6 +11462,18 @@ async function run(argv) {
   const { command, options } = parsed;
   const root = parsed.path ?? process.cwd();
   const value = (name) => options.get(name);
+  if (command === "doctor") {
+    const format = parseOutputFormat(value("--format"));
+    const result2 = await repositoryDiagnostics(root, {
+      mode: "doctor",
+      cliVersion: VERSION,
+      cliPath: process.argv[1],
+      cliSource: "unknown"
+    });
+    if (format === "text") console.log(renderDiagnostics(result2));
+    else print(result2);
+    return diagnosticsExitCode(result2);
+  }
   if (command === "new") {
     if (!parsed.kind) throw new Error("Expected a template kind.");
     if (options.has("--describe")) {
@@ -11247,7 +11495,7 @@ async function run(argv) {
     const checkFormat = command === "check" ? parseOutputFormat(value("--format"), true) : void 0;
     const listFormat = command === "list" ? parseOutputFormat(value("--format")) : void 0;
     const profilePath = value("--profile");
-    const profile = profilePath ? JSON.parse(await readFile5(profilePath, "utf8")) : void 0;
+    const profile = profilePath ? JSON.parse(await readFile6(profilePath, "utf8")) : void 0;
     const result2 = await checkRepository(root, { config: profile });
     console.log(
       command === "list" ? formatSpecList(result2, listFormat) : formatCheckResult(result2, checkFormat)
@@ -11279,7 +11527,7 @@ async function run(argv) {
 // apps/plugin/src/resolve.ts
 import { spawnSync } from "node:child_process";
 import { existsSync, readFileSync, realpathSync, statSync } from "node:fs";
-import { delimiter, dirname as dirname3, join as join4, relative as relative4, resolve as resolve6 } from "node:path";
+import { delimiter, dirname as dirname4, join as join5, relative as relative5, resolve as resolve7 } from "node:path";
 var PACKAGE_NAME = "@voyager-fm/spectrum";
 var BIN = "spectrum";
 function parseVersion(value) {
@@ -11313,25 +11561,25 @@ function isFile(path) {
   }
 }
 function packageScript(directory) {
-  const manifest = readJson(join4(directory, "package.json"));
+  const manifest = readJson(join5(directory, "package.json"));
   if (manifest?.name !== PACKAGE_NAME) return null;
   const bin = manifest.bin;
   const target = typeof bin === "string" ? bin : typeof bin === "object" && bin !== null ? bin[BIN] : void 0;
   if (typeof target !== "string") return null;
-  const script = resolve6(directory, target);
+  const script = resolve7(directory, target);
   if (!isFile(script)) return null;
   return { script, version: typeof manifest.version === "string" ? manifest.version : null };
 }
 function repositoryDirectories(cwd) {
   const directories = [];
-  for (let directory = resolve6(cwd); ; directory = dirname3(directory)) {
+  for (let directory = resolve7(cwd); ; directory = dirname4(directory)) {
     directories.push(directory);
-    if (existsSync(join4(directory, ".git"))) return directories;
-    if (dirname3(directory) === directory) return [resolve6(cwd)];
+    if (existsSync(join5(directory, ".git"))) return directories;
+    if (dirname4(directory) === directory) return [resolve7(cwd)];
   }
 }
 function declaresPackage(directory) {
-  const manifest = readJson(join4(directory, "package.json"));
+  const manifest = readJson(join5(directory, "package.json"));
   return ["dependencies", "devDependencies", "optionalDependencies"].some((field) => {
     const deps = manifest?.[field];
     return typeof deps === "object" && deps !== null && Object.hasOwn(deps, PACKAGE_NAME);
@@ -11343,27 +11591,27 @@ function versionFromOutput(stdout) {
   return words.length === 1 && parseVersion(words[0]) ? words[0] : null;
 }
 function display(cwd, path) {
-  const relativePath = relative4(cwd, path);
+  const relativePath = relative5(cwd, path);
   return relativePath && !relativePath.startsWith("..") ? relativePath : path;
 }
 function findRepositoryCli(options, notes = []) {
   const execPath = options.execPath ?? process.execPath;
   for (const directory of repositoryDirectories(options.cwd)) {
     for (const modules of [
-      join4(directory, "node_modules"),
-      join4(directory, "node_modules", ".pnpm", "node_modules")
+      join5(directory, "node_modules"),
+      join5(directory, "node_modules", ".pnpm", "node_modules")
     ]) {
-      const found = packageScript(join4(modules, PACKAGE_NAME));
+      const found = packageScript(join5(modules, PACKAGE_NAME));
       if (found)
         return {
           source: "repository",
           version: found.version,
           command: execPath,
           args: [found.script],
-          location: display(options.cwd, join4(modules, PACKAGE_NAME))
+          location: display(options.cwd, join5(modules, PACKAGE_NAME))
         };
     }
-    if (isFile(join4(directory, ".pnp.cjs")) && declaresPackage(directory)) {
+    if (isFile(join5(directory, ".pnp.cjs")) && declaresPackage(directory)) {
       const yarn = options.platform === "win32" ? "yarn.cmd" : "yarn";
       const probe = spawnSync(yarn, ["run", BIN, "--version"], {
         cwd: options.cwd,
@@ -11393,11 +11641,11 @@ function findGlobalCli(options, notes = []) {
   const pathValue = options.env.PATH ?? options.env.Path ?? "";
   for (const entry of pathValue.split(windows ? ";" : delimiter)) {
     if (!entry) continue;
-    const shim = join4(entry, windows ? `${BIN}.cmd` : BIN);
+    const shim = join5(entry, windows ? `${BIN}.cmd` : BIN);
     if (!isFile(shim)) continue;
-    const candidates = windows ? [join4(entry, "node_modules", PACKAGE_NAME)] : (() => {
-      const real = dirname3(realpathSync(shim));
-      return [real, dirname3(real), dirname3(dirname3(real))];
+    const candidates = windows ? [join5(entry, "node_modules", PACKAGE_NAME)] : (() => {
+      const real = dirname4(realpathSync(shim));
+      return [real, dirname4(real), dirname4(dirname4(real))];
     })();
     for (const directory of candidates) {
       const found = packageScript(directory);

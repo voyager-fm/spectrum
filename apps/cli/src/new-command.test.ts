@@ -97,9 +97,10 @@ test('practical aliases and explicit catalog IDs use exactly the canonical rende
 test('draft description exposes canonical content and required values without a customer root', async () => {
   const description = await describeDraft('feature');
   assert.equal(description.writes, false);
-  assert.deepEqual(description.templates.map((template) => template.id), [
-    'feature.interaction', 'feature.contract', 'feature.flow',
-  ]);
+  assert.deepEqual(
+    description.templates.map((template) => template.id),
+    ['feature.interaction', 'feature.contract', 'feature.flow'],
+  );
   assert.ok(description.requiredValues.includes('interaction_id'));
   assert.ok(description.requiredValues.includes('policy'));
   assert.equal(new Set(description.requiredValues).size, description.requiredValues.length);

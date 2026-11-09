@@ -1,6 +1,7 @@
 import { readFile } from 'node:fs/promises';
 import { checkRepository } from '@spectrum/spec-engine';
 import { SETUP } from '@spectrum/spec-engine/setup';
+import { diagnosticsExitCode, renderDiagnostics, repositoryDiagnostics } from './diagnostics.ts';
 import { createDraft, describeDraft, readTemplateValues } from './new-command.ts';
 import { formatCheckResult, formatSpecList, parseOutputFormat } from './output.ts';
 import { initRepository, installSkills, parseAgents, repositoryStatus } from './setup-commands.ts';
@@ -18,6 +19,7 @@ Commands:
   skills install [path] [--agent claude|codex|all] [--force] [--dry-run]
                                           Install the Spectrum agent skill into the repository
   status [path]                           Report configuration, package and agent skill setup
+  doctor [path] [--format json|text]       Inspect local evidence and run structural checks; no repairs
   new <kind> [path] --values values.json [--out relative-path] [--dry-run]
                                           Create drafts from canonical templates; never overwrite
   new <kind> --describe                    List required template inputs without writing
@@ -30,6 +32,7 @@ const COMMANDS: Record<string, Record<string, boolean>> = {
   init: { '--name': true, '--dry-run': false },
   'skills install': { '--agent': true, '--force': false, '--dry-run': false },
   status: {},
+  doctor: { '--format': true },
   new: { '--values': true, '--out': true, '--dry-run': false, '--describe': false },
 };
 
@@ -97,6 +100,18 @@ export async function run(argv: string[]): Promise<number> {
   const { command, options } = parsed;
   const root = parsed.path ?? process.cwd();
   const value = (name: string) => options.get(name) as string | undefined;
+  if (command === 'doctor') {
+    const format = parseOutputFormat(value('--format'));
+    const result = await repositoryDiagnostics(root, {
+      mode: 'doctor',
+      cliVersion: VERSION,
+      cliPath: process.argv[1],
+      cliSource: 'unknown',
+    });
+    if (format === 'text') console.log(renderDiagnostics(result));
+    else print(result);
+    return diagnosticsExitCode(result);
+  }
   if (command === 'new') {
     if (!parsed.kind) throw new Error('Expected a template kind.');
     if (options.has('--describe')) {
