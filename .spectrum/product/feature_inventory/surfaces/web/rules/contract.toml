@@ -1,0 +1,14 @@
+[contract]
+id = "surface.web.rules"
+region = "web.rules"
+
+[responsibility]
+primary = "Read repository rules from the configured sources."
+
+[policy]
+read_only = true
+capability = "ready"
+declared_status_is_execution_evidence = false
+
+[policy_refs]
+specification = ["../../../specs/dsh/contracts/dashboard.toml"]

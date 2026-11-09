@@ -14,7 +14,7 @@ test('dashboard snapshot reads the repository own specs, rules and config', asyn
   assert.ok(data.check?.specs.some((s) => s.id === 'VAL-001-check_repository'));
   assert.ok(data.contracts.some((d) => d.path.endsWith('/contracts/validation.toml')));
   assert.ok(data.flows.some((d) => d.path.endsWith('/flows/validation.md')));
-  assert.ok(data.documents.some((d) => d.path.endsWith('/page_contracts/specs/contract.toml')));
+  assert.ok(data.documents.some((d) => d.path.endsWith('/surfaces/web/specs/contract.toml')));
   assert.ok(
     data.rules.some((r) => r.path === '.spectrum/rules/agents.md' && r.title === 'Agent rules'),
   );

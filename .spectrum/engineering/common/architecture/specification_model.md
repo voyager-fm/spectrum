@@ -36,7 +36,7 @@ This document owns document parsing, deterministic reference checks and consumer
 | Next.js application (`apps/web`) | Dashboard loader and page rendering; owns planned server API, webhook and model execution entry points |
 | `@spectrum/integrations` | GitHub/Linear adapter contracts; connectivity is unimplemented |
 
-FI owns mirrored metadata; Markdown owns ACs. Inventory `ref` metadata produces relationships without rewriting source files. Contracts preserve domain-specific tables, policies, state models and reads/writes. App interaction flows and web route/page bundles remain distinct document roles.
+FI owns mirrored metadata; Markdown owns ACs. Inventory `ref` metadata produces relationships without rewriting source files. Contracts preserve domain-specific tables, policies, state models and reads/writes. Interaction specs and screen-level surface bundles remain distinct units: an interaction spec owns one behavior, and a surface bundle owns one region's screen.
 
 ## Dependencies
 
@@ -44,7 +44,7 @@ The engine uses `yaml` for frontmatter, `marked` for Markdown token structure an
 
 ## Current implementation
 
-The version 2 engine returns configuration, inventories, documents, relationships, interaction specs and findings. Errors fail `ok`; unresolved values remain warnings. It checks primary/foreign keys, composite parents, pipe-separated references, FI/spec mirrors, unique AC IDs, contract IDs/ownership, flow coverage, page contracts and local path containment. Profiles map existing repository paths without moving files.
+The version 2 engine returns configuration, inventories, documents, relationships, interaction specs and findings. Errors fail `ok`; unresolved values remain warnings. It checks primary/foreign keys, composite parents, pipe-separated references, FI/spec mirrors, unique AC IDs, contract IDs/ownership, flow coverage, surface and page contracts and local path containment. Profiles map existing repository paths without moving files.
 
 The engine owns base schemas for `FEATURE_CATEGORIES`, `FEATURES` and `INTERACTIONS`: table names, primary keys and the columns behind its category, feature and mirror checks. A domain `schema.json` catalog declares several tables and their TSV files. A catalog table declaring `extends` lists its header order and adds only its own columns; the engine merges it onto the base before row validation. The configuration still accepts one adjacent schema per table for brownfield layouts.
 
@@ -58,7 +58,7 @@ Semantic policy review, automatic spec generation, authenticated digest-bound ap
 
 ## Verification
 
-Behavior tests use temporary repositories with brownfield inventories, contracts, flows, frontmatter and web page bundles. They exercise malformed sources, stale references, metadata disagreement, missing coverage, stable AC IDs and unsafe paths. `pnpm check` is the local convergence gate; the plugin bundle must be regenerated when the shared CLI changes. Actual command outcomes belong to the task's execution record.
+Behavior tests use temporary repositories with brownfield inventories, contracts, flows, frontmatter, surface bundles and brownfield web page bundles. They exercise malformed sources, stale references, metadata disagreement, missing coverage, stable AC IDs and unsafe paths. `pnpm check` is the local convergence gate; the plugin bundle must be regenerated when the shared CLI changes. Actual command outcomes belong to the task's execution record.
 
 ## Sources
 

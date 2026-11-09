@@ -66,4 +66,4 @@ Page load errors are shown in the page. Hosted telemetry remains unimplemented.
 
 - [Contract](../contracts/dashboard.toml)
 - [Flow](../flows/dashboard.md)
-- [Rules page contract](../../../../website/page_contracts/rules/contract.toml)
+- [Rules surface contract](../../../surfaces/web/rules/contract.toml)

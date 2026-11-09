@@ -1,0 +1,14 @@
+[contract]
+id = "surface.web.spec_document"
+region = "web.spec_document"
+
+[responsibility]
+primary = "Read one contract, flow, page or rule document and the documents linked to it."
+
+[policy]
+read_only = true
+capability = "ready"
+declared_status_is_execution_evidence = false
+
+[policy_refs]
+specification = ["../../../specs/dsh/contracts/dashboard.toml"]

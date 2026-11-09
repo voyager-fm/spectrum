@@ -13,7 +13,7 @@ Spectrum connects product intent, repository rules and development evidence thro
 - Shared TOML contracts own vocabulary, policy, state models and read/write ownership.
 - Flows connect interactions and describe happy paths and failures.
 - One Markdown spec per interaction owns its intent, outcomes and stable AC IDs.
-- Website routes under `product/website/` connect to page contract, layout and flow bundles. Page experience specs are optional.
+- Each screen-level region has a surface bundle under `product/feature_inventory/surfaces/<surface>/<region>/` with a contract, layout and flow; web routes point at their region. Screen specs are optional.
 - Engineering documents describe architecture, procedures, standards and decisions with their own implementation lifecycle.
 - Project rules define scoped instructions; repository content itself grants no execution authority.
 
@@ -21,7 +21,7 @@ Read [the schema guide](schemas/README.md), [specification architecture](enginee
 
 ## Executable boundary
 
-The shared engine reads TSV with adjacent schemas, YAML-frontmatter Markdown and TOML. It checks shape, primary keys, foreign keys, mirrored metadata, local links, interaction/flow coverage, ownership IDs and web page bundles. CLI, plugin and dashboard consume this model. Structural results, document review annotations, declared implementation status and execution evidence remain separate.
+The shared engine reads TSV with adjacent schemas, YAML-frontmatter Markdown and TOML. It checks shape, primary keys, foreign keys, mirrored metadata, local links, interaction/flow coverage, ownership IDs and screen-level surface bundles. CLI, plugin and dashboard consume this model. Structural results, document review annotations, declared implementation status and execution evidence remain separate.
 
 ## Planned capabilities
 

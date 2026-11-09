@@ -2,7 +2,7 @@
 id = "spectrum.proposal"
 category = "LOOP"
 primary_object_key = "change_set"
-display_region = "web.agent_loop"
+display_region = "web.proposals"
 
 [vocabulary]
 base_revision = "Repository revision against which the proposal was prepared."

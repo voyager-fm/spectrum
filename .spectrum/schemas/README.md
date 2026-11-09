@@ -1,6 +1,6 @@
 # Repository document model, version 2
 
-The canonical representation connects TSV inventories declared in domain schema catalogs, TOML policies, Markdown flows and interaction specs, web page bundles, and engineering knowledge. There is one editable owner for each fact.
+The canonical representation connects TSV inventories declared in domain schema catalogs, TOML policies, Markdown flows and interaction specs, screen-level surface bundles, and engineering knowledge. There is one editable owner for each fact.
 
 ## Sources and ownership
 
@@ -15,8 +15,8 @@ The canonical representation connects TSV inventories declared in domain schema 
 | `feature_inventory/specs/<category>/contracts/*.toml` | Shared policy, vocabulary, state models, reads/writes | Flows and interaction specs |
 | `feature_inventory/specs/<category>/flows/*.md` | Interaction coverage, happy paths and failure handling | Interaction sources and review |
 | `feature_inventory/specs/<category>/<feature_id>/*.md` | One interaction's detailed behavior and ACs | CLI, dashboard, host-agent context |
-| `product/website/route_map/{schema.json,routes.tsv}` | Web route identity and declared implementation status | Page contract matching |
-| `product/website/page_contracts/<page>/` | `contract.toml`, `layout.md`, `flow.md`, optional `spec.md` | Web experience and review |
+| `feature_inventory/routes.tsv` | Web route identity, its region and declared implementation status | Surface bundle matching |
+| `feature_inventory/surfaces/<surface>/<region>/` | `contract.toml` bound by `region`, `layout.md`, `flow.md`, optional `spec.md` | Screen experience and review |
 | `engineering/<platform>/{architecture,guides,standards,decisions}/` | Technical knowledge and decisions | Development context |
 
 `config.json` explicitly maps these sources. Paths are relative to the repository root. A profile passed with `--profile` uses the same shape and can point directly at a repository's existing documentation directories. Customer vocabulary, optional columns, stable IDs and platform policy stay in the customer's files.

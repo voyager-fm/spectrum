@@ -1,0 +1,14 @@
+[contract]
+id = "surface.web.specs"
+region = "web.specs"
+
+[responsibility]
+primary = "Browse interactions and their canonical document relationships."
+
+[policy]
+read_only = true
+capability = "ready"
+declared_status_is_execution_evidence = false
+
+[policy_refs]
+specification = ["../../../specs/dsh/contracts/dashboard.toml"]

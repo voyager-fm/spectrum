@@ -1,0 +1,14 @@
+[contract]
+id = "surface.web.integrations"
+region = "web.integrations"
+
+[responsibility]
+primary = "Inspect integration connection state reported by the server."
+
+[policy]
+read_only = true
+capability = "ready"
+declared_status_is_execution_evidence = false
+
+[policy_refs]
+specification = ["../../../specs/dsh/contracts/dashboard.toml"]

@@ -7,9 +7,9 @@ Specification dashboard	DSH	Planned capability states	DSH-003	Show unimplemented
 Specification dashboard	DSH	Specification health	DSH-004	Chart a repository's specification states, acceptance criteria, structural findings and check history without treating declared state as evidence.	web.overview
 Agent plugin	AGT	Distribute Spectrum as an agent plugin	AGT-001	Distribute deterministic tools through an agent-host plugin.	plugin.spectrum
 Agent plugin	AGT	Spec-grounded agent guidance	AGT-002	Keep host-agent work aligned with repository specifications and human authority.	plugin.spectrum
-Agent loop	LOOP	Change proposals	LOOP-001	Propose, review and revalidate changes with explicit human authority.	web.agent_loop
-Agent loop	LOOP	Agent runs	LOOP-002	Run discovery and drafting against a pinned repository revision.	web.agent_loop
-Agent loop	LOOP	Pull request review	LOOP-003	Review pull requests against the specifications and rules they affect.	web.agent_loop
+Agent loop	LOOP	Change proposals	LOOP-001	Propose, review and revalidate changes with explicit human authority.	web.proposals
+Agent loop	LOOP	Agent runs	LOOP-002	Run discovery and drafting against a pinned repository revision.	web.runs
+Agent loop	LOOP	Pull request review	LOOP-003	Review pull requests against the specifications and rules they affect.	web.reviews
 Connections	INT	GitHub repository connection	INT-001	Read hosted GitHub repositories at a pinned commit through a GitHub App installation.	web.repository
 Connections	INT	Linear connection	INT-002	Link specification requirements to Linear issues.	web.integrations
 Connections	INT	Model provider connection	INT-003	Connect a verified model authentication path for server-side runs.	web.integrations

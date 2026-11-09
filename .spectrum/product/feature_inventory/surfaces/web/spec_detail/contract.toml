@@ -1,0 +1,16 @@
+[contract]
+id = "surface.web.spec_detail"
+region = "web.spec_detail"
+
+[responsibility]
+primary = "Read one interaction, its acceptance criteria and linked sources."
+
+[policy]
+read_only = true
+capability = "ready"
+declared_status_is_execution_evidence = false
+implementation_links_capability = "planned"
+implementation_links_region = "web.spec_implementation"
+
+[policy_refs]
+specification = ["../../../specs/dsh/contracts/dashboard.toml", "../../../specs/trc/contracts/implementation_links.toml"]

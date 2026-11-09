@@ -1,0 +1,15 @@
+[contract]
+id = "surface.web.runs"
+region = "web.runs"
+
+[responsibility]
+primary = "Explain planned discovery, drafting and review runs."
+
+[policy]
+read_only = true
+capability = "planned"
+execution_controls = false
+declared_status_is_execution_evidence = false
+
+[policy_refs]
+specification = ["../../../specs/dsh/contracts/dashboard.toml"]

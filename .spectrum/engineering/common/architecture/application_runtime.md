@@ -17,7 +17,7 @@ This decision establishes code ownership. It does not implement server APIs, sel
 - [Distribution contract](../../../contracts/distribution.md)
 - [Specification model](specification_model.md)
 - [Dashboard contract](../../../product/feature_inventory/specs/dsh/contracts/dashboard.toml)
-- [Runs page contract](../../../product/website/page_contracts/runs/contract.toml)
+- [Runs surface contract](../../../product/feature_inventory/surfaces/web/runs/contract.toml)
 
 ## Ownership
 

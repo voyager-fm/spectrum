@@ -18,14 +18,14 @@ View check trend	DSH-004-view_check_trend	display	Specification health	DSH	DSH-0
 Install plugin	AGT-001-install_plugin	command	Distribute Spectrum as an agent plugin	AGT	AGT-001	implementing	now	Install the Spectrum plugin from this repository's marketplace without model credentials.	plugin.spectrum	-	-
 Run plugin checks	AGT-001-run_plugin_checks	command	Distribute Spectrum as an agent plugin	AGT	AGT-001	implementing	now	Run the repository-pinned, global or bundled deterministic CLI inside the supported host agent.	plugin.spectrum	-	-
 Follow spec guardrails	AGT-002-follow_spec_guardrails	background	Spec-grounded agent guidance	AGT	AGT-002	implementing	now	Ground host-agent answers and edits in check results without weakening criteria or approving specs.	plugin.spectrum	-	-
-Draft proposal	LOOP-001-draft_proposal	command	Change proposals	LOOP	LOOP-001	idea	next	Prepare an exact change set from a detected gap against a pinned base revision.	web.agent_loop	-	-
-Review proposal	LOOP-001-review_proposal	command	Change proposals	LOOP	LOOP-001	planned	next	Review an exact proposal against its base revision before any approved application.	web.agent_loop	-	-
-Apply proposal	LOOP-001-apply_proposal	command	Change proposals	LOOP	LOOP-001	idea	next	Apply an approved change set after revision and file hash revalidation.	web.agent_loop	-	-
+Draft proposal	LOOP-001-draft_proposal	command	Change proposals	LOOP	LOOP-001	idea	next	Prepare an exact change set from a detected gap against a pinned base revision.	web.proposals	-	-
+Review proposal	LOOP-001-review_proposal	command	Change proposals	LOOP	LOOP-001	planned	next	Review an exact proposal against its base revision before any approved application.	web.proposals	-	-
+Apply proposal	LOOP-001-apply_proposal	command	Change proposals	LOOP	LOOP-001	idea	next	Apply an approved change set after revision and file hash revalidation.	web.proposals	-	-
 Propose rule change	LOOP-001-propose_rule_change	command	Change proposals	LOOP	LOOP-001	idea	later	Propose agent and review rule improvements as a reviewable change set.	web.rules	-	-
-Run discovery	LOOP-002-run_discovery	background	Agent runs	LOOP	LOOP-002	idea	later	Discover existing behavior and documentation in a pinned repository revision.	web.agent_loop	-	-
-Run drafting	LOOP-002-run_drafting	background	Agent runs	LOOP	LOOP-002	idea	later	Draft specification changes from discovery results as a proposal for review.	web.agent_loop	-	-
-Review pull request	LOOP-003-review_pull_request	background	Pull request review	LOOP	LOOP-003	idea	later	Report missing behavior, conflicts and acceptance-criteria gaps for a pull request head SHA.	web.agent_loop	-	-
-Publish review	LOOP-003-publish_review	command	Pull request review	LOOP	LOOP-003	idea	later	Publish an approved review result to GitHub for the current head SHA.	web.agent_loop	-	-
+Run discovery	LOOP-002-run_discovery	background	Agent runs	LOOP	LOOP-002	idea	later	Discover existing behavior and documentation in a pinned repository revision.	web.runs	-	-
+Run drafting	LOOP-002-run_drafting	background	Agent runs	LOOP	LOOP-002	idea	later	Draft specification changes from discovery results as a proposal for review.	web.runs	-	-
+Review pull request	LOOP-003-review_pull_request	background	Pull request review	LOOP	LOOP-003	idea	later	Report missing behavior, conflicts and acceptance-criteria gaps for a pull request head SHA.	web.reviews	-	-
+Publish review	LOOP-003-publish_review	command	Pull request review	LOOP	LOOP-003	idea	later	Publish an approved review result to GitHub for the current head SHA.	web.reviews	-	-
 List GitHub repositories	INT-001-list_github_repositories	display	GitHub repository connection	INT	INT-001	idea	now	List the repositories that the GitHub App installations can read.	web.repository	-	-
 Check GitHub revision	INT-001-check_github_revision	command	GitHub repository connection	INT	INT-001	idea	now	Run the structural check on a hosted repository at one resolved commit SHA.	web.repository	-	-
 Link Linear issue	INT-002-link_linear_issue	command	Linear connection	INT	INT-002	idea	later	Link a requirement or acceptance criterion to a Linear issue.	web.integrations	-	-

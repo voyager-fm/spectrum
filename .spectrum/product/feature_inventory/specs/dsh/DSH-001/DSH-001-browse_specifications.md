@@ -50,7 +50,7 @@ Malformed TSV, JSON schemas, YAML or TOML produce failures. Missing references a
 - [ ] **AC-3:** Dashboard is loopback-only and read-only in this scaffold.
 - [ ] **AC-4:** The dashboard consumes the shared repository model instead of independently parsing feature JSON.
 - [ ] **AC-5:** Interaction lifecycle, document review state, phase and recorded test evidence remain separate.
-- [ ] **AC-6:** Configured web routes resolve to page contract, layout and flow documents.
+- [ ] **AC-6:** Configured web routes resolve through their region to surface contract, layout and flow documents.
 - [ ] **AC-7:** The table lists every inventory interaction, including those without a document, in category order, and only interactions with a document link to a detail page.
 - [ ] **AC-8:** The tree and the documents table open every loaded canonical document in the reader.
 
@@ -75,4 +75,4 @@ Page load errors are shown in the page. Hosted telemetry remains unimplemented.
 
 - [Contract](../contracts/dashboard.toml)
 - [Flow](../flows/dashboard.md)
-- [Specs page contract](../../../../website/page_contracts/specs/contract.toml)
+- [Specs surface contract](../../../surfaces/web/specs/contract.toml)

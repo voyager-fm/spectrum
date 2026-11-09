@@ -69,4 +69,4 @@ None. Hosted telemetry remains unimplemented.
 
 - [Contract](../contracts/dashboard.toml)
 - [Flow](../flows/dashboard.md)
-- [Specs page contract](../../../../website/page_contracts/specs/contract.toml)
+- [Specs surface contract](../../../surfaces/web/specs/contract.toml)

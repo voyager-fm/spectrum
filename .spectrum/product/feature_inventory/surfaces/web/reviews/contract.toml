@@ -1,0 +1,14 @@
+[contract]
+id = "surface.web.reviews"
+region = "web.reviews"
+
+[responsibility]
+primary = "Explain the planned PR review boundary."
+
+[policy]
+read_only = true
+capability = "planned"
+declared_status_is_execution_evidence = false
+
+[policy_refs]
+specification = ["../../../specs/dsh/contracts/dashboard.toml"]

@@ -1,0 +1,10 @@
+page_id	page_name	path	region	type	nav_exposure	primary_role	implementation_status
+OVERVIEW	Overview	/	web.overview	page	top_nav	Inspect repository specification health.	implemented
+SPECS	Specs	/specs	web.specs	page	top_nav	Browse interactions and their canonical document relationships.	implemented
+SPEC_DETAIL	Spec detail	/specs/[id]	web.spec_detail	page	hidden	Read one interaction, its acceptance criteria and linked sources.	implemented
+SPEC_DOCUMENT	Spec document	/specs/documents/[...path]	web.spec_document	page	hidden	Read one contract, flow, page or rule document and the documents linked to it.	implemented
+RULES	Rules	/rules	web.rules	page	top_nav	Read repository rules from the configured sources.	implemented
+INTEGRATIONS	Integrations	/settings	web.integrations	page	top_nav	Inspect declared configuration independently of live connectivity.	implemented
+PROPOSALS	Proposals	/proposals	web.proposals	page	top_nav	Explain the planned proposal review boundary.	implemented
+RUNS	Runs	/runs	web.runs	page	top_nav	Explain planned discovery, drafting and review runs.	implemented
+REVIEWS	PR reviews	/reviews	web.reviews	page	top_nav	Explain the planned PR review boundary.	implemented

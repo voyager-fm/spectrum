@@ -8,9 +8,6 @@
   "inventories": [
     {
       "catalog": ".spectrum/product/feature_inventory/schema.json"
-    },
-    {
-      "catalog": ".spectrum/product/website/route_map/schema.json"
     }
   ],
   "documents": [
@@ -19,8 +16,8 @@
       "root": ".spectrum/product/feature_inventory/specs"
     },
     {
-      "kind": "page_bundle",
-      "root": ".spectrum/product/website/page_contracts"
+      "kind": "surface_bundle",
+      "root": ".spectrum/product/feature_inventory/surfaces"
     },
     {
       "kind": "contracts",
