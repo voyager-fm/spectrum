@@ -47,7 +47,7 @@ An unknown command prints usage and exits with status 2. An unknown or repeated 
 
 - [ ] **AC-1:** The packed package contains only the bundled executable, its manifest and README, and declares no runtime dependencies.
 - [ ] **AC-2:** Installed into a repository outside this workspace, the `spectrum` binary runs `check`, `list`, `init` and `skills install` from embedded templates.
-- [ ] **AC-3:** `spectrum --version` prints the version from the package manifest.
+- [ ] **AC-3:** `spectrum --version` prints the package name and the version from the package manifest.
 - [ ] **AC-4:** Unknown commands exit with status 2, and invalid options exit with status 1 before any read or write.
 
 ## Permissions / Dependencies

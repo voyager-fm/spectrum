@@ -26,8 +26,13 @@ Persistent execution state and queue delivery can be added when jobs require aut
    - `name`: 1–64 characters of `a-z`, `0-9` and single hyphens, equal to the directory name.
    - `description`: 1–1024 characters, stating what the skill does and when to use it.
    - Body at most 500 lines. Relative links stay inside the skill directory and resolve to existing files.
-3. Skills prefer the repository's installed `node_modules/.bin/spectrum`, so checks use the version the repository pins. Otherwise they run their own `scripts/spectrum.mjs`, located through the skill base directory the host reports. The plugin has no top-level `bin/`, so installation is not limited to hosts that accept executables on `PATH`.
-4. `scripts/spectrum.mjs` is a build output of `apps/cli`, checked in so a Git-based install works. The plugin check fails when the checked-in bundle differs from a fresh build.
+3. Skills run their own `scripts/spectrum.mjs`, located through the skill base directory the host reports. It is a launcher that picks the CLI, so checks use the version the repository pins:
+   1. The repository's pinned `@voyager-fm/spectrum`, searched from the working directory up to the Git root: `node_modules` (npm, Yarn classic and hoisted workspaces), pnpm's hidden hoist directory `node_modules/.pnpm/node_modules`, then a Yarn Plug'n'Play project that declares the package, run through `yarn run spectrum`.
+   2. Otherwise the first `spectrum` on `PATH`, only when its package manifest identifies `@voyager-fm/spectrum` and its version is newer than the bundle. Discovery reads manifests and never executes an unidentified `spectrum`.
+   3. Otherwise the bundled CLI.
+
+   Stdout and the exit status belong to the CLI that ran; stderr names it and its version and explains any skipped candidate. A pinned CLI older than the bundle still runs, with a version note. When that older CLI rejects the invocation with usage status 2, the launcher runs the bundled CLI instead and says so. A CLI that started and failed otherwise is not rerun, because it may have written files. The plugin has no top-level `bin/`, so installation is not limited to hosts that accept executables on `PATH`.
+4. `scripts/spectrum.mjs` is a build output of `apps/cli` behind the launcher in `apps/plugin/src/launcher.ts`, checked in so a Git-based install works. The plugin check fails when the checked-in bundle differs from a fresh build.
 5. A skill describes only commands that exist. Planned capabilities are not presented to the agent as available.
 6. Host support is stated per host and only after verification. Claude Code is the first target. No other host manifest ships until its format and behavior are verified.
 
