@@ -49,3 +49,17 @@ test('integrations report connection state, not configuration flags', async ({ p
   await expect(linear.getByText('Not implemented', { exact: true })).toBeVisible();
   await expect(page.getByText(/^(enabled|disabled)$/)).toHaveCount(0);
 });
+
+test('overview leaves planned agent loop pages to one sidebar group', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.getByRole('heading', { level: 2, name: 'Agent loop' })).toHaveCount(0);
+  const navigation = page.getByRole('navigation', { name: 'Dashboard' });
+  await expect(navigation.getByRole('link', { name: 'Runs', exact: true })).toBeHidden();
+  await navigation.getByText('Agent loop', { exact: true }).click();
+  await navigation.getByRole('link', { name: 'Runs', exact: true }).click();
+  await expect(page.getByRole('heading', { level: 1, name: 'Runs', exact: true })).toBeVisible();
+  await expect(navigation.getByRole('link', { name: 'Runs', exact: true })).toHaveAttribute(
+    'aria-current',
+    'page',
+  );
+});

@@ -36,3 +36,29 @@ export function repositoryContext(pathname: string): RepositoryContext {
     tab: pathname === '/specs' || pathname.startsWith('/specs/') ? 'specs' : 'overview',
   };
 }
+
+export interface NavTarget {
+  href: string;
+  active: boolean;
+}
+
+/**
+ * Sidebar Specification links for a dashboard path. Overview and Specs follow the repository the
+ * path shows; Rules reads only the local repository, so it is `null` for a connected one.
+ */
+export function specificationNav(pathname: string): {
+  overview: NavTarget;
+  specs: NavTarget;
+  rules: NavTarget | null;
+} {
+  const context = repositoryContext(pathname);
+  const remote = context.kind === 'github' && context.owner && context.repo ? context : null;
+  const inTab = remote !== null || pathname === '/' || /^\/specs(\/|$)/.test(pathname);
+  const href = (tab: RepositoryTab) =>
+    remote ? repositoryPath(remote.owner ?? '', remote.repo ?? '', tab) : localPath(tab);
+  return {
+    overview: { href: href('overview'), active: inTab && context.tab === 'overview' },
+    specs: { href: href('specs'), active: inTab && context.tab === 'specs' },
+    rules: remote ? null : { href: '/rules', active: /^\/rules(\/|$)/.test(pathname) },
+  };
+}

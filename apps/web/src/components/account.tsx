@@ -9,18 +9,10 @@ export function signInHref(next = '/') {
   return `/api/auth/github/login?next=${encodeURIComponent(next)}`;
 }
 
-/** Sidebar footer: who is signed in, or how this server decides access. */
+/** Sidebar footer: who is signed in, a sign-in link, or a pointer to broken sign-in settings. */
 export function AccountControl({ viewer }: { viewer: Viewer }) {
-  if (viewer.mode === 'single-operator') {
-    return (
-      <p
-        className="px-2 text-xs text-muted-foreground"
-        title="No accounts are configured. Anyone who can reach this server sees every repository the App can read."
-      >
-        Single-operator mode
-      </p>
-    );
-  }
+  // Single-operator mode has no account to show; Integrations reports the mode.
+  if (viewer.mode === 'single-operator') return null;
   if (viewer.mode === 'misconfigured') {
     return (
       <Link

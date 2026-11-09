@@ -83,7 +83,8 @@ export default async function SettingsPage() {
                   </>
                 ) : (
                   <>
-                    No sign-in and no stored history. Set <Mono>DATABASE_URL</Mono>,{' '}
+                    No sign-in and no stored history: anyone who can reach this server sees every
+                    repository the App can read. Set <Mono>DATABASE_URL</Mono>,{' '}
                     <Mono>GITHUB_APP_CLIENT_ID</Mono> and <Mono>GITHUB_APP_CLIENT_SECRET</Mono> to
                     enable accounts
                   </>

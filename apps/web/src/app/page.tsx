@@ -1,7 +1,4 @@
 import type { CheckResult } from '@spectrum/core';
-import { ArrowUpRight } from 'lucide-react';
-import Link from 'next/link';
-import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   EmptyNotice,
   LoadErrors,
@@ -13,12 +10,10 @@ import {
 } from '../components/dashboard.tsx';
 import {
   AcceptancePanel,
-  CheckTrendPanel,
   FindingsPanel,
   StatusDistributionPanel,
 } from '../components/overview.tsx';
 import { loadDashboard } from '../lib/dashboard.ts';
-import { githubAppStatus } from '../lib/github.ts';
 import {
   acceptanceCoverage,
   categoryBreakdown,
@@ -29,12 +24,6 @@ import {
   statusDistribution,
 } from '../lib/overview.ts';
 
-const loop = [
-  { href: '/proposals', title: 'Proposals', detail: 'Spec change sets awaiting review' },
-  { href: '/runs', title: 'Runs', detail: 'Discover, draft and review jobs' },
-  { href: '/reviews', title: 'PR reviews', detail: 'Pull requests checked against specs' },
-];
-
 type Props = {
   searchParams: Promise<{ group?: string | string[]; severity?: string | string[] }>;
 };
@@ -42,9 +31,9 @@ type Props = {
 const specHref = (spec: { id: string }) => `/specs/${encodeURIComponent(spec.id)}`;
 
 export default async function OverviewPage({ searchParams }: Props) {
-  const [data, github] = await Promise.all([loadDashboard(), githubAppStatus()]);
-  const { check, config } = data;
-  const approved = check?.specs.filter((s) => s.status === 'approved').length ?? 0;
+  const data = await loadDashboard();
+  const { check } = data;
+  const categories = new Set(check?.specs.map((s) => s.categoryKey) ?? []).size;
   return (
     <>
       <PageHead
@@ -53,7 +42,7 @@ export default async function OverviewPage({ searchParams }: Props) {
       />
       <LoadErrors errors={data.errors} />
 
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <StatCard
           title="Spec check"
           value={
@@ -71,62 +60,11 @@ export default async function OverviewPage({ searchParams }: Props) {
             : 'See the error above'}
         </StatCard>
         <StatCard title="Interaction specs" value={check?.specs.length ?? '—'}>
-          {approved} marked approved · document review only
-        </StatCard>
-        <StatCard title="Rules" value={data.rules.length}>
-          files in <Mono>.spectrum/rules</Mono>
-        </StatCard>
-        <StatCard
-          title="Mode"
-          value={<StatusBadge tone="info">{config?.mode ?? 'unknown'}</StatusBadge>}
-        >
-          Canonical source: {config?.canonicalSource ?? 'unknown'}
+          {check ? `Across ${categories} categor${categories === 1 ? 'y' : 'ies'}` : 'Not read'}
         </StatCard>
       </div>
 
       {check ? <OverviewHealth check={check} view={parseFindingView(await searchParams)} /> : null}
-
-      <Section title="Agent loop" description="Planned capabilities. Nothing here runs yet.">
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          {loop.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className="group rounded-xl outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            >
-              <Card size="sm" className="h-full transition-colors group-hover:bg-muted/50">
-                <CardHeader>
-                  <CardTitle className="flex items-center justify-between">
-                    {item.title}
-                    <ArrowUpRight className="size-4 text-muted-foreground" aria-hidden />
-                  </CardTitle>
-                  <CardDescription>{item.detail}</CardDescription>
-                  <div>
-                    <StatusBadge tone="planned">Not implemented</StatusBadge>
-                  </div>
-                </CardHeader>
-              </Card>
-            </Link>
-          ))}
-          <Link
-            href="/settings"
-            className="group rounded-xl outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          >
-            <Card size="sm" className="h-full transition-colors group-hover:bg-muted/50">
-              <CardHeader>
-                <CardTitle className="flex items-center justify-between">
-                  Integrations
-                  <ArrowUpRight className="size-4 text-muted-foreground" aria-hidden />
-                </CardTitle>
-                <CardDescription>
-                  GitHub App {github.configured ? 'configured' : 'not configured'} · Linear not
-                  implemented
-                </CardDescription>
-              </CardHeader>
-            </Card>
-          </Link>
-        </div>
-      </Section>
     </>
   );
 }
@@ -169,18 +107,8 @@ function OverviewHealth({ check, view }: { check: CheckResult; view: FindingView
         targetQuery=""
         specHref={specHref}
         emptyNote={
-          check.findings.length ? null : (
-            <EmptyNotice>
-              No structural findings. This does not show that the code implements the specs.
-            </EmptyNotice>
-          )
+          check.findings.length ? null : <EmptyNotice>No structural findings.</EmptyNotice>
         }
-      />
-      <CheckTrendPanel
-        rows={null}
-        currentSha={undefined}
-        hrefFor={() => '/'}
-        unavailable="This repository is read from the working tree on every request, so no check history is stored. Connected repositories keep one check per commit when accounts are enabled."
       />
     </>
   );

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
-import { localPath, repositoryContext, repositoryPath } from './paths.ts';
+import { localPath, repositoryContext, repositoryPath, specificationNav } from './paths.ts';
 
 describe('repositoryContext', () => {
   it('reads the repository and tab from GitHub repository paths', () => {
@@ -35,5 +35,32 @@ describe('paths', () => {
     assert.equal(repositoryPath('a', 'b.c'), '/repositories/a/b.c');
     assert.equal(localPath('specs'), '/specs');
     assert.equal(localPath(), '/');
+  });
+});
+
+describe('specificationNav', () => {
+  it('points Overview and Specs at the connected repository and hides Rules', () => {
+    const nav = specificationNav('/repositories/voyager-fm/spectrum/specs/VAL-001-x');
+    assert.deepEqual(nav.overview, { href: '/repositories/voyager-fm/spectrum', active: false });
+    assert.deepEqual(nav.specs, { href: '/repositories/voyager-fm/spectrum/specs', active: true });
+    assert.equal(nav.rules, null);
+    assert.equal(specificationNav('/repositories/voyager-fm/spectrum').overview.active, true);
+  });
+
+  it('uses local paths elsewhere and marks only the page that is shown', () => {
+    assert.deepEqual(specificationNav('/'), {
+      overview: { href: '/', active: true },
+      specs: { href: '/specs', active: false },
+      rules: { href: '/rules', active: false },
+    });
+    assert.equal(specificationNav('/specs/documents').specs.active, true);
+    const rules = specificationNav('/rules');
+    assert.equal(rules.overview.active, false);
+    assert.equal(rules.rules?.active, true);
+    for (const path of ['/settings', '/repositories', '/runs']) {
+      const nav = specificationNav(path);
+      assert.equal(nav.overview.active || nav.specs.active, false, path);
+      assert.equal(nav.overview.href, '/', path);
+    }
   });
 });

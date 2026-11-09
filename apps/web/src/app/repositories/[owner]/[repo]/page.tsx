@@ -387,8 +387,7 @@ function CheckSummary({
             </EmptyNotice>
           ) : result.findings.length ? null : (
             <EmptyNotice>
-              No structural findings at <Mono>{short(check.sha)}</Mono>. This does not show that the
-              code implements the specs.
+              No structural findings at <Mono>{short(check.sha)}</Mono>.
             </EmptyNotice>
           )
         }
