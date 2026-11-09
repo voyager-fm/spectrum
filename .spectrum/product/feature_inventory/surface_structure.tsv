@@ -7,6 +7,7 @@ web	repository	spec_detail	Specification detail	2	section	web.spec_detail	One in
 web	repository	spec_document	Specification document	2	section	web.spec_document	One non-interaction document rendered in the reader with its outline and links.	DSH-001-view_specification_document	implementing
 web	repository	spec_category	Feature category	2	section	web.spec_category	One category's description, features and interactions in the reader.	DSH-001-view_feature_category	implementing
 web	repository	spec_feature	Feature	2	section	web.spec_feature	One feature's description, category, related UI and interactions in the reader.	DSH-001-view_feature	implementing
+web	repository	spec_graph	Specification graph	2	section	web.spec_graph	Force-directed graph of interactions, features, categories and documents joined by declared links, ownership, regions and membership.	DSH-001-view_specification_graph	implementing
 web	repository	spec_search	Specification search	2	overlay	web.spec_search	Command palette over interactions, categories, features and documents, opened from any reader page.	DSH-001-search_specifications	implementing
 web	repository	rules	Rules	2	section	web.rules	Rule files from the configured rule sources.	DSH-002-read_rules|LOOP-001-propose_rule_change	implementing
 web	repository	integrations	Integrations	2	section	web.integrations	Integration connection state and model provider state.	DSH-002-inspect_integrations|INT-002-link_linear_issue|INT-003-connect_model_provider	implementing

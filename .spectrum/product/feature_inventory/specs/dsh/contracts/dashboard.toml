@@ -49,6 +49,10 @@ writes = []
 reads = ["spec_bundle", "interaction"]
 writes = []
 
+[ownership."DSH-001-view_specification_graph"]
+reads = ["repository", "spec_bundle", "interaction"]
+writes = []
+
 [ownership."DSH-002-read_rules"]
 reads = ["agent_rule"]
 writes = []

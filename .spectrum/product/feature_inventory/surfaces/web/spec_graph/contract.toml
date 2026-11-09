@@ -1,0 +1,15 @@
+[contract]
+id = "surface.web.spec_graph"
+region = "web.spec_graph"
+
+[responsibility]
+primary = "Show a connected repository's interactions, features, categories and documents as a graph of their declared relationships."
+
+[policy]
+read_only = true
+capability = "ready"
+declared_status_is_execution_evidence = false
+inferred_edges = false
+
+[policy_refs]
+specification = ["../../../specs/dsh/contracts/dashboard.toml"]

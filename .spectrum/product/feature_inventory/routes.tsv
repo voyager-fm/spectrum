@@ -5,6 +5,7 @@ SPEC_DETAIL	Spec detail	/specs/[id]	web.spec_detail	page	hidden	Read one interac
 SPEC_DOCUMENT	Spec document	/specs/documents/[...path]	web.spec_document	page	hidden	Read one contract, flow, page or rule document and the documents linked to it.	implemented
 SPEC_CATEGORY	Spec category	/specs/categories/[key]	web.spec_category	page	hidden	Read one feature category, its features and its interactions.	implemented
 SPEC_FEATURE	Spec feature	/specs/features/[id]	web.spec_feature	page	hidden	Read one feature, its category, related UI and interactions.	implemented
+SPEC_GRAPH	Spec graph	/repositories/[owner]/[repo]/specs/graph	web.spec_graph	page	hidden	See a connected repository's specifications as a graph of their declared relationships.	implemented
 RULES	Rules	/rules	web.rules	page	top_nav	Read repository rules from the configured sources.	implemented
 INTEGRATIONS	Integrations	/settings	web.integrations	page	top_nav	Inspect declared configuration independently of live connectivity.	implemented
 PROPOSALS	Proposals	/proposals	web.proposals	page	top_nav	Explain the planned proposal review boundary.	implemented
