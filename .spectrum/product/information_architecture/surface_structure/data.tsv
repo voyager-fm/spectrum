@@ -1,6 +1,6 @@
 surface_key	parent_region_id	region_id	region_label	level	slot_type	structure_key	description	interaction_refs	status
-cli	-	output	Command output	1	root	cli.output	JSON results and a nonzero exit status for structural errors.	SP-001-check_repository|SP-001-list_specifications|SP-005-check_with_profile|SP-005-initialize_configuration	implementing
-web	-	repository	Repository workspace	1	root	web.repository	Specification, rule and declared integration views.	SP-011-list_github_repositories|SP-011-check_github_revision	implementing
+cli	-	output	Command output	1	root	cli.output	JSON results and a nonzero exit status for structural errors.	SP-001-check_repository|SP-001-list_specifications|SP-005-check_with_profile|SP-014-install_cli_package|SP-015-initialize_repository|SP-016-install_repository_skills	implementing
+web	-	repository	Repository workspace	1	root	web.repository	Specification, rule and declared integration views.	SP-011-list_github_repositories|SP-011-check_github_revision|SP-017-view_setup_checklist|SP-018-browse_remote_specifications|SP-018-view_remote_specification|SP-018-switch_repository	implementing
 web	repository	overview	Overview	2	section	web.overview	Structural check health and repository counts.	SP-002-view_repository_overview	implementing
 web	repository	specs	Specifications	2	section	web.specs	Interaction list with shared contracts and flows.	SP-002-browse_specifications	implementing
 web	repository	spec_detail	Specification detail	2	section	web.spec_detail	One interaction with its states, criteria, findings and links.	SP-002-view_specification_detail	implementing
@@ -8,3 +8,4 @@ web	repository	rules	Rules	2	section	web.rules	Rule files from the configured ru
 web	repository	integrations	Integrations	2	section	web.integrations	Integration connection state and model provider state.	SP-006-inspect_integrations|SP-012-link_linear_issue|SP-013-connect_model_provider	implementing
 web	repository	agent_loop	Agent loop	2	section	web.agent_loop	Proposals, runs and PR reviews; planned states until execution exists.	SP-007-show_planned_capabilities|SP-003-draft_proposal|SP-003-review_proposal|SP-003-apply_proposal|SP-009-run_discovery|SP-009-run_drafting|SP-010-review_pull_request|SP-010-publish_review	implementing
 plugin	-	spectrum	Spectrum skill	1	root	plugin.spectrum	The host skill invokes the same CLI contract.	SP-004-install_plugin|SP-004-run_plugin_checks|SP-008-follow_spec_guardrails	implementing
+skill	-	spectrum	Spectrum skill	1	root	skill.spectrum	The repository skill invokes the repository's installed CLI.	SP-016-run_repository_skill	implementing

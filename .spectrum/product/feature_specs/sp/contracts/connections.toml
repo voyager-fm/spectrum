@@ -1,0 +1,25 @@
+[contract]
+id = "spectrum.connections"
+category = "INT"
+primary_object_key = "repository"
+display_region = "web.repository"
+
+[policy]
+access = "GitHub App installation, read-only"
+results_bound_to_commit_sha = true
+cache_key = "commit SHA"
+snapshot_removed_after_read = true
+credentials_reach_pages = false
+sample_data_on_failure = false
+
+[ownership."SP-018-browse_remote_specifications"]
+reads = ["repository", "spec_bundle", "interaction"]
+writes = []
+
+[ownership."SP-018-view_remote_specification"]
+reads = ["repository", "spec_bundle", "interaction"]
+writes = []
+
+[ownership."SP-018-switch_repository"]
+reads = ["repository"]
+writes = []

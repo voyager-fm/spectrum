@@ -21,7 +21,7 @@ Run the bundled deterministic CLI inside the supported host agent.
 
 ## Trigger / Entry Points
 
-The host agent loads the Spectrum skill when the user mentions Spectrum or `.spectrum` specs, asks whether specs are valid, asks for a feature's acceptance criteria, or is about to change behavior a spec covers. The skill runs `node <skill base directory>/scripts/spectrum.mjs check|list [repository path] [--profile profile.json]`.
+The host agent loads the Spectrum skill when the user mentions Spectrum or `.spectrum` specs, asks whether specs are valid, asks for a feature's acceptance criteria, or is about to change behavior a spec covers. The skill runs the repository's `node_modules/.bin/spectrum` when it exists and otherwise `node <skill base directory>/scripts/spectrum.mjs`, with `check|list [repository path] [--profile profile.json]`.
 
 ## Preconditions
 
@@ -50,6 +50,7 @@ Malformed TSV, JSON schemas, YAML or TOML produce failures. Missing references a
 - [ ] **AC-3:** Skills run the checked-in CLI bundle, and the build fails when that bundle is stale.
 - [ ] **AC-4:** Skills describe only commands the bundled CLI implements.
 - [ ] **AC-5:** The plugin runs the same schema_version 2 checks and listing as the workspace CLI.
+- [ ] **AC-6:** When the repository has `node_modules/.bin/spectrum`, the skill runs that pinned binary instead of the bundled copy and says which one it ran.
 
 ## Permissions / Dependencies
 
@@ -65,6 +66,7 @@ Local JSON findings and process exit status are available to the host agent. Hos
 - [List specifications](../SP-001/SP-001-list_specifications.md)
 - [Install plugin](../SP-004/SP-004-install_plugin.md)
 - [Follow spec guardrails](../SP-008/SP-008-follow_spec_guardrails.md)
+- [Run repository skill](../SP-016/SP-016-run_repository_skill.md)
 
 ## Source
 

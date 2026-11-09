@@ -14,7 +14,7 @@
 
 1. The user adds this repository as a plugin marketplace and installs the Spectrum plugin in the host agent. No model credential is requested.
 2. The host agent loads the Spectrum skill when the user mentions Spectrum, asks about spec validity or acceptance criteria, or is about to change behavior a spec covers.
-3. The skill runs the bundled CLI (`check` or `list`) from the repository root and reads the JSON result and linked canonical documents.
+3. The skill runs the repository's installed `node_modules/.bin/spectrum` when present, and otherwise the bundled CLI, with `check` or `list` from the repository root. It reads the JSON result and the linked canonical documents.
 4. The host agent answers or edits from that evidence, reports code/spec disagreements and proposes spec changes for the user to decide.
 
 ## Failure Handling

@@ -2,3 +2,4 @@ surface_key	label	kind	description
 cli	Command line	cli	Deterministic repository checks and specification listing.
 web	Repository dashboard	web	Read-only local views of the shared model; the same application owns planned server capabilities.
 plugin	Agent plugin	agent_host	Host-agent reasoning with the bundled deterministic CLI.
+skill	Repository agent skill	agent_host	The skill installed in a client repository; it runs that repository's pinned CLI.

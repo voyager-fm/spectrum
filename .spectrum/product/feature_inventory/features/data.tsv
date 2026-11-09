@@ -12,3 +12,8 @@ Agent loop	LOOP	Pull request review	SP-010	Review pull requests against the spec
 Connections	INT	GitHub repository connection	SP-011	Read hosted GitHub repositories at a pinned commit through a GitHub App installation.	web.repository
 Connections	INT	Linear connection	SP-012	Link specification requirements to Linear issues.	web.integrations
 Connections	INT	Model provider connection	SP-013	Connect a verified model authentication path for server-side runs.	web.integrations
+Connections	INT	Connected repositories	SP-018	Browse a connected hosted repository's specifications at a pinned commit and switch between repositories.	web.repository
+Repository setup	SET	Installable command-line package	SP-014	Ship the deterministic CLI as one package a client repository pins and runs from its own binary.	cli.output
+Repository setup	SET	Repository initialization	SP-015	Create a connected starter specification bundle in a repository that has none.	cli.output
+Repository setup	SET	Repository agent skills	SP-016	Install the Spectrum agent skill into a repository so agents run the repository's pinned CLI.	skill.spectrum
+Repository setup	SET	Repository onboarding	SP-017	Show a connected repository's setup state and the command that completes each missing step.	web.repository
