@@ -6,6 +6,7 @@ description: "Implement and inspect the Spectrum Next.js dashboard (apps/web) or
 # Spectrum UI
 
 Load only the reference the task needs:
+- [brand.md](references/brand.md): terminal-aesthetic brand tone, pixel/bitmap accent and voice drawn from OpenCode, Ghostty, Warp, CodeRabbit and Greptile; per-surface limits (dashboard, CLI, docs/landing).
 - [design.md](references/design.md): monotone developer-review-tool direction and patterns for upcoming pages.
 - [review-patterns.md](references/review-patterns.md): observed review-summary, findings, PR detail, runs and list structures for the PR reviews, Proposals and Runs pages.
 - [architecture.md](references/architecture.md): stack, data flow, routes and how to add a page.
