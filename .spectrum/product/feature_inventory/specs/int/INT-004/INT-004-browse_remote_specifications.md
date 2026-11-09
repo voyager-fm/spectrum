@@ -29,7 +29,7 @@ The GitHub App is configured and installed on the repository, and the requested 
 
 ## Expected Outcome
 
-The page lists the interaction specifications the shared engine reads from that commit's snapshot, with their stable IDs, FI states and finding counts, and names the commit.
+The page opens the same specification reader as `/specs` for that commit's snapshot: the specification tree, the filterable interaction table with stable IDs, FI states and finding counts, and documents by kind. It names the commit.
 
 ## State Changes
 
@@ -48,6 +48,7 @@ A missing or invalid configuration shows the setup checklist instead of an empty
 - [ ] **AC-1:** The list shows the specs the shared engine reads at the pinned commit and names that SHA.
 - [ ] **AC-2:** Navigation keeps the selected ref or pull request.
 - [ ] **AC-3:** A cached result is used only for the same commit SHA.
+- [ ] **AC-4:** Filters, search results and documents opened from the reader stay on the pinned commit and keep the selected ref or pull request.
 
 ## Permissions / Dependencies
 

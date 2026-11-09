@@ -6,7 +6,7 @@ Open `/specs/[id]` for the configured local repository.
 
 ## Ready
 
-Read one interaction, its acceptance criteria and linked sources.
+Read one interaction, its acceptance criteria and linked sources. Links inside the document open other interactions and documents in the reader. An interaction declared only in the inventory shows its declared fields and states that no document exists.
 
 ## Empty and failure states
 

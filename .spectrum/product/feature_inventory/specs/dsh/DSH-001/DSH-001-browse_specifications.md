@@ -6,7 +6,7 @@ category_key: "DSH"
 feature_id: "DSH-001"
 status: "implementing"
 phase: "now"
-summary: "Inspect specification relationships and distinguish declared status from executed evidence."
+summary: "Browse every inventory interaction and canonical document in a tree and tables, keeping declared status apart from executed evidence."
 related_region: "web.specs"
 menu: "-"
 shortcut: "-"
@@ -17,11 +17,11 @@ document_status: "draft"
 
 ## Intent
 
-Inspect specification relationships and distinguish declared status from executed evidence.
+Browse every inventory interaction and canonical document in a tree and tables, keeping declared status apart from executed evidence.
 
 ## Trigger / Entry Points
 
-The user opens `/specs` from the dashboard navigation.
+The user opens `/specs` from the dashboard navigation or the "All interactions" link in the specification tree.
 
 ## Preconditions
 
@@ -29,7 +29,7 @@ A local repository and a schema_version 2 configuration identify canonical docum
 
 ## Expected Outcome
 
-A table lists every interaction specification with its ID, title, document status, acceptance-criteria count and link count. Each ID opens its detail page. Shared contracts and flows appear below the table with their paths.
+The page opens the specification reader. A tree beside the content groups interactions by category and feature and lists documents under Overview, Flows, Contracts, Pages, Engineering, Rules and Reference. The content shows counts for interactions, interactions with a document, interactions declared implementing and interactions with findings. A table lists every inventory interaction grouped by category with its title, ID, feature, declared lifecycle, phase, type, acceptance-criteria count and structural findings; the table can be filtered (see [Filter specifications](DSH-001-filter_specifications.md)). Each title with a document opens its detail page. A documents table lists contracts, flows, pages, engineering, rule, reference and overview documents one kind at a time with their paths and how many documents link to each; each title opens the document in the reader.
 
 ## State Changes
 
@@ -37,7 +37,7 @@ Canonical repository files stay unchanged. The response contains a derived model
 
 ## User-visible Feedback
 
-Document status is labeled as a review annotation. IDs and paths use monospace text.
+Document status is labeled as a review annotation. IDs and paths use monospace text. Lifecycle uses a solid, ringed or dashed marker for implementing, planned and idea. Interactions declared only in the inventory are listed without a link and marked in the tree. A legend states that lifecycle is declared in the inventory and is not executed evidence.
 
 ## Edge Cases / Failure Handling
 
@@ -51,6 +51,8 @@ Malformed TSV, JSON schemas, YAML or TOML produce failures. Missing references a
 - [ ] **AC-4:** The dashboard consumes the shared repository model instead of independently parsing feature JSON.
 - [ ] **AC-5:** Interaction lifecycle, document review state, phase and recorded test evidence remain separate.
 - [ ] **AC-6:** Configured web routes resolve to page contract, layout and flow documents.
+- [ ] **AC-7:** The table lists every inventory interaction, including those without a document, in category order, and only interactions with a document link to a detail page.
+- [ ] **AC-8:** The tree and the documents table open every loaded canonical document in the reader.
 
 ## Permissions / Dependencies
 
@@ -65,6 +67,9 @@ Page load errors are shown in the page. Hosted telemetry remains unimplemented.
 - [List specifications](../../val/VAL-001/VAL-001-list_specifications.md)
 - [View repository overview](DSH-001-view_repository_overview.md)
 - [View specification detail](DSH-001-view_specification_detail.md)
+- [Filter specifications](DSH-001-filter_specifications.md)
+- [Search specifications](DSH-001-search_specifications.md)
+- [View specification document](DSH-001-view_specification_document.md)
 
 ## Source
 

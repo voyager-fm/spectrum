@@ -2,7 +2,7 @@
 
 ## Regions
 
-Repository navigation, page heading and load errors precede the page content. Tables and document previews use the existing dashboard components.
+Repository navigation, page heading and load errors precede the reader. The specification tree, the rendered document and a rail with the outline, structural findings, links in both directions and the source location sit side by side on wide screens. Under 1280px the rail follows the document; under 1024px the tree collapses behind a toggle. A property grid separates lifecycle, phase, type, region, document status and the structural check. Acceptance criteria render as a table in place of the document's section. Previous and next links close the page.
 
 ## Planned Connected code region
 

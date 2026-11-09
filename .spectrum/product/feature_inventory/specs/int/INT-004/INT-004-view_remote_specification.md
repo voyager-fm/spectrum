@@ -29,7 +29,7 @@ The GitHub App is configured and installed on the repository, and the requested 
 
 ## Expected Outcome
 
-The page shows the interaction's FI states, acceptance criteria with verification state, linked documents, its own findings and a GitHub link to the file at the pinned SHA.
+The page renders the interaction in the same reader as a local spec detail: its FI states, its document with acceptance criteria and verification state, its own findings, links in both directions and a GitHub link to the file at the pinned SHA. Links to loaded documents open in the reader at the same commit; links to other repository files open GitHub at that SHA.
 
 ## State Changes
 
@@ -48,6 +48,7 @@ An unknown interaction ID shows a not-found state for that commit. Checked boxes
 - [ ] **AC-1:** The detail shows the interaction's states, criteria, findings and links at the pinned commit.
 - [ ] **AC-2:** The source link opens the file at that exact SHA on GitHub.
 - [ ] **AC-3:** An interaction missing at the commit shows a not-found state instead of another revision's data.
+- [ ] **AC-4:** Links in the document stay on the pinned commit, in the reader for loaded documents and on GitHub at that SHA for other files.
 
 ## Permissions / Dependencies
 
