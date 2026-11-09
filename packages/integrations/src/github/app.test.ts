@@ -4,10 +4,13 @@ import { text } from 'node:stream/consumers';
 import { describe, it } from 'node:test';
 import {
   createAppJwt,
+  exchangeOAuthCode,
   type Fetch,
   GitHubApp,
   GitHubError,
   GitHubRepositoryClient,
+  GitHubUserClient,
+  oauthAuthorizeUrl,
   validRef,
   validRepositoryName,
 } from './app.ts';
@@ -58,12 +61,12 @@ describe('GitHubApp', () => {
   it('lists installations with the App JWT and versioned headers', async () => {
     const { fetcher, calls } = mockGitHub({
       'GET /app/installations?per_page=100&page=1': ok([
-        { id: 7, target_type: 'Organization', account: { login: 'voyager-fm' } },
+        { id: 7, target_type: 'Organization', account: { login: 'voyager-fm', id: 99 } },
       ]),
     });
     const app = new GitHubApp({ appId: '123', privateKey: pem, fetch: fetcher, now: () => NOW });
     assert.deepEqual(await app.listInstallations(), [
-      { id: 7, account: 'voyager-fm', targetType: 'Organization' },
+      { id: 7, account: 'voyager-fm', accountId: 99, targetType: 'Organization' },
     ]);
     const headers = calls[0]?.headers ?? {};
     assert.equal(headers.Accept, 'application/vnd.github+json');
@@ -100,6 +103,7 @@ describe('GitHubApp', () => {
       'GET /installation/repositories?per_page=100&page=1': ok({
         repositories: [
           {
+            id: 1450780976,
             name: 'spectrum',
             full_name: 'voyager-fm/spectrum',
             private: false,
@@ -113,6 +117,7 @@ describe('GitHubApp', () => {
     const app = new GitHubApp({ appId: '1', privateKey: pem, fetch: fetcher, now: () => NOW });
     const [repo] = await app.listRepositories(7);
     assert.equal(repo?.fullName, 'voyager-fm/spectrum');
+    assert.equal(repo?.id, 1450780976);
     assert.equal(repo?.defaultBranch, 'main');
     assert.equal(calls[1]?.headers.Authorization, 'Bearer ghs_secret');
   });
@@ -218,5 +223,67 @@ describe('GitHubRepositoryClient', () => {
       assert.doesNotMatch(error.message, /ghs_secret/);
       return true;
     });
+  });
+});
+
+describe('user authorization', () => {
+  it('builds an authorization URL that carries the state and callback', () => {
+    const url = new URL(
+      oauthAuthorizeUrl({
+        clientId: 'Iv1.abc',
+        redirectUri: 'http://127.0.0.1:3000/cb',
+        state: 's1',
+      }),
+    );
+    assert.equal(url.origin + url.pathname, 'https://github.com/login/oauth/authorize');
+    assert.equal(url.searchParams.get('client_id'), 'Iv1.abc');
+    assert.equal(url.searchParams.get('redirect_uri'), 'http://127.0.0.1:3000/cb');
+    assert.equal(url.searchParams.get('state'), 's1');
+  });
+
+  it('exchanges a code for a token and keeps secrets out of errors', async () => {
+    const seen: string[] = [];
+    const fetcher: Fetch = async (url, init) => {
+      seen.push(`${init?.method} ${url}`);
+      const body = JSON.parse(String(init?.body));
+      if (body.code === 'good') return Response.json({ access_token: 'ghu_token' });
+      return Response.json({ error: 'bad_verification_code' });
+    };
+    const base = {
+      clientId: 'id',
+      clientSecret: 'shh',
+      redirectUri: 'http://x/cb',
+      fetch: fetcher,
+    };
+    assert.equal(await exchangeOAuthCode({ ...base, code: 'good' }), 'ghu_token');
+    assert.deepEqual(seen, ['POST https://github.com/login/oauth/access_token']);
+    await assert.rejects(exchangeOAuthCode({ ...base, code: 'bad' }), (error: Error) => {
+      assert.ok(error instanceof GitHubError);
+      assert.match(error.message, /bad_verification_code/);
+      assert.doesNotMatch(error.message, /shh|bad\b/);
+      return true;
+    });
+  });
+
+  it('reads the user and the installations the user can access', async () => {
+    const { fetcher, calls } = mockGitHub({
+      'GET /user': ok({ id: 5, login: 'octo', name: null, avatar_url: 'https://a/5' }),
+      'GET /user/installations?per_page=100&page=1': ok({
+        installations: [
+          { id: 7, target_type: 'Organization', account: { login: 'voyager-fm', id: 99 } },
+        ],
+      }),
+    });
+    const user = new GitHubUserClient({ token: 'ghu_token', fetch: fetcher });
+    assert.deepEqual(await user.getUser(), {
+      id: 5,
+      login: 'octo',
+      name: null,
+      avatarUrl: 'https://a/5',
+    });
+    assert.deepEqual(await user.listInstallations(), [
+      { id: 7, account: 'voyager-fm', accountId: 99, targetType: 'Organization' },
+    ]);
+    assert.equal(calls[0]?.headers.Authorization, 'Bearer ghu_token');
   });
 });

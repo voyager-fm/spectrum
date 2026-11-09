@@ -4,6 +4,8 @@ import type { ReadableStream as WebReadableStream } from 'node:stream/web';
 
 /** Read-only GitHub App client. It never writes to repositories, comments or check runs. */
 export const GITHUB_API = 'https://api.github.com';
+/** Web origin for OAuth authorization and code exchange. */
+export const GITHUB_WEB = 'https://github.com';
 
 export type Fetch = (input: string, init?: RequestInit) => Promise<Response>;
 
@@ -75,10 +77,29 @@ async function json<T>(response: Response): Promise<T> {
 export interface Installation {
   id: number;
   account: string;
+  /** GitHub's numeric id for the account; stable across renames. */
+  accountId: number;
   targetType: string;
 }
 
+interface RawInstallation {
+  id: number;
+  target_type: string;
+  account: { login: string; id: number } | null;
+}
+
+function installation(raw: RawInstallation): Installation {
+  return {
+    id: raw.id,
+    account: raw.account?.login ?? '',
+    accountId: raw.account?.id ?? 0,
+    targetType: raw.target_type,
+  };
+}
+
 export interface Repository {
+  /** GitHub's numeric id; stable across renames and transfers. */
+  id: number;
   owner: string;
   name: string;
   fullName: string;
@@ -101,6 +122,7 @@ export interface PullRequest {
 }
 
 interface RawRepository {
+  id: number;
   name: string;
   full_name: string;
   private: boolean;
@@ -111,6 +133,7 @@ interface RawRepository {
 
 function repository(raw: RawRepository): Repository {
   return {
+    id: raw.id,
     owner: raw.owner.login,
     name: raw.name,
     fullName: raw.full_name,
@@ -178,15 +201,11 @@ export class GitHubApp {
 
   async listInstallations(): Promise<Installation[]> {
     const raw = await paginate(async (page) =>
-      json<{ id: number; target_type: string; account: { login: string } | null }[]>(
+      json<RawInstallation[]>(
         await this.#appRequest('GET', `/app/installations?per_page=${PAGE}&page=${page}`),
       ),
     );
-    return raw.map((i) => ({
-      id: i.id,
-      account: i.account?.login ?? '',
-      targetType: i.target_type,
-    }));
+    return raw.map(installation);
   }
 
   /** Installation tokens last one hour; reuse them until five minutes before expiry. */
@@ -238,6 +257,16 @@ export class GitHubApp {
     if (!validRepositoryName(owner, repo)) throw new GitHubError(400, 'Invalid repository name');
     const installationId = await this.repositoryInstallation(owner, repo);
     if (installationId === null) return null;
+    return this.installationClient(owner, repo, installationId);
+  }
+
+  /** A client for a repository through a known installation, after the caller checked access. */
+  async installationClient(
+    owner: string,
+    repo: string,
+    installationId: number,
+  ): Promise<GitHubRepositoryClient> {
+    if (!validRepositoryName(owner, repo)) throw new GitHubError(400, 'Invalid repository name');
     return new GitHubRepositoryClient({
       owner,
       repo,
@@ -332,4 +361,106 @@ function pullRequest(raw: {
     headSha: raw.head.sha,
     htmlUrl: raw.html_url,
   };
+}
+
+/** The GitHub account that signed in through the App's user authorization. */
+export interface GitHubUser {
+  id: number;
+  login: string;
+  name: string | null;
+  avatarUrl: string;
+}
+
+/** Authorization URL for the App's user-to-server OAuth flow. The App's permissions apply. */
+export function oauthAuthorizeUrl(options: {
+  clientId: string;
+  redirectUri: string;
+  state: string;
+}): string {
+  const query = new URLSearchParams({
+    client_id: options.clientId,
+    redirect_uri: options.redirectUri,
+    state: options.state,
+    allow_signup: 'false',
+  });
+  return `${GITHUB_WEB}/login/oauth/authorize?${query}`;
+}
+
+/**
+ * Exchange an OAuth code for a user access token. The token is returned to the caller only;
+ * error messages never contain the code, the secret or the token.
+ */
+export async function exchangeOAuthCode(options: {
+  clientId: string;
+  clientSecret: string;
+  code: string;
+  redirectUri: string;
+  fetch?: Fetch;
+}): Promise<string> {
+  const fetcher = options.fetch ?? fetch;
+  let response: Response;
+  try {
+    response = await fetcher(`${GITHUB_WEB}/login/oauth/access_token`, {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+        'User-Agent': HEADERS['User-Agent'],
+      },
+      body: JSON.stringify({
+        client_id: options.clientId,
+        client_secret: options.clientSecret,
+        code: options.code,
+        redirect_uri: options.redirectUri,
+      }),
+      cache: 'no-store',
+    });
+  } catch {
+    throw new GitHubError(0, 'GitHub request failed: POST /login/oauth/access_token');
+  }
+  if (!response.ok) {
+    response.body?.cancel().catch(() => {});
+    throw new GitHubError(response.status, `GitHub returned ${response.status} for OAuth exchange`);
+  }
+  // GitHub reports a bad or expired code with 200 and an `error` field.
+  const body = (await response.json()) as { access_token?: string; error?: string };
+  if (!body.access_token) {
+    throw new GitHubError(401, `GitHub rejected the OAuth code (${body.error ?? 'no token'})`);
+  }
+  return body.access_token;
+}
+
+/** Calls made as the signed-in user, bounded by what both the user and the App can access. */
+export class GitHubUserClient {
+  #token: string;
+  #fetch: Fetch;
+
+  constructor(options: { token: string; fetch?: Fetch }) {
+    this.#token = options.token;
+    this.#fetch = options.fetch ?? fetch;
+  }
+
+  #get(path: string): Promise<Response> {
+    return request(this.#fetch, 'GET', path, `Bearer ${this.#token}`);
+  }
+
+  async getUser(): Promise<GitHubUser> {
+    const raw = await json<{ id: number; login: string; name: string | null; avatar_url: string }>(
+      await this.#get('/user'),
+    );
+    return { id: raw.id, login: raw.login, name: raw.name, avatarUrl: raw.avatar_url };
+  }
+
+  /** Installations of this App that the user can access, as GitHub decides. */
+  async listInstallations(): Promise<Installation[]> {
+    const raw = await paginate(
+      async (page) =>
+        (
+          await json<{ installations: RawInstallation[] }>(
+            await this.#get(`/user/installations?per_page=${PAGE}&page=${page}`),
+          )
+        ).installations,
+    );
+    return raw.map(installation);
+  }
 }
