@@ -38,6 +38,47 @@ test('CLI check and list expose the same canonical interaction model', () => {
   assert.equal(result.config.schema_version, 2);
 });
 
+test('CLI output flags preserve JSON defaults and provide human-readable check/list results', () => {
+  const original = cli(['check']);
+  const explicit = cli(['check', '--format', 'json']);
+  assert.equal(explicit.status, original.status, explicit.stderr);
+  assert.deepEqual(JSON.parse(explicit.stdout), JSON.parse(original.stdout));
+  const check = cli(['check', '--format', 'text']);
+  assert.equal(check.status, original.status, check.stderr);
+  assert.match(check.stdout, /^Structural check: PASS/);
+  const list = cli(['list', '--format', 'text']);
+  assert.equal(list.status, original.status, list.stderr);
+  const first = JSON.parse(original.stdout).specs[0];
+  assert.ok(list.stdout.includes(first.id));
+  assert.match(list.stdout, /execution verification: not recorded/);
+  const jsonList = cli(['list', '--format', 'json']);
+  assert.deepEqual(JSON.parse(jsonList.stdout), JSON.parse(original.stdout).specs);
+});
+
+test('CLI GitHub output emits annotations and keeps a failed structural check nonzero', async (t) => {
+  const directory = await emptyRepository(t);
+  const result = cli(['check', directory, '--format', 'github']);
+  assert.equal(result.status, 1, result.stderr);
+  assert.match(result.stdout, /^Structural check: FAIL/);
+  assert.match(result.stdout, /^::error .*file=\.spectrum\/config\.json::/m);
+  assert.deepEqual(await readdir(directory), []);
+});
+
+test('CLI rejects invalid output selections without changing the customer repository', async (t) => {
+  const directory = await emptyRepository(t);
+  for (const args of [
+    ['check', directory, '--format', 'other'],
+    ['list', directory, '--format', 'github'],
+    ['init', directory, '--format', 'text'],
+  ]) {
+    const result = cli(args);
+    assert.equal(result.status, 1);
+    assert.equal(result.stdout, '');
+    assert.match(result.stderr, /format/);
+  }
+  assert.deepEqual(await readdir(directory), []);
+});
+
 test('CLI profile reads an existing repository without installing a config', async (t) => {
   const directory = await mkdtemp(join(tmpdir(), 'spectrum-cli-'));
   t.after(() => rm(directory, { recursive: true, force: true }));

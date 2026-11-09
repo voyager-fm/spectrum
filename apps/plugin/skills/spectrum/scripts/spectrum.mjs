@@ -10702,6 +10702,90 @@ async function inspectRepositorySetup(root) {
   return { config, package: pkg, skills, plugin };
 }
 
+// apps/cli/src/output.ts
+function parseOutputFormat(value = "json", allowGithub = false) {
+  if (value === "json" || value === "text") return value;
+  if (value === "github" && allowGithub) return value;
+  if (value === "github") throw new Error("The github output format is supported only for check.");
+  throw new Error(
+    `Unsupported output format: ${value}. Expected json, text${allowGithub ? ", or github" : ""}.`
+  );
+}
+function isControl(character) {
+  const code = character.charCodeAt(0);
+  return code < 32 || code >= 127 && code <= 159 || code === 8232 || code === 8233;
+}
+function singleLine(value) {
+  return Array.from(value, (character) => {
+    if (!isControl(character)) return character;
+    if (character === "\n") return "\\n";
+    if (character === "\r") return "\\r";
+    if (character === "	") return "\\t";
+    return `\\u${character.charCodeAt(0).toString(16).padStart(4, "0")}`;
+  }).join("");
+}
+function escapeData(value) {
+  return value.replace(/%/g, "%25").replace(/\r/g, "%0D").replace(/\n/g, "%0A");
+}
+function escapeProperty(value) {
+  return escapeData(value).replace(/:/g, "%3A").replace(/,/g, "%2C");
+}
+function annotationPath(path) {
+  const normalized = path.replace(/\\/g, "/");
+  if (!normalized || normalized.startsWith("/") || /^[A-Za-z]:/.test(normalized) || /^[A-Za-z][A-Za-z0-9+.-]*:\/\//.test(normalized) || Array.from(normalized).some(isControl) || normalized.split("/").some((part) => part === ".."))
+    return null;
+  const parts = normalized.split("/").filter((part) => part && part !== ".");
+  return parts.length ? parts.join("/") : null;
+}
+function annotation(finding) {
+  const properties = [`title=${escapeProperty(finding.code)}`];
+  const path = annotationPath(finding.path);
+  if (path !== null) {
+    properties.push(`file=${escapeProperty(path)}`);
+    if (Number.isSafeInteger(finding.line) && (finding.line ?? 0) > 0)
+      properties.push(`line=${finding.line}`);
+  }
+  return `::${finding.severity} ${properties.join(",")}::${escapeData(finding.message)}`;
+}
+function summary(result) {
+  const errors = result.findings.filter((finding) => finding.severity === "error").length;
+  const warnings = result.findings.filter((finding) => finding.severity === "warning").length;
+  return `Structural check: ${result.ok ? "PASS" : "FAIL"} | ${errors} error(s), ${warnings} warning(s) | ${result.specs.length} spec(s)`;
+}
+function formatCheckResult(result, format = "json") {
+  const selected = parseOutputFormat(format, true);
+  if (selected === "json") return JSON.stringify(result, null, 2);
+  if (selected === "github")
+    return [summary(result), ...result.findings.map(annotation)].join("\n");
+  return [
+    summary(result),
+    ...result.findings.map((finding) => {
+      const line = Number.isSafeInteger(finding.line) && (finding.line ?? 0) > 0 ? `:${finding.line}` : "";
+      return `${finding.severity.toUpperCase()} ${singleLine(finding.path) || "(repository)"}${line} [${singleLine(finding.code)}] ${singleLine(finding.message)}`;
+    })
+  ].join("\n");
+}
+function formatSpecList(result, format = "json") {
+  const selected = parseOutputFormat(format);
+  if (selected === "json") return JSON.stringify(result.specs, null, 2);
+  const lines = [summary(result)];
+  if (!result.specs.length) lines.push("No specs found.");
+  for (const spec of result.specs) {
+    const checked = spec.acceptance.filter((criterion) => criterion.checked).length;
+    lines.push(
+      `${singleLine(spec.id)} \u2014 ${singleLine(spec.title)}`,
+      `  ${singleLine(spec.path)} | feature: ${singleLine(spec.featureId)} | review: ${singleLine(spec.status)} | implementation: ${singleLine(spec.implementationStatus)}`,
+      `  AC: ${spec.acceptance.length} total, ${checked} annotated checked; execution verification: not recorded`
+    );
+    for (const criterion of spec.acceptance) {
+      lines.push(
+        `    [${criterion.checked ? "x" : " "}] ${singleLine(criterion.id ?? "(no ID)")}: ${singleLine(criterion.statement)}`
+      );
+    }
+  }
+  return lines.join("\n");
+}
+
 // apps/cli/src/files.ts
 import { lstat as lstat2, mkdir, readFile as readFile3, realpath as realpath4, writeFile } from "node:fs/promises";
 import { dirname as dirname2, isAbsolute as isAbsolute2, join as join2, relative as relative3, resolve as resolve4, sep as sep3 } from "node:path";
@@ -10910,8 +10994,10 @@ var VERSION = "0.1.0";
 var USAGE = `Usage: spectrum <command> [repository path] [options]
 
 Commands:
-  check [path] [--profile profile.json]   Validate .spectrum specs; prints JSON
-  list [path] [--profile profile.json]    List parsed interaction specs; prints JSON
+  check [path] [--profile profile.json] [--format json|text|github]
+                                          Validate .spectrum specs; JSON by default
+  list [path] [--profile profile.json] [--format json|text]
+                                          List parsed interaction specs; JSON by default
   init [path] [--name project] [--dry-run]
                                           Write .spectrum/config.json and a starter bundle
   skills install [path] [--agent claude|codex|all] [--force] [--dry-run]
@@ -10919,8 +11005,8 @@ Commands:
   status [path]                           Report configuration, package and agent skill setup
   --version                               Print the package name and installed version`;
 var COMMANDS = {
-  check: { "--profile": true },
-  list: { "--profile": true },
+  check: { "--profile": true, "--format": true },
+  list: { "--profile": true, "--format": true },
   init: { "--name": true, "--dry-run": false },
   "skills install": { "--agent": true, "--force": false, "--dry-run": false },
   status: {}
@@ -10977,10 +11063,14 @@ async function run(argv) {
   const root = parsed.path ?? process.cwd();
   const value = (name) => options.get(name);
   if (command === "check" || command === "list") {
+    const checkFormat = command === "check" ? parseOutputFormat(value("--format"), true) : void 0;
+    const listFormat = command === "list" ? parseOutputFormat(value("--format")) : void 0;
     const profilePath = value("--profile");
     const profile = profilePath ? JSON.parse(await readFile4(profilePath, "utf8")) : void 0;
     const result2 = await checkRepository(root, { config: profile });
-    print(command === "list" ? result2.specs : result2);
+    console.log(
+      command === "list" ? formatSpecList(result2, listFormat) : formatCheckResult(result2, checkFormat)
+    );
     return result2.ok ? 0 : 1;
   }
   if (command === "init") {

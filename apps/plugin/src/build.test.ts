@@ -118,3 +118,34 @@ test('an older pinned CLI that rejects a command falls back to the bundled CLI',
   assert.match(status.stderr, /CLI 0\.0\.1 does not accept this command; running the bundled/);
   assert.match(status.stderr, /ran the bundled CLI/);
 });
+
+test('standalone output formats work without workspace files and preserve error exit codes', async (t) => {
+  const directory = await mkdtemp(join(tmpdir(), 'spectrum-output-bundle-'));
+  t.after(() => rm(directory, { recursive: true, force: true }));
+  const binary = join(directory, 'spectrum.mjs');
+  await writeFile(binary, await bundleCli());
+  const client = join(directory, 'client');
+  await mkdir(client);
+  const run = (args: string[]) =>
+    spawnSync(process.execPath, [binary, ...args], {
+      cwd: client,
+      encoding: 'utf8',
+      maxBuffer: 2 * 1024 * 1024,
+    });
+  const missing = run(['check', '--format', 'github']);
+  assert.equal(missing.status, 1, missing.stderr);
+  assert.match(missing.stdout, /^::error .*file=\.spectrum\/config\.json::/m);
+  assert.equal(run(['init']).status, 0);
+  const json = run(['check']);
+  assert.equal(json.status, 0, json.stderr);
+  assert.deepEqual(JSON.parse(run(['check', '--format', 'json']).stdout), JSON.parse(json.stdout));
+  const text = run(['check', '--format', 'text']);
+  assert.equal(text.status, 0, text.stderr);
+  assert.match(text.stdout, /^Structural check: PASS/);
+  const list = run(['list', '--format', 'text']);
+  assert.equal(list.status, 0, list.stderr);
+  assert.match(list.stdout, /execution verification: not recorded/);
+  const github = run(['check', '--format', 'github']);
+  assert.equal(github.status, 0, github.stderr);
+  assert.match(github.stdout, /^::warning /m);
+});

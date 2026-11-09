@@ -1,14 +1,17 @@
 import { readFile } from 'node:fs/promises';
 import { checkRepository } from '@spectrum/spec-engine';
 import { SETUP } from '@spectrum/spec-engine/setup';
+import { formatCheckResult, formatSpecList, parseOutputFormat } from './output.ts';
 import { initRepository, installSkills, parseAgents, repositoryStatus } from './setup-commands.ts';
 import { VERSION } from './version.ts';
 
 const USAGE = `Usage: spectrum <command> [repository path] [options]
 
 Commands:
-  check [path] [--profile profile.json]   Validate .spectrum specs; prints JSON
-  list [path] [--profile profile.json]    List parsed interaction specs; prints JSON
+  check [path] [--profile profile.json] [--format json|text|github]
+                                          Validate .spectrum specs; JSON by default
+  list [path] [--profile profile.json] [--format json|text]
+                                          List parsed interaction specs; JSON by default
   init [path] [--name project] [--dry-run]
                                           Write .spectrum/config.json and a starter bundle
   skills install [path] [--agent claude|codex|all] [--force] [--dry-run]
@@ -18,8 +21,8 @@ Commands:
 
 /** Options each command accepts; `true` takes a value, `false` is a boolean flag. */
 const COMMANDS: Record<string, Record<string, boolean>> = {
-  check: { '--profile': true },
-  list: { '--profile': true },
+  check: { '--profile': true, '--format': true },
+  list: { '--profile': true, '--format': true },
   init: { '--name': true, '--dry-run': false },
   'skills install': { '--agent': true, '--force': false, '--dry-run': false },
   status: {},
@@ -84,10 +87,17 @@ export async function run(argv: string[]): Promise<number> {
   const root = parsed.path ?? process.cwd();
   const value = (name: string) => options.get(name) as string | undefined;
   if (command === 'check' || command === 'list') {
+    const checkFormat =
+      command === 'check' ? parseOutputFormat(value('--format'), true) : undefined;
+    const listFormat = command === 'list' ? parseOutputFormat(value('--format')) : undefined;
     const profilePath = value('--profile');
     const profile = profilePath ? JSON.parse(await readFile(profilePath, 'utf8')) : undefined;
     const result = await checkRepository(root, { config: profile });
-    print(command === 'list' ? result.specs : result);
+    console.log(
+      command === 'list'
+        ? formatSpecList(result, listFormat)
+        : formatCheckResult(result, checkFormat),
+    );
     return result.ok ? 0 : 1;
   }
   if (command === 'init') {
