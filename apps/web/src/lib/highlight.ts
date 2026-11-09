@@ -141,17 +141,24 @@ function load() {
 }
 
 /**
- * Splits `text` into lines of colored tokens. Unknown languages, and any grammar failure,
- * return unhighlighted lines: highlighting is presentation and never hides the source.
+ * Above this many characters a document renders plain: pages are rendered per request, and
+ * tokenizing a very large file would delay the page for presentation alone.
+ */
+export const MAX_HIGHLIGHT_LENGTH = 200_000;
+
+/**
+ * Splits `text` into lines of colored tokens. Unknown languages, oversized sources and any
+ * grammar failure return unhighlighted lines: highlighting is presentation and never hides the
+ * source.
  */
 export async function highlightLines(
   text: string,
   label: string | undefined,
 ): Promise<HighlightToken[][]> {
-  const source = text.replace(/\n$/, '');
+  const source = text.replace(/\r\n?/g, '\n').replace(/\n$/, '');
   const plain = () => source.split('\n').map((line) => (line ? [{ text: line }] : []));
   const lang = highlightLanguage(label);
-  if (!lang) return plain();
+  if (!lang || source.length > MAX_HIGHLIGHT_LENGTH) return plain();
   if (lang === 'tsv' || lang === 'csv') return delimitedLines(source, DELIMITERS[lang]);
   try {
     const { tokens } = (await load()).codeToTokens(source, { lang, theme: 'spectrum' });

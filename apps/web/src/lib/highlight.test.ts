@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { highlightLanguage, highlightLines } from './highlight.ts';
+import { highlightLanguage, highlightLines, MAX_HIGHLIGHT_LENGTH } from './highlight.ts';
 
 const text = (lines: { text: string }[][]) => lines.map((l) => l.map((t) => t.text).join(''));
 const colorOf = (lines: { text: string; color?: string }[][], value: string) =>
@@ -47,6 +47,45 @@ test('highlightLines bolds the TSV header and alternates column tones', async ()
   assert.equal(colorOf(lines, 'A-1'), undefined);
   assert.equal(colorOf(lines, 'Browse'), 'var(--code-string)');
   assert.equal(colorOf(lines, 'draft'), undefined);
+});
+
+test('every supported grammar loads and colors a sample with the JavaScript regex engine', async () => {
+  const samples: Record<string, string> = {
+    toml: 'a = "x"',
+    json: '{"a": 1}',
+    jsonc: '// note\n{"a": 1}',
+    yaml: 'a: "x"',
+    markdown: '# Title',
+    typescript: 'const a: number = 1;',
+    tsx: 'const a = <div className="x" />;',
+    javascript: 'const a = "x";',
+    jsx: 'const a = <b>x</b>;',
+    shellscript: 'echo "hi" # note',
+    diff: '+ added\n- removed',
+    sql: "SELECT 'x' FROM t;",
+    html: '<a href="x">y</a>',
+    css: 'a { color: red; }',
+  };
+  for (const [lang, code] of Object.entries(samples)) {
+    const lines = await highlightLines(code, lang);
+    assert.deepEqual(text(lines), code.split('\n'), lang);
+    assert.ok(
+      lines.flat().some((t) => t.color),
+      `${lang} produced no colored token`,
+    );
+  }
+});
+
+test('highlightLines normalizes CRLF line endings', async () => {
+  const lines = await highlightLines('a = 1\r\nb = "x"\r\n', 'toml');
+  assert.deepEqual(text(lines), ['a = 1', 'b = "x"']);
+  assert.equal(colorOf(lines, '"x"'), 'var(--code-string)');
+});
+
+test('highlightLines leaves oversized sources plain', async () => {
+  const source = `a = "${'x'.repeat(MAX_HIGHLIGHT_LENGTH)}"`;
+  const lines = await highlightLines(source, 'toml');
+  assert.deepEqual(lines, [[{ text: source }]]);
 });
 
 test('highlightLines returns plain lines for unknown languages', async () => {
