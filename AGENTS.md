@@ -7,7 +7,14 @@ Keep the plugin, CLI, dashboard and worker on the shared workspace packages (@sp
 Run pnpm check. Add regression tests for changed behavior.
 Keep unimplemented integration paths explicit; never fabricate successful model calls or reviews.
 Keep specs aligned with changes, but distinguish planned requirements from verified functionality.
-Do not commit, push, publish, or create external issues without explicit user authorization.
+Do not commit, push, publish, or create external issues without explicit user authorization, except as the temporary hackathon workflow below allows.
+
+## Temporary: hackathon workflow
+This section is temporary. Remove it when the hackathon ends; it applies from 2026-11-09 until then.
+- Work on `main` only. Do not create feature branches, worktrees or pull requests, and do not push to any branch other than `origin/main`.
+- Commit and push finished, verified work to `origin/main` as you go, in small commits split by scope. This authorizes commits and pushes to `main` only; publishing, releases and external issues still need explicit approval.
+- Several agents share this working tree. Stage only the paths you changed (`git add <paths>`, never `git add -A`), and never stash, reset, check out or reformat another agent's uncommitted changes.
+- Before pushing, run `pnpm check`, then `git pull --rebase --autostash origin main`. If the rebase conflicts or the autostash does not reapply cleanly, stop and tell the user; never drop a stash.
 
 ## Development harness
 
