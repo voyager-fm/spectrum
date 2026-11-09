@@ -9778,7 +9778,7 @@ function strings(value) {
 function parseConfiguration(raw) {
   if (!record(raw) || raw.schema_version !== 2)
     throw new Error(
-      "Expected schema_version: 2. Migrate legacy feature JSON to TSV inventories and Markdown interaction specs; see .spectrum/schemas/README.md."
+      "Expected schema_version: 2. Migrate legacy feature JSON to TSV inventories and Markdown interaction specs; see the @spectrum/spec-engine document model guide."
     );
   if (!text(raw.name) || raw.mode !== "proposal-only" || raw.canonical_source !== "git-files")
     throw new Error(
@@ -9787,8 +9787,13 @@ function parseConfiguration(raw) {
   if (!Array.isArray(raw.inventories) || !raw.inventories.length || !Array.isArray(raw.documents) || !raw.documents.length)
     throw new Error("Configuration requires nonempty inventories and documents.");
   const inventories = raw.inventories.map((source) => {
+    if (record(source) && source.catalog !== void 0) {
+      if (!text(source.catalog) || Object.keys(source).some((key) => key !== "catalog"))
+        throw new Error("A catalog inventory entry requires only a catalog path.");
+      return { catalog: source.catalog };
+    }
     if (!record(source) || !inventoryKinds.includes(source.kind) || !text(source.data) || !text(source.schema))
-      throw new Error("Each inventory requires kind, data and schema paths.");
+      throw new Error("Each inventory requires a catalog path, or kind, data and schema paths.");
     return { kind: source.kind, data: source.data, schema: source.schema };
   });
   const documents = raw.documents.map((source) => {
@@ -9815,6 +9820,9 @@ function retiredConfigurationKeys(raw) {
 async function readRawConfiguration(root, configPath = ".spectrum/config.json") {
   return JSON.parse(await readRepositoryText(root, configPath));
 }
+
+// ../../packages/spec-engine/src/inventory.ts
+import { posix } from "node:path";
 
 // ../../packages/spec-engine/src/base-schemas.ts
 var baseInventorySchemas = {
@@ -9992,11 +10000,63 @@ function concrete(value) {
 function rowKey(table, values) {
   return `${table.schema.name}:${JSON.stringify(table.schema.primary_key.map((key) => values[key]))}`;
 }
+function parseInventoryCatalog(raw, catalogPath) {
+  if (!record(raw) || !text(raw.schema_version) || !record(raw.tables))
+    throw new Error("Inventory catalog requires schema_version and a tables mapping.");
+  const entries = Object.entries(raw.tables);
+  if (!entries.length) throw new Error("Inventory catalog requires at least one table.");
+  return entries.map(([name, entry]) => {
+    const fail = (message) => {
+      throw new Error(`${name}: ${message}`);
+    };
+    if (!record(entry)) return fail("table definition must be a mapping.");
+    const { data, kind, ...definition } = entry;
+    if (!text(data) || posix.isAbsolute(data) || data.includes("\\"))
+      return fail("data must be a TSV path relative to the catalog.");
+    if (definition.name !== void 0 || definition.schema_version !== void 0)
+      fail("the table key names the table; name and schema_version belong to the catalog.");
+    if (kind !== void 0 && !inventoryKinds.includes(kind))
+      fail(`unknown kind ${String(kind)}.`);
+    const table = { ...definition, schema_version: raw.schema_version };
+    let schema;
+    let resolvedKind;
+    try {
+      if (definition.extends !== void 0) {
+        const base = baseInventoryKinds[definition.extends];
+        schema = extendInventorySchema(table, kind ?? base);
+        resolvedKind = base;
+        if (schema.name !== name) fail(`${definition.extends} defines table ${schema.name}.`);
+      } else {
+        if (kind === void 0) fail("kind is required unless the table extends a base schema.");
+        schema = parseInventorySchema({ ...table, name });
+        resolvedKind = kind;
+      }
+    } catch (error) {
+      if (error instanceof Error && !error.message.startsWith(`${name}: `)) fail(error.message);
+      throw error;
+    }
+    return {
+      kind: resolvedKind,
+      data: posix.normalize(posix.join(posix.dirname(catalogPath), data)),
+      schema
+    };
+  });
+}
+async function readInventoryCatalog(root, catalogPath) {
+  return parseInventoryCatalog(
+    JSON.parse(await readRepositoryText(root, catalogPath)),
+    catalogPath
+  );
+}
 async function readInventory(root, source, findings) {
   const schema = resolveInventorySchema(
     JSON.parse(await readRepositoryText(root, source.schema)),
     source.kind
   );
+  return readTable(root, { kind: source.kind, data: source.data, schema }, source.schema, findings);
+}
+async function readTable(root, source, schemaPath, findings) {
+  const { schema } = source;
   const body = await readRepositoryText(root, source.data);
   const lines = body.replace(/^\uFEFF/, "").split(/\r?\n/);
   if (lines.at(-1) === "") lines.pop();
@@ -10005,7 +10065,7 @@ async function readInventory(root, source, findings) {
   const table = {
     kind: source.kind,
     path: source.data,
-    schemaPath: source.schema,
+    schemaPath,
     schema,
     rows: []
   };
@@ -10163,21 +10223,42 @@ async function checkRepository(root, options = {}) {
     return result;
   }
   const config = result.config;
+  const addTable = (table) => {
+    if (model.inventories.some((t) => t.schema.name === table.schema.name))
+      add("duplicate-table", table.schemaPath, `Table ${table.schema.name} is configured twice.`);
+    else model.inventories.push(table);
+  };
+  const schemaError = (error, schemaPath, dataPath) => {
+    if (error instanceof RepositoryFileError || !(error instanceof Error))
+      fileError(error, dataPath, "invalid-inventory");
+    else
+      add(
+        "invalid-inventory",
+        schemaPath,
+        error instanceof SyntaxError ? "Inventory schema must be valid JSON." : error.message
+      );
+  };
   for (const source of config.inventories) {
+    if ("catalog" in source) {
+      let tables2;
+      try {
+        tables2 = await readInventoryCatalog(base, source.catalog);
+      } catch (error) {
+        schemaError(error, source.catalog, source.catalog);
+        continue;
+      }
+      for (const table of tables2)
+        try {
+          addTable(await readTable(base, table, source.catalog, findings));
+        } catch (error) {
+          fileError(error, table.data, "invalid-inventory");
+        }
+      continue;
+    }
     try {
-      const table = await readInventory(base, source, findings);
-      if (model.inventories.some((t) => t.schema.name === table.schema.name))
-        add("duplicate-table", source.schema, `Table ${table.schema.name} is configured twice.`);
-      else model.inventories.push(table);
+      addTable(await readInventory(base, source, findings));
     } catch (error) {
-      if (error instanceof RepositoryFileError || !(error instanceof Error))
-        fileError(error, source.data, "invalid-inventory");
-      else
-        add(
-          "invalid-inventory",
-          source.schema,
-          error instanceof SyntaxError ? "Inventory schema must be valid JSON." : error.message
-        );
+      schemaError(error, source.schema, source.data);
     }
   }
   checkReferences(model.inventories, findings, model.relationships);

@@ -1,3 +1,4 @@
+import { posix } from 'node:path';
 import type {
   Finding,
   Inventory,
@@ -12,7 +13,7 @@ import {
   baseInventoryKinds,
   baseInventorySchema,
 } from './base-schemas.ts';
-import { strings, text } from './config.ts';
+import { inventoryKinds, strings, text } from './config.ts';
 import { readRepositoryText } from './files.ts';
 import { record } from './markdown.ts';
 
@@ -151,6 +152,68 @@ export function rowKey(table: Inventory, values: Record<string, string>): string
   return `${table.schema.name}:${JSON.stringify(table.schema.primary_key.map((key) => values[key]))}`;
 }
 
+/** One table declared by a domain catalog, with its data path resolved from the repository root. */
+export interface CatalogTable {
+  kind: InventoryKind;
+  data: string;
+  schema: InventorySchema;
+}
+
+/**
+ * Parse a domain schema catalog: `tables` maps each table name to its TSV file (relative to the
+ * catalog), its kind and its columns. Engine-owned FI tables use `extends`; other tables are
+ * complete definitions. Throws on the first invalid table so the catalog is never half-trusted.
+ */
+export function parseInventoryCatalog(raw: unknown, catalogPath: string): CatalogTable[] {
+  if (!record(raw) || !text(raw.schema_version) || !record(raw.tables))
+    throw new Error('Inventory catalog requires schema_version and a tables mapping.');
+  const entries = Object.entries(raw.tables);
+  if (!entries.length) throw new Error('Inventory catalog requires at least one table.');
+  return entries.map(([name, entry]) => {
+    const fail = (message: string): never => {
+      throw new Error(`${name}: ${message}`);
+    };
+    if (!record(entry)) return fail('table definition must be a mapping.');
+    const { data, kind, ...definition } = entry;
+    if (!text(data) || posix.isAbsolute(data) || data.includes('\\'))
+      return fail('data must be a TSV path relative to the catalog.');
+    if (definition.name !== undefined || definition.schema_version !== undefined)
+      fail('the table key names the table; name and schema_version belong to the catalog.');
+    if (kind !== undefined && !inventoryKinds.includes(kind as InventoryKind))
+      fail(`unknown kind ${String(kind)}.`);
+    const table = { ...definition, schema_version: raw.schema_version };
+    let schema: InventorySchema;
+    let resolvedKind: InventoryKind;
+    try {
+      if (definition.extends !== undefined) {
+        const base = baseInventoryKinds[definition.extends as BaseInventorySchemaId];
+        schema = extendInventorySchema(table, (kind as InventoryKind | undefined) ?? base);
+        resolvedKind = base;
+        if (schema.name !== name) fail(`${definition.extends} defines table ${schema.name}.`);
+      } else {
+        if (kind === undefined) fail('kind is required unless the table extends a base schema.');
+        schema = parseInventorySchema({ ...table, name });
+        resolvedKind = kind as InventoryKind;
+      }
+    } catch (error) {
+      if (error instanceof Error && !error.message.startsWith(`${name}: `)) fail(error.message);
+      throw error;
+    }
+    return {
+      kind: resolvedKind,
+      data: posix.normalize(posix.join(posix.dirname(catalogPath), data)),
+      schema,
+    };
+  });
+}
+
+export async function readInventoryCatalog(root: string, catalogPath: string) {
+  return parseInventoryCatalog(
+    JSON.parse(await readRepositoryText(root, catalogPath)),
+    catalogPath,
+  );
+}
+
 export async function readInventory(
   root: string,
   source: InventorySource,
@@ -160,6 +223,16 @@ export async function readInventory(
     JSON.parse(await readRepositoryText(root, source.schema)),
     source.kind,
   );
+  return readTable(root, { kind: source.kind, data: source.data, schema }, source.schema, findings);
+}
+
+export async function readTable(
+  root: string,
+  source: CatalogTable,
+  schemaPath: string,
+  findings: Finding[],
+): Promise<Inventory> {
+  const { schema } = source;
   const body = await readRepositoryText(root, source.data);
   const lines = body.replace(/^\uFEFF/, '').split(/\r?\n/);
   if (lines.at(-1) === '') lines.pop();
@@ -168,7 +241,7 @@ export async function readInventory(
   const table: Inventory = {
     kind: source.kind,
     path: source.data,
-    schemaPath: source.schema,
+    schemaPath,
     schema,
     rows: [],
   };

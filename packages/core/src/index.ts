@@ -31,11 +31,17 @@ export type InventoryKind =
   | 'interactions'
   | 'routes'
   | 'other';
+/** One table whose schema file describes only that table (brownfield layout). */
 export interface InventorySource {
   kind: InventoryKind;
   data: string;
   schema: string;
 }
+/** A domain schema file that declares several tables and their TSV files. */
+export interface InventoryCatalogSource {
+  catalog: string;
+}
+export type InventoryEntry = InventorySource | InventoryCatalogSource;
 export type DocumentSourceKind =
   | 'feature_bundle'
   | 'page_bundle'
@@ -54,7 +60,7 @@ export interface SpectrumConfig {
   mode: 'proposal-only';
   canonical_source: 'git-files';
   overview?: string;
-  inventories: InventorySource[];
+  inventories: InventoryEntry[];
   documents: DocumentSource[];
 }
 export interface ColumnReference {

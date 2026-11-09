@@ -1,14 +1,14 @@
 import type {
   DocumentSource,
   DocumentSourceKind,
+  InventoryEntry,
   InventoryKind,
-  InventorySource,
   SpectrumConfig,
 } from '@spectrum/core';
 import { readRepositoryText } from './files.ts';
 import { record } from './markdown.ts';
 
-const inventoryKinds: InventoryKind[] = [
+export const inventoryKinds: InventoryKind[] = [
   'objects',
   'surfaces',
   'regions',
@@ -39,7 +39,7 @@ export function strings(value: unknown): value is string[] {
 export function parseConfiguration(raw: unknown): SpectrumConfig {
   if (!record(raw) || raw.schema_version !== 2)
     throw new Error(
-      'Expected schema_version: 2. Migrate legacy feature JSON to TSV inventories and Markdown interaction specs; see .spectrum/schemas/README.md.',
+      'Expected schema_version: 2. Migrate legacy feature JSON to TSV inventories and Markdown interaction specs; see the @spectrum/spec-engine document model guide.',
     );
   if (!text(raw.name) || raw.mode !== 'proposal-only' || raw.canonical_source !== 'git-files')
     throw new Error(
@@ -52,14 +52,19 @@ export function parseConfiguration(raw: unknown): SpectrumConfig {
     !raw.documents.length
   )
     throw new Error('Configuration requires nonempty inventories and documents.');
-  const inventories: InventorySource[] = raw.inventories.map((source: unknown) => {
+  const inventories: InventoryEntry[] = raw.inventories.map((source: unknown) => {
+    if (record(source) && source.catalog !== undefined) {
+      if (!text(source.catalog) || Object.keys(source).some((key) => key !== 'catalog'))
+        throw new Error('A catalog inventory entry requires only a catalog path.');
+      return { catalog: source.catalog };
+    }
     if (
       !record(source) ||
       !inventoryKinds.includes(source.kind as InventoryKind) ||
       !text(source.data) ||
       !text(source.schema)
     )
-      throw new Error('Each inventory requires kind, data and schema paths.');
+      throw new Error('Each inventory requires a catalog path, or kind, data and schema paths.');
     return { kind: source.kind as InventoryKind, data: source.data, schema: source.schema };
   });
   const documents: DocumentSource[] = raw.documents.map((source: unknown) => {

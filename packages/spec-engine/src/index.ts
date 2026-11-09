@@ -23,7 +23,14 @@ import {
   repositoryDocuments,
   repositoryPath,
 } from './files.ts';
-import { checkReferences, concrete, readInventory } from './inventory.ts';
+import {
+  type CatalogTable,
+  checkReferences,
+  concrete,
+  readInventory,
+  readInventoryCatalog,
+  readTable,
+} from './inventory.ts';
 import {
   type DocumentLink,
   interactionSections,
@@ -39,7 +46,9 @@ export {
   baseInventorySchemas,
 } from './base-schemas.ts';
 export {
+  type CatalogTable,
   extendInventorySchema,
+  parseInventoryCatalog,
   parseInventorySchema,
   resolveInventorySchema,
 } from './inventory.ts';
@@ -138,21 +147,42 @@ export async function checkRepository(
     return result;
   }
   const config = result.config;
+  const addTable = (table: Inventory) => {
+    if (model.inventories.some((t) => t.schema.name === table.schema.name))
+      add('duplicate-table', table.schemaPath, `Table ${table.schema.name} is configured twice.`);
+    else model.inventories.push(table);
+  };
+  const schemaError = (error: unknown, schemaPath: string, dataPath: string) => {
+    if (error instanceof RepositoryFileError || !(error instanceof Error))
+      fileError(error, dataPath, 'invalid-inventory');
+    else
+      add(
+        'invalid-inventory',
+        schemaPath,
+        error instanceof SyntaxError ? 'Inventory schema must be valid JSON.' : error.message,
+      );
+  };
   for (const source of config.inventories) {
+    if ('catalog' in source) {
+      let tables: CatalogTable[];
+      try {
+        tables = await readInventoryCatalog(base, source.catalog);
+      } catch (error) {
+        schemaError(error, source.catalog, source.catalog);
+        continue;
+      }
+      for (const table of tables)
+        try {
+          addTable(await readTable(base, table, source.catalog, findings));
+        } catch (error) {
+          fileError(error, table.data, 'invalid-inventory');
+        }
+      continue;
+    }
     try {
-      const table = await readInventory(base, source, findings);
-      if (model.inventories.some((t) => t.schema.name === table.schema.name))
-        add('duplicate-table', source.schema, `Table ${table.schema.name} is configured twice.`);
-      else model.inventories.push(table);
+      addTable(await readInventory(base, source, findings));
     } catch (error) {
-      if (error instanceof RepositoryFileError || !(error instanceof Error))
-        fileError(error, source.data, 'invalid-inventory');
-      else
-        add(
-          'invalid-inventory',
-          source.schema,
-          error instanceof SyntaxError ? 'Inventory schema must be valid JSON.' : error.message,
-        );
+      schemaError(error, source.schema, source.data);
     }
   }
   checkReferences(model.inventories, findings, model.relationships);
