@@ -12,7 +12,7 @@ Spectrum represents a repository's product, website and engineering documentatio
 
 ## Canonical traceability
 
-- [Document ownership and schemas](../../../schemas/README.md)
+- [Document ownership and schemas](https://github.com/voyager-fm/spectrum/blob/main/packages/spec-engine/docs/document-model.md)
 - [Validation contract](../../../product/feature_inventory/specs/val/contracts/validation.toml)
 - [Dashboard contract](../../../product/feature_inventory/specs/dsh/contracts/dashboard.toml)
 - [Proposal contract](../../../product/feature_inventory/specs/loop/contracts/proposal.toml)

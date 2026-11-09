@@ -14,5 +14,5 @@
 
 ## Sources
 
-- [Contract](contract.toml)
+- [Surface contract](contract.toml)
 - [Layout](layout.md)

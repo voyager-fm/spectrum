@@ -1,6 +1,5 @@
 ---
-page_id: {{json:page_id}}
-path: {{json:route_path}}
+region: {{json:structure_key}}
 spec_status: draft
 ---
 

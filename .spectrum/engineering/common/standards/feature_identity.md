@@ -45,4 +45,4 @@ FI owns category/feature identity. Interaction metadata, IA references, contract
 
 - [Feature inventory](../../../product/feature_inventory/features.tsv)
 - [Interaction inventory](../../../product/feature_inventory/interactions.tsv)
-- [Schema guide](../../../schemas/README.md)
+- [Engine document model](https://github.com/voyager-fm/spectrum/blob/main/packages/spec-engine/docs/document-model.md)

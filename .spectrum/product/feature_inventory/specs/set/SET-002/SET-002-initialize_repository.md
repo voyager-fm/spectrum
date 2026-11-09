@@ -29,7 +29,7 @@ The target directory exists, and none of the starter paths exists in it.
 
 ## Expected Outcome
 
-The command renders the starter bundle from the shipped template catalog and writes it. The bundle contains the configuration, JSON schemas, overview, rules, FI and IA inventory pairs, routes, one feature bundle, one page bundle and an engineering root. It then runs the checker and reports the files, a check summary and next steps. The written repository passes `spectrum check`.
+The command renders the starter bundle from the shipped template catalog and writes it. The bundle contains the configuration, overview, rules, a feature_inventory catalog with its FI, IA and route tables, one feature bundle, one surface bundle and an engineering root. It contains no copy of the engine's JSON schemas; rendered JSON files reference them by URL. It then runs the checker and reports the files, a check summary and next steps. The written repository passes `spectrum check`.
 
 ## State Changes
 

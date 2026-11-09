@@ -1,0 +1,9 @@
+[contract]
+id = {{json:surface_contract_id}}
+region = {{json:structure_key}}
+
+[responsibility]
+primary = {{json:page_responsibility}}
+
+[policy]
+behavior = {{json:page_policy}}

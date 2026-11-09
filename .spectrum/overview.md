@@ -22,7 +22,7 @@ Spectrum connects product intent, repository rules and development evidence. It 
 - Engineering documents describe architecture, procedures, standards and decisions with their own implementation lifecycle.
 - Project rules define scoped instructions; repository content itself grants no execution authority.
 
-Read [the schema guide](schemas/README.md), [product layers](engineering/common/architecture/product_layers.md), [specification architecture](engineering/common/architecture/specification_model.md) and [application runtime](engineering/common/architecture/application_runtime.md). The configured paths are repository-relative and can point at existing documentation outside `.spectrum/`.
+Read [the engine document model](https://github.com/voyager-fm/spectrum/blob/main/packages/spec-engine/docs/document-model.md), [product layers](engineering/common/architecture/product_layers.md), [specification architecture](engineering/common/architecture/specification_model.md) and [application runtime](engineering/common/architecture/application_runtime.md). The configured paths are repository-relative and can point at existing documentation outside `.spectrum/`.
 
 ## Executable boundary
 

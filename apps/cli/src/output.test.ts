@@ -236,7 +236,7 @@ test('list consumes a real spec parsed from the canonical engine template API', 
   const rendered = await renderTemplate('feature.interaction', values);
   await mkdir(dirname(join(root, rendered.path)), { recursive: true });
   await writeFile(join(root, rendered.path), rendered.content);
-  for (const id of ['inventory.custom.schema', 'inventory.custom.data']) {
+  for (const id of ['inventory.custom.catalog', 'inventory.custom.data']) {
     const output = await renderTemplate(id, {
       table_key: 'records',
       table_name: 'RECORDS',
@@ -252,14 +252,8 @@ test('list consumes a real spec parsed from the canonical engine template API', 
       name: 'Neutral customer',
       mode: 'proposal-only',
       canonical_source: 'git-files',
-      inventories: [
-        {
-          kind: 'other',
-          data: '.spectrum/custom/records/data.tsv',
-          schema: '.spectrum/custom/records/schema.json',
-        },
-      ],
-      documents: [{ kind: 'feature_bundle', root: '.spectrum/product/feature_specs' }],
+      inventories: [{ catalog: '.spectrum/custom/records.schema.json' }],
+      documents: [{ kind: 'feature_bundle', root: '.spectrum/product/feature_inventory/specs' }],
     },
   });
   // One template intentionally does not supply its contract/flow: keep real findings, not a success mock.

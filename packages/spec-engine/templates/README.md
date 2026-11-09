@@ -4,12 +4,11 @@ This directory ships the reusable authoring files owned by `@spectrum/spec-engin
 
 | IDs | Files and purpose |
 | --- | --- |
-| `schema.*` | JSON Schema definitions for configuration, standalone inventories, inventory extensions, interaction frontmatter and engineering metadata |
 | `repository.*` | Source mapping, overview and agent rules |
-| `inventory.*.schema`, `inventory.*.data` | FI categories/features/interactions, IA objects/surfaces/regions, routes, optional menus and custom tables |
+| `inventory.*.catalog`, `inventory.*.data` | The feature_inventory catalog and its FI categories/features/interactions, IA objects/surfaces/regions and routes tables; optional menus and custom catalogs |
 | `feature.interaction` | Complete interaction frontmatter, all required sections and a stable `AC-1` task item |
 | `feature.contract`, `feature.flow` | TOML vocabulary, policy, state model and reads/writes; Markdown coverage, happy/alternate paths and failures |
-| `page.*` | Page contract, layout, flow and optional experience specification |
+| `surface.*` | Surface bundle for one screen-level region: contract bound by `region`, layout, flow and optional experience specification |
 | `engineering.adr` | A proposed architecture decision record with context, alternatives and consequences |
 
 ## Loading and rendering
@@ -27,13 +26,13 @@ Every referenced field must be supplied, including prose. Use `TBD` for a genuin
 
 ## Connected starter bundle
 
-The default repository configuration selects FI, IA, route/page bundles, feature bundles, engineering and rules. Render its corresponding inventory pairs, `feature.*`, `page.*`, `repository.*` and `schema.*` with consistent IDs. Optional menus and custom tables require explicit entries in the installed configuration. Engineering knowledge grows with the project; architecture, implementation, boundary, runbook and governance articles have no fixed authoring template here. The ADR destination includes a decision month; supply the full dated filename as `article_key` when adopting a date-based naming convention.
+The default repository configuration declares one catalog, `feature_inventory/schema.json`, whose tables sit beside it as flat TSV files, with feature bundles under `feature_inventory/specs/`, surface bundles under `feature_inventory/surfaces/<surface>/<region>/`, engineering and rules. Render the catalog and its tables, `feature.*`, `surface.*` and `repository.*` with consistent IDs; the route row and the surface contract name the same `structure_key`. Optional menus and custom catalogs require explicit `catalog` entries in the installed configuration. Engineering knowledge grows with the project; architecture, implementation, boundary, runbook and governance articles have no fixed authoring template here. The ADR destination includes a decision month; supply the full dated filename as `article_key` when adopting a date-based naming convention.
 
-FI schema templates extend the engine's `spectrum:*` base schemas. Base column types, keys and references remain in `src/base-schemas.ts`; repository extensions add their own fields. JSON Schema definitions in `schemas/` are shipped authoring assets. `.spectrum/schemas/` is the self-repository installation; update both through review when changing the format. A regression check prevents these installed definitions from drifting.
+FI tables in the catalog extend the engine's `spectrum:*` base schemas. Base column types, keys and references remain in `src/base-schemas.ts`; repository extensions add their own fields. Rendered JSON files reference the engine's [JSON Schemas](../schemas/) by URL. No template installs a copy of an engine definition into a client, and a regression check enforces that.
 
 ## Verification
 
-`src/templates.test.ts` renders the catalog into an isolated repository and runs the actual checker, YAML/Markdown and TOML parsers. It also checks escaping, traversal rejection, missing inputs and schema installation consistency. These checks prove structural usability, not that filled-in product behavior is implemented. Run `pnpm check` for the repository gate.
+`src/templates.test.ts` renders the catalog into an isolated repository and runs the actual checker, YAML/Markdown and TOML parsers. It also checks escaping, traversal rejection, missing inputs, catalog table-name substitution and that rendered `$schema` values are engine URLs rather than installed copies. These checks prove structural usability, not that filled-in product behavior is implemented. Run `pnpm check` for the repository gate.
 
 
 Engine installation policy is data in [scaffolding.json](scaffolding.json), consumed by `renderStarterBundle` in `src/setup.ts`. `templates` selects catalog IDs; `defaults` supplies starter values; `unresolved_value` fills undecided prose; `empty_document_roots` supplies a placeholder file only when a configured root has no selected documents. Output destinations remain in `catalog.json`. The blueprint is package control data, not a catalog entry or a generated customer specification.

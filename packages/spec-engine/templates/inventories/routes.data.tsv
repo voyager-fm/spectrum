@@ -1,2 +1,2 @@
-page_id	page_name	path	type	nav_exposure	primary_role	implementation_status
-{{tsv:page_id}}	{{tsv:page_title}}	{{tsv:route_path}}	page	hidden	{{tsv:page_responsibility}}	planned
+page_id	page_name	path	region	type	nav_exposure	primary_role	implementation_status
+{{tsv:page_id}}	{{tsv:page_title}}	{{tsv:route_path}}	{{tsv:structure_key}}	page	hidden	{{tsv:page_responsibility}}	planned

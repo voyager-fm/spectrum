@@ -1,2 +1,2 @@
 surface_key	parent_region_id	region_id	region_label	level	slot_type	structure_key	description	interaction_refs	status
-{{tsv:surface_key}}	-	root	{{tsv:region_label}}	1	root	{{tsv:structure_key}}	TBD	{{tsv:interaction_id}}	drafted
+{{tsv:surface_key}}	-	{{tsv:region_id}}	{{tsv:region_label}}	1	root	{{tsv:structure_key}}	TBD	{{tsv:interaction_id}}	drafted

@@ -1,28 +1,8 @@
 [
   {
-    "id": "schema.config",
-    "source": "schemas/config.schema.json",
-    "output": ".spectrum/schemas/config.schema.json"
-  },
-  {
-    "id": "schema.engineering",
-    "source": "schemas/engineering.schema.json",
-    "output": ".spectrum/schemas/engineering.schema.json"
-  },
-  {
-    "id": "schema.interaction",
-    "source": "schemas/interaction.schema.json",
-    "output": ".spectrum/schemas/interaction.schema.json"
-  },
-  {
-    "id": "schema.inventory-extension",
-    "source": "schemas/inventory-extension.schema.json",
-    "output": ".spectrum/schemas/inventory-extension.schema.json"
-  },
-  {
-    "id": "schema.inventory",
-    "source": "schemas/inventory.schema.json",
-    "output": ".spectrum/schemas/inventory.schema.json"
+    "id": "inventory.feature_inventory.catalog",
+    "source": "inventories/feature_inventory.catalog.json",
+    "output": ".spectrum/product/feature_inventory/schema.json"
   },
   {
     "id": "repository.config",
@@ -40,129 +20,94 @@
     "output": ".spectrum/rules/agents.md"
   },
   {
-    "id": "inventory.feature_categories.schema",
-    "source": "inventories/feature_categories.schema.json",
-    "output": ".spectrum/product/feature_inventory/feature_categories/schema.json"
-  },
-  {
     "id": "inventory.feature_categories.data",
     "source": "inventories/feature_categories.data.tsv",
-    "output": ".spectrum/product/feature_inventory/feature_categories/data.tsv"
-  },
-  {
-    "id": "inventory.features.schema",
-    "source": "inventories/features.schema.json",
-    "output": ".spectrum/product/feature_inventory/features/schema.json"
+    "output": ".spectrum/product/feature_inventory/feature_categories.tsv"
   },
   {
     "id": "inventory.features.data",
     "source": "inventories/features.data.tsv",
-    "output": ".spectrum/product/feature_inventory/features/data.tsv"
-  },
-  {
-    "id": "inventory.interactions.schema",
-    "source": "inventories/interactions.schema.json",
-    "output": ".spectrum/product/feature_inventory/interactions/schema.json"
+    "output": ".spectrum/product/feature_inventory/features.tsv"
   },
   {
     "id": "inventory.interactions.data",
     "source": "inventories/interactions.data.tsv",
-    "output": ".spectrum/product/feature_inventory/interactions/data.tsv"
-  },
-  {
-    "id": "inventory.objects.schema",
-    "source": "inventories/objects.schema.json",
-    "output": ".spectrum/product/information_architecture/objects/schema.json"
+    "output": ".spectrum/product/feature_inventory/interactions.tsv"
   },
   {
     "id": "inventory.objects.data",
     "source": "inventories/objects.data.tsv",
-    "output": ".spectrum/product/information_architecture/objects/data.tsv"
-  },
-  {
-    "id": "inventory.surface_structure.schema",
-    "source": "inventories/surface_structure.schema.json",
-    "output": ".spectrum/product/information_architecture/surface_structure/schema.json"
+    "output": ".spectrum/product/feature_inventory/objects.tsv"
   },
   {
     "id": "inventory.surface_structure.data",
     "source": "inventories/surface_structure.data.tsv",
-    "output": ".spectrum/product/information_architecture/surface_structure/data.tsv"
-  },
-  {
-    "id": "inventory.surfaces.schema",
-    "source": "inventories/surfaces.schema.json",
-    "output": ".spectrum/product/information_architecture/surfaces/schema.json"
+    "output": ".spectrum/product/feature_inventory/surface_structure.tsv"
   },
   {
     "id": "inventory.surfaces.data",
     "source": "inventories/surfaces.data.tsv",
-    "output": ".spectrum/product/information_architecture/surfaces/data.tsv"
-  },
-  {
-    "id": "inventory.routes.schema",
-    "source": "inventories/routes.schema.json",
-    "output": ".spectrum/product/website/route_map/routes/schema.json"
+    "output": ".spectrum/product/feature_inventory/surfaces.tsv"
   },
   {
     "id": "inventory.routes.data",
     "source": "inventories/routes.data.tsv",
-    "output": ".spectrum/product/website/route_map/routes/data.tsv"
+    "output": ".spectrum/product/feature_inventory/routes.tsv"
   },
   {
-    "id": "inventory.menus.schema",
-    "source": "inventories/menus.schema.json",
-    "output": ".spectrum/product/information_architecture/menus/schema.json"
+    "id": "inventory.menus.catalog",
+    "source": "inventories/menus.catalog.json",
+    "output": ".spectrum/product/feature_inventory/menus.schema.json"
   },
   {
     "id": "inventory.menus.data",
     "source": "inventories/menus.data.tsv",
-    "output": ".spectrum/product/information_architecture/menus/data.tsv"
+    "output": ".spectrum/product/feature_inventory/menus.tsv"
   },
   {
-    "id": "inventory.custom.schema",
-    "source": "inventories/custom.schema.json",
-    "output": ".spectrum/custom/{{path:table_key}}/schema.json"
+    "id": "inventory.custom.catalog",
+    "source": "inventories/custom.catalog.json",
+    "output": ".spectrum/custom/{{path:table_key}}.schema.json"
   },
   {
     "id": "inventory.custom.data",
     "source": "inventories/custom.data.tsv",
-    "output": ".spectrum/custom/{{path:table_key}}/data.tsv"
+    "output": ".spectrum/custom/{{path:table_key}}.tsv"
   },
   {
     "id": "feature.interaction",
     "source": "feature/interaction.md",
-    "output": ".spectrum/product/feature_specs/{{path:category_key}}/{{path:feature_id}}/{{path:interaction_id}}.md"
+    "output": ".spectrum/product/feature_inventory/specs/{{path:category_key}}/{{path:feature_id}}/{{path:interaction_id}}.md"
   },
   {
     "id": "feature.contract",
     "source": "feature/contract.toml",
-    "output": ".spectrum/product/feature_specs/{{path:category_key}}/contracts/contract.toml"
+    "output": ".spectrum/product/feature_inventory/specs/{{path:category_key}}/contracts/contract.toml"
   },
   {
     "id": "feature.flow",
     "source": "feature/flow.md",
-    "output": ".spectrum/product/feature_specs/{{path:category_key}}/flows/flow.md"
+    "output": ".spectrum/product/feature_inventory/specs/{{path:category_key}}/flows/flow.md"
   },
   {
-    "id": "page.contract",
-    "source": "page/contract.toml",
-    "output": ".spectrum/product/website/page_contracts/{{path:page_key}}/contract.toml"
+    "id": "surface.contract",
+    "source": "surface/contract.toml",
+    "output": ".spectrum/product/feature_inventory/surfaces/{{path:surface_key}}/{{path:region_id}}/contract.toml"
   },
   {
-    "id": "page.layout",
-    "source": "page/layout.md",
-    "output": ".spectrum/product/website/page_contracts/{{path:page_key}}/layout.md"
+    "id": "surface.layout",
+    "source": "surface/layout.md",
+    "output": ".spectrum/product/feature_inventory/surfaces/{{path:surface_key}}/{{path:region_id}}/layout.md"
   },
   {
-    "id": "page.flow",
-    "source": "page/flow.md",
-    "output": ".spectrum/product/website/page_contracts/{{path:page_key}}/flow.md"
+    "id": "surface.flow",
+    "source": "surface/flow.md",
+    "output": ".spectrum/product/feature_inventory/surfaces/{{path:surface_key}}/{{path:region_id}}/flow.md"
   },
   {
-    "id": "page.spec",
-    "source": "page/spec.md",
-    "output": ".spectrum/product/website/page_contracts/{{path:page_key}}/spec.md"
+    "id": "surface.spec",
+    "source": "surface/spec.md",
+    "output": ".spectrum/product/feature_inventory/surfaces/{{path:surface_key}}/{{path:region_id}}/spec.md"
   },
   {
     "id": "engineering.adr",

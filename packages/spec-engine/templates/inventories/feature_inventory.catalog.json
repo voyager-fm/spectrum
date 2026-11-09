@@ -1,0 +1,299 @@
+{
+  "$schema": "https://raw.githubusercontent.com/voyager-fm/spectrum/main/packages/spec-engine/schemas/inventory-catalog.schema.json",
+  "schema_version": "1.0",
+  "tables": {
+    "OBJECTS": {
+      "kind": "objects",
+      "data": "objects.tsv",
+      "primary_key": ["key"],
+      "null_values": ["-"],
+      "columns": [
+        {
+          "name": "category",
+          "type": "string",
+          "required": true,
+          "enum": ["Domain", "Conversation", "State", "Operation", "Rule"]
+        },
+        {
+          "name": "key",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "label",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "summary",
+          "type": "string",
+          "required": false
+        }
+      ]
+    },
+    "SURFACES": {
+      "kind": "surfaces",
+      "data": "surfaces.tsv",
+      "primary_key": ["surface_key"],
+      "null_values": ["-"],
+      "columns": [
+        {
+          "name": "surface_key",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "label",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "kind",
+          "type": "string",
+          "required": true,
+          "enum": ["cli", "web", "agent_host", "background"]
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "required": false
+        }
+      ]
+    },
+    "SURFACE_STRUCTURE": {
+      "kind": "regions",
+      "data": "surface_structure.tsv",
+      "primary_key": ["structure_key"],
+      "null_values": ["-"],
+      "columns": [
+        {
+          "name": "surface_key",
+          "type": "string",
+          "required": true,
+          "ref": {
+            "table": "SURFACES",
+            "column": "surface_key"
+          }
+        },
+        {
+          "name": "parent_region_id",
+          "type": "string",
+          "required": false,
+          "ref": {
+            "table": "SURFACE_STRUCTURE",
+            "columns": ["surface_key", "parent_region_id"],
+            "references": ["surface_key", "region_id"]
+          }
+        },
+        {
+          "name": "region_id",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "region_label",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "level",
+          "type": "number",
+          "required": false
+        },
+        {
+          "name": "slot_type",
+          "type": "string",
+          "required": false,
+          "enum": ["root", "pane", "section", "overlay", "mode"]
+        },
+        {
+          "name": "structure_key",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "interaction_refs",
+          "type": "string",
+          "required": false,
+          "ref": {
+            "table": "INTERACTIONS",
+            "column": "interaction_id"
+          }
+        },
+        {
+          "name": "status",
+          "type": "string",
+          "required": false,
+          "enum": ["idea", "drafted", "planned", "implementing", "shipped", "deprecated"]
+        }
+      ]
+    },
+    "FEATURE_CATEGORIES": {
+      "data": "feature_categories.tsv",
+      "extends": "spectrum:feature_categories",
+      "columns": [
+        {
+          "name": "order",
+          "type": "number",
+          "required": false
+        },
+        {
+          "name": "category_title"
+        },
+        {
+          "name": "category_key"
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "required": false
+        }
+      ]
+    },
+    "FEATURES": {
+      "data": "features.tsv",
+      "extends": "spectrum:features",
+      "columns": [
+        {
+          "name": "feature_category"
+        },
+        {
+          "name": "category_key"
+        },
+        {
+          "name": "feature_title"
+        },
+        {
+          "name": "feature_id"
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "related_ui",
+          "type": "string",
+          "required": false,
+          "ref": {
+            "table": "SURFACE_STRUCTURE",
+            "column": "structure_key"
+          }
+        }
+      ]
+    },
+    "INTERACTIONS": {
+      "data": "interactions.tsv",
+      "extends": "spectrum:interactions",
+      "columns": [
+        {
+          "name": "interaction_title"
+        },
+        {
+          "name": "interaction_id"
+        },
+        {
+          "name": "interaction_type"
+        },
+        {
+          "name": "feature"
+        },
+        {
+          "name": "category_key"
+        },
+        {
+          "name": "feature_id"
+        },
+        {
+          "name": "status"
+        },
+        {
+          "name": "phase"
+        },
+        {
+          "name": "summary"
+        },
+        {
+          "name": "related_region",
+          "type": "string",
+          "required": false,
+          "ref": {
+            "table": "SURFACE_STRUCTURE",
+            "column": "structure_key"
+          }
+        },
+        {
+          "name": "menu",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "shortcut",
+          "type": "string",
+          "required": false
+        }
+      ]
+    },
+    "ROUTES": {
+      "kind": "routes",
+      "data": "routes.tsv",
+      "primary_key": ["page_id"],
+      "null_values": ["-"],
+      "columns": [
+        {
+          "name": "page_id",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "page_name",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "path",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "region",
+          "type": "string",
+          "required": false,
+          "description": "Screen-level region whose surface bundle specifies this page; `-` for API and text routes.",
+          "ref": {
+            "table": "SURFACE_STRUCTURE",
+            "column": "structure_key"
+          }
+        },
+        {
+          "name": "type",
+          "type": "string",
+          "required": true,
+          "enum": ["page", "route_parent", "api", "text"]
+        },
+        {
+          "name": "nav_exposure",
+          "type": "string",
+          "required": true,
+          "enum": ["top_nav", "top_nav/footer", "footer", "hidden", "modal"]
+        },
+        {
+          "name": "primary_role",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "implementation_status",
+          "type": "string",
+          "required": true,
+          "enum": ["implemented", "branch_partial", "planned", "cms_driven", "modal_surface"]
+        }
+      ]
+    }
+  }
+}

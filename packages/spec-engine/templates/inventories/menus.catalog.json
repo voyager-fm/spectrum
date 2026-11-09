@@ -1,0 +1,33 @@
+{
+  "$schema": "https://raw.githubusercontent.com/voyager-fm/spectrum/main/packages/spec-engine/schemas/inventory-catalog.schema.json",
+  "schema_version": "1.0",
+  "tables": {
+    "MENUS": {
+      "kind": "menus",
+      "data": "menus.tsv",
+      "primary_key": ["menu_node_id"],
+      "null_values": ["-"],
+      "columns": [
+        {
+          "name": "menu_node_id",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "label",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "parent_menu_node_id",
+          "type": "string",
+          "required": false,
+          "ref": {
+            "table": "MENUS",
+            "column": "menu_node_id"
+          }
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "$schema": "https://raw.githubusercontent.com/voyager-fm/spectrum/main/packages/spec-engine/schemas/inventory-catalog.schema.json",
+  "schema_version": "1.0",
+  "tables": {
+    "{{text:table_name}}": {
+      "kind": "other",
+      "data": "{{path:table_key}}.tsv",
+      "primary_key": ["key"],
+      "null_values": ["-"],
+      "columns": [
+        {
+          "name": "key",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "required": false
+        }
+      ]
+    }
+  }
+}

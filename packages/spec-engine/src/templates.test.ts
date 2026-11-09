@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import { access, mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { test } from 'node:test';
@@ -24,6 +24,7 @@ const values: Record<string, string> = {
   object_definition: 'A local record.',
   surface_key: 'cli',
   structure_key: 'cli.root',
+  region_id: 'root',
   region_label: 'Command output',
   contract_id: 'reading.record',
   initial_state: 'idle',
@@ -31,10 +32,9 @@ const values: Record<string, string> = {
   read_state: 'record',
   write_state: 'result',
   page_id: 'HOME',
-  page_key: 'home',
   page_title: 'Home',
   route_path: '/',
-  page_contract_id: 'website.home',
+  surface_contract_id: 'surface.cli.root',
   page_responsibility: 'Explain the product.',
   page_policy: 'Show planned capabilities explicitly.',
   platform: 'common',
@@ -78,30 +78,22 @@ test('templates render a connected repository that passes the real engine', asyn
   assert.equal(result.specs[0].status, 'draft');
   assert.equal(result.specs[0].acceptance[0].verification, 'not_recorded');
   const routeTable = result.model.inventories.find((table) => table.kind === 'routes');
-  assert.equal(routeTable?.path, '.spectrum/product/website/route_map/routes/data.tsv');
+  assert.equal(routeTable?.path, '.spectrum/product/feature_inventory/routes.tsv');
   assert.ok(
-    result.model.documents.some(
-      (doc) =>
-        doc.kind === 'page_contract' &&
-        doc.path === '.spectrum/product/website/page_contracts/home/contract.toml',
+    result.model.relationships.some(
+      (rel) =>
+        rel.kind === 'region_contract' &&
+        rel.source === 'cli.root' &&
+        rel.target === '.spectrum/product/feature_inventory/surfaces/cli/root/contract.toml',
     ),
   );
-  for (const template of await listTemplates()) {
-    const output = await renderTemplate(template.id, inputs);
-    if (!output.path.endsWith('.json')) continue;
-    const schema = JSON.parse(output.content).$schema;
-    if (typeof schema === 'string' && !schema.includes(':')) {
-      const installed = await readFile(resolve(directory, dirname(output.path), schema), 'utf8');
-      assert.doesNotThrow(() => JSON.parse(installed));
-    }
-  }
   for (const kind of [
     'interaction',
     'contract',
     'flow',
-    'page_contract',
+    'surface_contract',
     'layout',
-    'page_spec',
+    'surface_spec',
     'engineering',
   ])
     assert.ok(
@@ -129,16 +121,24 @@ test('template substitutions escape structured values and reject unsafe output p
     renderTemplate('inventory.features.data', { ...inputs, feature_title: 'two\tcells' }),
     /one cell/,
   );
+  const custom = await renderTemplate('inventory.custom.catalog', { ...inputs, table_name: title });
+  assert.deepEqual(Object.keys(JSON.parse(custom.content).tables), [title]);
   await assert.rejects(renderTemplate('feature.interaction', {}), /Missing template value/);
   await assert.rejects(loadTemplate('../outside'), /Unknown specification template/);
 });
 
-test('shipped JSON schema templates match the self-repository schema contract', async () => {
-  for (const template of (await listTemplates()).filter((template) =>
-    template.id.startsWith('schema.'),
-  )) {
-    const output = await renderTemplate(template.id, {});
-    const installed = await readFile(resolve(import.meta.dirname, '../../..', output.path), 'utf8');
-    assert.deepEqual(JSON.parse(output.content), JSON.parse(installed));
+test('templates reference engine schemas by URL and install no schema copies', async () => {
+  const base =
+    'https://raw.githubusercontent.com/voyager-fm/spectrum/main/packages/spec-engine/schemas/';
+  const inputs = await completedValues();
+  for (const template of await listTemplates()) {
+    const output = await renderTemplate(template.id, inputs);
+    assert.ok(!output.path.startsWith('.spectrum/schemas/'), output.path);
+    assert.ok(!template.source.startsWith('schemas/'), template.source);
+    if (!output.path.endsWith('.json')) continue;
+    const schema: unknown = JSON.parse(output.content).$schema;
+    if (schema === undefined) continue;
+    assert.ok(typeof schema === 'string' && schema.startsWith(base), `${template.id}: ${schema}`);
+    await access(resolve(import.meta.dirname, '../schemas', schema.slice(base.length)));
   }
 });

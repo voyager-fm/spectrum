@@ -50,7 +50,9 @@ export async function renderTemplate(
       if (typeof value === 'string') return substitute(value, true);
       if (Array.isArray(value)) return value.map(expand);
       if (value && typeof value === 'object')
-        return Object.fromEntries(Object.entries(value).map(([key, item]) => [key, expand(item)]));
+        return Object.fromEntries(
+          Object.entries(value).map(([key, item]) => [substitute(key, true), expand(item)]),
+        );
       return value;
     }
     content = `${JSON.stringify(expand(JSON.parse(template.content)), null, 2)}\n`;

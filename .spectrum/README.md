@@ -1,6 +1,6 @@
 # Repository specifications
 
-[Overview](overview.md) explains Spectrum's intent and executable boundary. [The schema guide](schemas/README.md) defines document ownership and validation. [Architecture](engineering/common/architecture/specification_model.md) connects the canonical files to the shared engine and its consumers.
+[Overview](overview.md) explains Spectrum's intent and executable boundary. [The engine document model](https://github.com/voyager-fm/spectrum/blob/main/packages/spec-engine/docs/document-model.md) defines document ownership and validation. [Architecture](engineering/common/architecture/specification_model.md) connects the canonical files to the shared engine and its consumers.
 
 [Application runtime](engineering/common/architecture/application_runtime.md) defines the Next.js server boundary, shared package ownership and the planned execution capabilities.
 

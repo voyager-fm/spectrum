@@ -69,7 +69,7 @@ The Next.js application is the single server entry point. Shared packages own do
 
 `.spectrum/config.json` uses `schema_version: 2` and maps canonical repository-relative paths. IA and FI use TSV with adjacent schemas; TOML owns shared policy and read/write ownership; Markdown owns interaction behavior, flows and stable AC IDs. Website routes have page contract/layout/flow bundles, and engineering documents retain their own lifecycle. CLI, plugin and dashboard read the same derived model.
 
-Read the [schema guide](.spectrum/schemas/README.md) and [architecture](.spectrum/engineering/common/architecture/specification_model.md). Existing repositories can keep their current paths with a profile:
+Read the [document model](packages/spec-engine/docs/document-model.md) and [architecture](.spectrum/engineering/common/architecture/specification_model.md). Existing repositories can keep their current paths with a profile:
 
 ```sh
 pnpm cli check /path/to/repository --profile /path/to/profile.json
