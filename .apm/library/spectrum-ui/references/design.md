@@ -10,6 +10,8 @@ Spectrum looks like a developer review tool: the dense, quiet dashboards of AI c
 - **Honest emptiness.** Unimplemented areas use dashed borders (`Planned`, `EmptyNotice`, `planned` badges). Dashed means "not real yet"; never use a dashed style for working features.
 
 ## Patterns to reuse for upcoming pages
+Observed structures (summary, findings, PR detail, runs, lists) are in [review-patterns.md](review-patterns.md). The summary per page:
+
 | Page | Pattern |
 | --- | --- |
 | PR reviews | Table: PR title, head SHA, reviewed SHA, finding count, status. Detail page: findings grouped by affected spec, each with file path, evidence and the AC it relates to. |
