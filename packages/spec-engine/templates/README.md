@@ -14,7 +14,7 @@ This directory ships the reusable authoring files owned by `@spectrum/spec-engin
 
 ## Loading and rendering
 
-Import `listTemplates`, `loadTemplate` and `renderTemplate` from `@spectrum/spec-engine/templates`. `loadTemplate(id)` returns the raw file and destination pattern so the caller can collect the values it needs. `renderTemplate(id, values)` returns `{ path, content }`. It writes no files, grants no approval, makes no model calls and publishes nothing. The CLI currently implements check/list; it has no template generation command.
+Import `listTemplates`, `loadTemplate` and `renderTemplate` from `@spectrum/spec-engine/templates`. `loadTemplate(id)` returns the raw file and destination pattern so the caller can collect the values it needs. `renderTemplate(id, values)` returns `{ path, content }`. It writes no files, grants no approval, makes no model calls and publishes nothing. `spectrum init` renders the connected starter bundle through `renderStarterBundle` in `@spectrum/spec-engine/setup`. It writes the bundle only into a repository that has none of its paths yet.
 
 Placeholders use `{{kind:field_name}}`:
 

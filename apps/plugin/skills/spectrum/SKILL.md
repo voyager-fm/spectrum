@@ -9,11 +9,17 @@ Spectrum keeps product and technical specs in the repository under `.spectrum/`.
 
 ## Run the CLI
 
-The CLI is `scripts/spectrum.mjs` in this skill's base directory. Run it with Node 20 or later from the repository root:
+Prefer the repository's own installed CLI so checks use the version the repository pins. From the repository root:
+
+1. If `node_modules/.bin/spectrum` exists, run it: `node_modules/.bin/spectrum check`.
+2. Otherwise run the bundled copy, `scripts/spectrum.mjs` in this skill's base directory, with Node 20 or later: `node "<skill base directory>/scripts/spectrum.mjs" check`.
+
+Say which one you ran. Both accept the same commands:
 
 ```sh
-node "<skill base directory>/scripts/spectrum.mjs" check [repository path]
-node "<skill base directory>/scripts/spectrum.mjs" list [repository path]
+spectrum check [repository path]
+spectrum list [repository path]
+spectrum --version
 ```
 
 The repository path defaults to the current directory.
@@ -22,7 +28,16 @@ The repository path defaults to the current directory.
 - `list` prints the parsed interaction specs as a JSON array. It uses the same validation and exit status.
 - Any other command prints usage and exits with code 2.
 
-Add `--profile /path/to/profile.json` to either command to select an explicit source mapping for an existing repository without installing a config or moving its files.
+Add `--profile /path/to/profile.json` to `check` or `list` to select an explicit source mapping for an existing repository without installing a config or moving its files.
+
+## Set up a repository
+
+These commands write files. Run them only when the user asks to set Spectrum up, and show `--dry-run` output first.
+
+- `spectrum init [path] [--name <project>] [--dry-run]` writes `.spectrum/config.json` and a connected starter bundle. It refuses, writing nothing, when any target file already exists.
+- `spectrum skills install [path] [--agent claude|codex|all] [--force] [--dry-run]` writes `.claude/skills/spectrum/SKILL.md` and `.agents/skills/spectrum/SKILL.md`, which run the repository's installed package. It updates files it installed earlier and refuses to replace other files without `--force`.
+
+To pin a version for the whole team, suggest `npm install --save-dev @voyager-fm/spectrum`. The package is not yet published to npm.
 
 ## Read the specs
 
@@ -38,4 +53,4 @@ Read `config.json` for the version 2 source mapping. TSV inventories and adjacen
 - When code and spec disagree, report which one looks wrong with evidence. Do not edit a spec to match a bug.
 - Never weaken or delete acceptance criteria to make a check pass. Propose the change and let the user decide.
 - Do not mark a spec `approved` yourself. Approval is the user's decision.
-- If the repository has no `.spectrum/config.json`, say that Spectrum is not set up here.
+- If the repository has no `.spectrum/config.json`, say that Spectrum is not set up here and offer `spectrum init --dry-run`.

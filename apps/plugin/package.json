@@ -6,8 +6,5 @@
   "scripts": {
     "build": "node src/build.ts",
     "check": "node src/build.ts --check"
-  },
-  "devDependencies": {
-    "esbuild": "0.28.2"
   }
 }

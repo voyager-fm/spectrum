@@ -23,7 +23,7 @@ The canonical representation connects TSV inventories with adjacent schemas, TOM
 
 ## Schemas
 
-Reusable authoring files are shipped in [the spec-engine template library](../../packages/spec-engine/templates/README.md). The library includes schema/TSV pairs, complete interaction Markdown, contracts, flows, web page bundles and an ADR. Engineering articles develop with the project and are not generated from fixed document-type templates. Import its read-only loader and renderer through `@spectrum/spec-engine/templates`; generated documents still require human review and structural checks. The CLI currently provides no generation command.
+Reusable authoring files are shipped in [the spec-engine template library](../../packages/spec-engine/templates/README.md). The library includes schema/TSV pairs, complete interaction Markdown, contracts, flows, web page bundles and an ADR. Engineering articles develop with the project and are not generated from fixed document-type templates. Import its read-only loader and renderer through `@spectrum/spec-engine/templates`; generated documents still require human review and structural checks. `spectrum init` writes the connected starter bundle into a repository without one; it overwrites nothing.
 
 - [config.schema.json](config.schema.json): versioned source mapping and mode.
 - [inventory.schema.json](inventory.schema.json): the adjacent TSV schema vocabulary, including scalar and composite `ref` metadata.

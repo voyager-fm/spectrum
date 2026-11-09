@@ -10,6 +10,17 @@ claude plugin install spectrum@spectrum
 ```
 Inside Claude Code 2.1.275 or later: `/plugin install spectrum --marketplace voyager-fm/spectrum`. Claude Code is the only verified host so far.
 
+## Install in a repository
+Pin the CLI in a client repository and install the agent skill there instead, so every contributor and agent runs the same version:
+
+```sh
+npm install --save-dev @voyager-fm/spectrum
+npx --no spectrum init
+npx --no spectrum skills install
+npx --no spectrum check
+```
+`init` writes `.spectrum/config.json` and a starter bundle and overwrites nothing. `skills install` writes `.claude/skills/spectrum` (Claude Code) and `.agents/skills/spectrum` (Codex, OpenCode). The package is not yet published to npm; build a local tarball with `pnpm --filter @voyager-fm/spectrum pack` until it is. See [the CLI README](apps/cli/README.md).
+
 ## Develop
 Node 22.18+ is required; `.nvmrc` pins the development runtime to Node 24.13.0. pnpm is pinned to 10.20.0. From this directory:
 
@@ -43,7 +54,7 @@ Biome respects `.gitignore`, including generated build output and deployed agent
 ## Structure
 `apps/` holds deliverables and `packages/` shared workspace libraries; see `.spectrum/contracts/distribution.md`.
 - apps/plugin: the agent plugin. Skills in `skills/<name>/SKILL.md` run a bundled CLI from `scripts/spectrum.mjs`; `pnpm plugin:build` regenerates it and `pnpm plugin:check` validates skills and bundle freshness
-- apps/cli: deterministic check/list commands (unpublished; bundled into the plugin)
+- apps/cli: the `@voyager-fm/spectrum` package with deterministic `check`, `list`, `init` and `skills install` commands. It is bundled into the plugin and packable for client repositories but not yet published; see [the CLI README](apps/cli/README.md)
 - apps/web: Next.js (App Router) application owning the dashboard and planned server API, webhooks and model execution. The current dashboard is read-only, with Tailwind CSS v4 and shadcn/ui in a monotone theme. Overview, specs, spec detail, rules and integrations read real repository data; proposals, runs and PR reviews are explicit not-implemented placeholders
 - packages/core: shared spec and proposal types
 - packages/spec-engine: parsing, local links and validation
@@ -67,6 +78,6 @@ pnpm cli check /path/to/repository --profile /path/to/profile.json
 The checker writes no files. It reports structural errors and unresolved warnings; it does not approve requirements or run customer tests. Legacy feature-only JSON configuration reports an explicit migration boundary.
 
 ## Implemented vs planned
-Working: local spec listing/checking, validation failures, a local dashboard and a Claude Code plugin whose `spectrum` skill runs those checks.
+Working: local spec listing/checking, validation failures, repository initialization and agent skill installation through the packable CLI, a local dashboard and a Claude Code plugin whose `spectrum` skill runs those checks.
 Planned: AI generation, brownfield indexing, proposal review/apply UI, exact digest-bound approvals, GitHub App and signed webhooks, issue sync, hosted accounts/DB, model providers/BYOK/subscriptions.
 This is a scaffold, not a running autonomous closed loop. No credentials are required and no external requests are made by the app. No deployment or git initialization is performed.

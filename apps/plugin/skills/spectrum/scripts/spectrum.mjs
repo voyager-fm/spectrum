@@ -14,12 +14,24 @@ var __require = /* @__PURE__ */ ((x2) => typeof require !== "undefined" ? requir
   if (typeof require !== "undefined") return require.apply(this, arguments);
   throw Error('Dynamic require of "' + x2 + '" is not supported');
 });
+var __esm = (fn, res, err) => function __init() {
+  if (err) throw err[0];
+  try {
+    return fn && (res = (0, fn[__getOwnPropNames(fn)[0]])(fn = 0)), res;
+  } catch (e) {
+    throw err = [e], e;
+  }
+};
 var __commonJS = (cb, mod) => function __require2() {
   try {
     return mod || (0, cb[__getOwnPropNames(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;
   } catch (e) {
     throw mod = 0, e;
   }
+};
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
 };
 var __copyProps = (to, from, except, desc) => {
   if (from && typeof from === "object" || typeof from === "function") {
@@ -3791,29 +3803,29 @@ var require_resolve_props = __commonJS({
       let comma = null;
       let found = null;
       let start = null;
-      for (const token of tokens) {
+      for (const token2 of tokens) {
         if (reqSpace) {
-          if (token.type !== "space" && token.type !== "newline" && token.type !== "comma")
-            onError(token.offset, "MISSING_CHAR", "Tags and anchors must be separated from the next token by white space");
+          if (token2.type !== "space" && token2.type !== "newline" && token2.type !== "comma")
+            onError(token2.offset, "MISSING_CHAR", "Tags and anchors must be separated from the next token by white space");
           reqSpace = false;
         }
         if (tab) {
-          if (atNewline && token.type !== "comment" && token.type !== "newline") {
+          if (atNewline && token2.type !== "comment" && token2.type !== "newline") {
             onError(tab, "TAB_AS_INDENT", "Tabs are not allowed as indentation");
           }
           tab = null;
         }
-        switch (token.type) {
+        switch (token2.type) {
           case "space":
-            if (!flow && (indicator !== "doc-start" || next?.type !== "flow-collection") && token.source.includes("	")) {
-              tab = token;
+            if (!flow && (indicator !== "doc-start" || next?.type !== "flow-collection") && token2.source.includes("	")) {
+              tab = token2;
             }
             hasSpace = true;
             break;
           case "comment": {
             if (!hasSpace)
-              onError(token, "MISSING_CHAR", "Comments must be separated from other tokens by white space characters");
-            const cb = token.source.substring(1) || " ";
+              onError(token2, "MISSING_CHAR", "Comments must be separated from other tokens by white space characters");
+            const cb = token2.source.substring(1) || " ";
             if (!comment)
               comment = cb;
             else
@@ -3825,33 +3837,33 @@ var require_resolve_props = __commonJS({
           case "newline":
             if (atNewline) {
               if (comment)
-                comment += token.source;
+                comment += token2.source;
               else if (!found || indicator !== "seq-item-ind")
                 spaceBefore = true;
             } else
-              commentSep += token.source;
+              commentSep += token2.source;
             atNewline = true;
             hasNewline = true;
             if (anchor || tag)
-              newlineAfterProp = token;
+              newlineAfterProp = token2;
             hasSpace = true;
             break;
           case "anchor":
             if (anchor)
-              onError(token, "MULTIPLE_ANCHORS", "A node can have at most one anchor");
-            if (token.source.endsWith(":"))
-              onError(token.offset + token.source.length - 1, "BAD_ALIAS", "Anchor ending in : is ambiguous", true);
-            anchor = token;
-            start ?? (start = token.offset);
+              onError(token2, "MULTIPLE_ANCHORS", "A node can have at most one anchor");
+            if (token2.source.endsWith(":"))
+              onError(token2.offset + token2.source.length - 1, "BAD_ALIAS", "Anchor ending in : is ambiguous", true);
+            anchor = token2;
+            start ?? (start = token2.offset);
             atNewline = false;
             hasSpace = false;
             reqSpace = true;
             break;
           case "tag": {
             if (tag)
-              onError(token, "MULTIPLE_TAGS", "A node can have at most one tag");
-            tag = token;
-            start ?? (start = token.offset);
+              onError(token2, "MULTIPLE_TAGS", "A node can have at most one tag");
+            tag = token2;
+            start ?? (start = token2.offset);
             atNewline = false;
             hasSpace = false;
             reqSpace = true;
@@ -3859,25 +3871,25 @@ var require_resolve_props = __commonJS({
           }
           case indicator:
             if (anchor || tag)
-              onError(token, "BAD_PROP_ORDER", `Anchors and tags must be after the ${token.source} indicator`);
+              onError(token2, "BAD_PROP_ORDER", `Anchors and tags must be after the ${token2.source} indicator`);
             if (found)
-              onError(token, "UNEXPECTED_TOKEN", `Unexpected ${token.source} in ${flow ?? "collection"}`);
-            found = token;
+              onError(token2, "UNEXPECTED_TOKEN", `Unexpected ${token2.source} in ${flow ?? "collection"}`);
+            found = token2;
             atNewline = indicator === "seq-item-ind" || indicator === "explicit-key-ind";
             hasSpace = false;
             break;
           case "comma":
             if (flow) {
               if (comma)
-                onError(token, "UNEXPECTED_TOKEN", `Unexpected , in ${flow}`);
-              comma = token;
+                onError(token2, "UNEXPECTED_TOKEN", `Unexpected , in ${flow}`);
+              comma = token2;
               atNewline = false;
               hasSpace = false;
               break;
             }
           // else fallthrough
           default:
-            onError(token, "UNEXPECTED_TOKEN", `Unexpected ${token.type} token`);
+            onError(token2, "UNEXPECTED_TOKEN", `Unexpected ${token2.type} token`);
             atNewline = false;
             hasSpace = false;
         }
@@ -4001,10 +4013,10 @@ var require_resolve_block_map = __commonJS({
       let offset = bm.offset;
       let commentEnd = null;
       for (const collItem of bm.items) {
-        const { start, key, sep: sep2, value } = collItem;
+        const { start, key, sep: sep4, value } = collItem;
         const keyProps = resolveProps.resolveProps(start, {
           indicator: "explicit-key-ind",
-          next: key ?? sep2?.[0],
+          next: key ?? sep4?.[0],
           offset,
           onError,
           parentIndent: bm.indent,
@@ -4018,7 +4030,7 @@ var require_resolve_block_map = __commonJS({
             else if ("indent" in key && key.indent !== bm.indent)
               onError(offset, "BAD_INDENT", startColMsg);
           }
-          if (!keyProps.anchor && !keyProps.tag && !sep2) {
+          if (!keyProps.anchor && !keyProps.tag && !sep4) {
             commentEnd = keyProps.end;
             if (keyProps.comment) {
               if (map.comment)
@@ -4042,7 +4054,7 @@ var require_resolve_block_map = __commonJS({
         ctx.atKey = false;
         if (utilMapIncludes.mapIncludes(ctx, map.items, keyNode))
           onError(keyStart, "DUPLICATE_KEY", "Map keys must be unique");
-        const valueProps = resolveProps.resolveProps(sep2 ?? [], {
+        const valueProps = resolveProps.resolveProps(sep4 ?? [], {
           indicator: "map-value-ind",
           next: value,
           offset: keyNode.range[2],
@@ -4058,7 +4070,7 @@ var require_resolve_block_map = __commonJS({
             if (ctx.options.strict && keyProps.start < valueProps.found.offset - 1024)
               onError(keyNode.range, "KEY_OVER_1024_CHARS", "The : indicator must be at most 1024 chars after the start of an implicit block mapping key");
           }
-          const valueNode = value ? composeNode(ctx, value, valueProps, onError) : composeEmptyNode(ctx, offset, sep2, null, valueProps, onError);
+          const valueNode = value ? composeNode(ctx, value, valueProps, onError) : composeEmptyNode(ctx, offset, sep4, null, valueProps, onError);
           if (ctx.schema.compat)
             utilFlowIndentCheck.flowIndentCheck(bm.indent, value, onError);
           offset = valueNode.range[2];
@@ -4149,31 +4161,31 @@ var require_resolve_end = __commonJS({
       let comment = "";
       if (end) {
         let hasSpace = false;
-        let sep2 = "";
-        for (const token of end) {
-          const { source, type } = token;
+        let sep4 = "";
+        for (const token2 of end) {
+          const { source, type } = token2;
           switch (type) {
             case "space":
               hasSpace = true;
               break;
             case "comment": {
               if (reqSpace && !hasSpace)
-                onError(token, "MISSING_CHAR", "Comments must be separated from other tokens by white space characters");
+                onError(token2, "MISSING_CHAR", "Comments must be separated from other tokens by white space characters");
               const cb = source.substring(1) || " ";
               if (!comment)
                 comment = cb;
               else
-                comment += sep2 + cb;
-              sep2 = "";
+                comment += sep4 + cb;
+              sep4 = "";
               break;
             }
             case "newline":
               if (comment)
-                sep2 += source;
+                sep4 += source;
               hasSpace = true;
               break;
             default:
-              onError(token, "UNEXPECTED_TOKEN", `Unexpected ${type} at node end`);
+              onError(token2, "UNEXPECTED_TOKEN", `Unexpected ${type} at node end`);
           }
           offset += source.length;
         }
@@ -4197,7 +4209,7 @@ var require_resolve_flow_collection = __commonJS({
     var utilContainsNewline = require_util_contains_newline();
     var utilMapIncludes = require_util_map_includes();
     var blockMsg = "Block collections are not allowed within flow collections";
-    var isBlock = (token) => token && (token.type === "block-map" || token.type === "block-seq");
+    var isBlock = (token2) => token2 && (token2.type === "block-map" || token2.type === "block-seq");
     function resolveFlowCollection({ composeNode, composeEmptyNode }, ctx, fc, onError, tag) {
       const isMap = fc.start.source === "{";
       const fcName = isMap ? "flow map" : "flow sequence";
@@ -4212,18 +4224,18 @@ var require_resolve_flow_collection = __commonJS({
       let offset = fc.offset + fc.start.source.length;
       for (let i = 0; i < fc.items.length; ++i) {
         const collItem = fc.items[i];
-        const { start, key, sep: sep2, value } = collItem;
+        const { start, key, sep: sep4, value } = collItem;
         const props = resolveProps.resolveProps(start, {
           flow: fcName,
           indicator: "explicit-key-ind",
-          next: key ?? sep2?.[0],
+          next: key ?? sep4?.[0],
           offset,
           onError,
           parentIndent: fc.indent,
           startOnNewline: false
         });
         if (!props.found) {
-          if (!props.anchor && !props.tag && !sep2 && !value) {
+          if (!props.anchor && !props.tag && !sep4 && !value) {
             if (i === 0 && props.comma)
               onError(props.comma, "UNEXPECTED_TOKEN", `Unexpected , in ${fcName}`);
             else if (i < fc.items.length - 1)
@@ -4277,8 +4289,8 @@ var require_resolve_flow_collection = __commonJS({
             }
           }
         }
-        if (!isMap && !sep2 && !props.found) {
-          const valueNode = value ? composeNode(ctx, value, props, onError) : composeEmptyNode(ctx, props.end, sep2, null, props, onError);
+        if (!isMap && !sep4 && !props.found) {
+          const valueNode = value ? composeNode(ctx, value, props, onError) : composeEmptyNode(ctx, props.end, sep4, null, props, onError);
           coll.items.push(valueNode);
           offset = valueNode.range[2];
           if (isBlock(value))
@@ -4290,7 +4302,7 @@ var require_resolve_flow_collection = __commonJS({
           if (isBlock(key))
             onError(keyNode.range, "BLOCK_IN_FLOW", blockMsg);
           ctx.atKey = false;
-          const valueProps = resolveProps.resolveProps(sep2 ?? [], {
+          const valueProps = resolveProps.resolveProps(sep4 ?? [], {
             flow: fcName,
             indicator: "map-value-ind",
             next: value,
@@ -4301,8 +4313,8 @@ var require_resolve_flow_collection = __commonJS({
           });
           if (valueProps.found) {
             if (!isMap && !props.found && ctx.options.strict) {
-              if (sep2)
-                for (const st2 of sep2) {
+              if (sep4)
+                for (const st2 of sep4) {
                   if (st2 === valueProps.found)
                     break;
                   if (st2.type === "newline") {
@@ -4319,7 +4331,7 @@ var require_resolve_flow_collection = __commonJS({
             else
               onError(valueProps.start, "MISSING_CHAR", `Missing , or : between ${fcName} items`);
           }
-          const valueNode = value ? composeNode(ctx, value, valueProps, onError) : valueProps.found ? composeEmptyNode(ctx, valueProps.end, sep2, null, valueProps, onError) : null;
+          const valueNode = value ? composeNode(ctx, value, valueProps, onError) : valueProps.found ? composeEmptyNode(ctx, valueProps.end, sep4, null, valueProps, onError) : null;
           if (valueNode) {
             if (isBlock(value))
               onError(valueNode.range, "BLOCK_IN_FLOW", blockMsg);
@@ -4389,8 +4401,8 @@ var require_compose_collection = __commonJS({
     var resolveBlockMap = require_resolve_block_map();
     var resolveBlockSeq = require_resolve_block_seq();
     var resolveFlowCollection = require_resolve_flow_collection();
-    function resolveCollection(CN, ctx, token, onError, tagName, tag) {
-      const coll = token.type === "block-map" ? resolveBlockMap.resolveBlockMap(CN, ctx, token, onError, tag) : token.type === "block-seq" ? resolveBlockSeq.resolveBlockSeq(CN, ctx, token, onError, tag) : resolveFlowCollection.resolveFlowCollection(CN, ctx, token, onError, tag);
+    function resolveCollection(CN, ctx, token2, onError, tagName, tag) {
+      const coll = token2.type === "block-map" ? resolveBlockMap.resolveBlockMap(CN, ctx, token2, onError, tag) : token2.type === "block-seq" ? resolveBlockSeq.resolveBlockSeq(CN, ctx, token2, onError, tag) : resolveFlowCollection.resolveFlowCollection(CN, ctx, token2, onError, tag);
       const Coll = coll.constructor;
       if (tagName === "!" || tagName === Coll.tagName) {
         coll.tag = Coll.tagName;
@@ -4400,10 +4412,10 @@ var require_compose_collection = __commonJS({
         coll.tag = tagName;
       return coll;
     }
-    function composeCollection(CN, ctx, token, props, onError) {
+    function composeCollection(CN, ctx, token2, props, onError) {
       const tagToken = props.tag;
       const tagName = !tagToken ? null : ctx.directives.tagName(tagToken.source, (msg) => onError(tagToken, "TAG_RESOLVE_FAILED", msg));
-      if (token.type === "block-seq") {
+      if (token2.type === "block-seq") {
         const { anchor, newlineAfterProp: nl } = props;
         const lastProp = anchor && tagToken ? anchor.offset > tagToken.offset ? anchor : tagToken : anchor ?? tagToken;
         if (lastProp && (!nl || nl.offset < lastProp.offset)) {
@@ -4411,9 +4423,9 @@ var require_compose_collection = __commonJS({
           onError(lastProp, "MISSING_CHAR", message);
         }
       }
-      const expType = token.type === "block-map" ? "map" : token.type === "block-seq" ? "seq" : token.start.source === "{" ? "map" : "seq";
+      const expType = token2.type === "block-map" ? "map" : token2.type === "block-seq" ? "seq" : token2.start.source === "{" ? "map" : "seq";
       if (!tagToken || !tagName || tagName === "!" || tagName === YAMLMap.YAMLMap.tagName && expType === "map" || tagName === YAMLSeq.YAMLSeq.tagName && expType === "seq") {
-        return resolveCollection(CN, ctx, token, onError, tagName);
+        return resolveCollection(CN, ctx, token2, onError, tagName);
       }
       let tag = ctx.schema.tags.find((t) => t.tag === tagName && t.collection === expType);
       if (!tag) {
@@ -4427,10 +4439,10 @@ var require_compose_collection = __commonJS({
           } else {
             onError(tagToken, "TAG_RESOLVE_FAILED", `Unresolved tag: ${tagName}`, true);
           }
-          return resolveCollection(CN, ctx, token, onError, tagName);
+          return resolveCollection(CN, ctx, token2, onError, tagName);
         }
       }
-      const coll = resolveCollection(CN, ctx, token, onError, tagName, tag);
+      const coll = resolveCollection(CN, ctx, token2, onError, tagName, tag);
       const res = tag.resolve?.(coll, (msg) => onError(tagToken, "TAG_RESOLVE_FAILED", msg), ctx.options) ?? coll;
       const node = identity.isNode(res) ? res : new Scalar.Scalar(res);
       node.range = coll.range;
@@ -4499,7 +4511,7 @@ var require_resolve_block_scalar = __commonJS({
           chompStart = i + 1;
       }
       let value = "";
-      let sep2 = "";
+      let sep4 = "";
       let prevMoreIndented = false;
       for (let i = 0; i < contentStart; ++i)
         value += lines[i][0].slice(trimIndent) + "\n";
@@ -4516,24 +4528,24 @@ var require_resolve_block_scalar = __commonJS({
           indent = "";
         }
         if (type === Scalar.Scalar.BLOCK_LITERAL) {
-          value += sep2 + indent.slice(trimIndent) + content;
-          sep2 = "\n";
+          value += sep4 + indent.slice(trimIndent) + content;
+          sep4 = "\n";
         } else if (indent.length > trimIndent || content[0] === "	") {
-          if (sep2 === " ")
-            sep2 = "\n";
-          else if (!prevMoreIndented && sep2 === "\n")
-            sep2 = "\n\n";
-          value += sep2 + indent.slice(trimIndent) + content;
-          sep2 = "\n";
+          if (sep4 === " ")
+            sep4 = "\n";
+          else if (!prevMoreIndented && sep4 === "\n")
+            sep4 = "\n\n";
+          value += sep4 + indent.slice(trimIndent) + content;
+          sep4 = "\n";
           prevMoreIndented = true;
         } else if (content === "") {
-          if (sep2 === "\n")
+          if (sep4 === "\n")
             value += "\n";
           else
-            sep2 = "\n";
+            sep4 = "\n";
         } else {
-          value += sep2 + content;
-          sep2 = " ";
+          value += sep4 + content;
+          sep4 = " ";
           prevMoreIndented = false;
         }
       }
@@ -4580,31 +4592,31 @@ var require_resolve_block_scalar = __commonJS({
       let comment = "";
       let length = source.length;
       for (let i = 1; i < props.length; ++i) {
-        const token = props[i];
-        switch (token.type) {
+        const token2 = props[i];
+        switch (token2.type) {
           case "space":
             hasSpace = true;
           // fallthrough
           case "newline":
-            length += token.source.length;
+            length += token2.source.length;
             break;
           case "comment":
             if (strict && !hasSpace) {
               const message = "Comments must be separated from other tokens by white space characters";
-              onError(token, "MISSING_CHAR", message);
+              onError(token2, "MISSING_CHAR", message);
             }
-            length += token.source.length;
-            comment = token.source.substring(1);
+            length += token2.source.length;
+            comment = token2.source.substring(1);
             break;
           case "error":
-            onError(token, "UNEXPECTED_TOKEN", token.message);
-            length += token.source.length;
+            onError(token2, "UNEXPECTED_TOKEN", token2.message);
+            length += token2.source.length;
             break;
           /* istanbul ignore next should not happen */
           default: {
-            const message = `Unexpected token in block scalar header: ${token.type}`;
-            onError(token, "UNEXPECTED_TOKEN", message);
-            const ts = token.source;
+            const message = `Unexpected token in block scalar header: ${token2.type}`;
+            onError(token2, "UNEXPECTED_TOKEN", message);
+            const ts = token2.source;
             if (ts && typeof ts === "string")
               length += ts.length;
           }
@@ -4716,25 +4728,25 @@ var require_resolve_flow_scalar = __commonJS({
         trimBoth = /^[ \t]+|[ \t]+$/g;
       }
       let res = match[1].replace(trimEnd, "");
-      let sep2 = " ";
+      let sep4 = " ";
       let pos = line.lastIndex;
       while (match = line.exec(source)) {
         const lm = match[1].replace(trimBoth, "");
         if (lm === "") {
-          if (sep2 === "\n")
-            res += sep2;
+          if (sep4 === "\n")
+            res += sep4;
           else
-            sep2 = "\n";
+            sep4 = "\n";
         } else {
-          res += sep2 + lm;
-          sep2 = " ";
+          res += sep4 + lm;
+          sep4 = " ";
         }
         pos = line.lastIndex;
       }
       const last = /[ \t]*(.*)/sy;
       last.lastIndex = pos;
       match = last.exec(source);
-      return res + sep2 + (match?.[1] ?? "");
+      return res + sep4 + (match?.[1] ?? "");
     }
     function doubleQuotedValue(source, onError) {
       let res = "";
@@ -4855,25 +4867,25 @@ var require_compose_scalar = __commonJS({
     var Scalar = require_Scalar();
     var resolveBlockScalar = require_resolve_block_scalar();
     var resolveFlowScalar = require_resolve_flow_scalar();
-    function composeScalar(ctx, token, tagToken, onError) {
-      const { value, type, comment, range } = token.type === "block-scalar" ? resolveBlockScalar.resolveBlockScalar(ctx, token, onError) : resolveFlowScalar.resolveFlowScalar(token, ctx.options.strict, onError);
+    function composeScalar(ctx, token2, tagToken, onError) {
+      const { value, type, comment, range } = token2.type === "block-scalar" ? resolveBlockScalar.resolveBlockScalar(ctx, token2, onError) : resolveFlowScalar.resolveFlowScalar(token2, ctx.options.strict, onError);
       const tagName = tagToken ? ctx.directives.tagName(tagToken.source, (msg) => onError(tagToken, "TAG_RESOLVE_FAILED", msg)) : null;
       let tag;
       if (ctx.options.stringKeys && ctx.atKey) {
         tag = ctx.schema[identity.SCALAR];
       } else if (tagName)
         tag = findScalarTagByName(ctx.schema, value, tagName, tagToken, onError);
-      else if (token.type === "scalar")
-        tag = findScalarTagByTest(ctx, value, token, onError);
+      else if (token2.type === "scalar")
+        tag = findScalarTagByTest(ctx, value, token2, onError);
       else
         tag = ctx.schema[identity.SCALAR];
       let scalar;
       try {
-        const res = tag.resolve(value, (msg) => onError(tagToken ?? token, "TAG_RESOLVE_FAILED", msg), ctx.options);
+        const res = tag.resolve(value, (msg) => onError(tagToken ?? token2, "TAG_RESOLVE_FAILED", msg), ctx.options);
         scalar = identity.isScalar(res) ? res : new Scalar.Scalar(res);
       } catch (error) {
         const msg = error instanceof Error ? error.message : String(error);
-        onError(tagToken ?? token, "TAG_RESOLVE_FAILED", msg);
+        onError(tagToken ?? token2, "TAG_RESOLVE_FAILED", msg);
         scalar = new Scalar.Scalar(value);
       }
       scalar.range = range;
@@ -4911,7 +4923,7 @@ var require_compose_scalar = __commonJS({
       onError(tagToken, "TAG_RESOLVE_FAILED", `Unresolved tag: ${tagName}`, tagName !== "tag:yaml.org,2002:str");
       return schema[identity.SCALAR];
     }
-    function findScalarTagByTest({ atKey, directives, schema }, value, token, onError) {
+    function findScalarTagByTest({ atKey, directives, schema }, value, token2, onError) {
       const tag = schema.tags.find((tag2) => (tag2.default === true || atKey && tag2.default === "key") && tag2.test?.test(value)) || schema[identity.SCALAR];
       if (schema.compat) {
         const compat = schema.compat.find((tag2) => tag2.default && tag2.test?.test(value)) ?? schema[identity.SCALAR];
@@ -4919,7 +4931,7 @@ var require_compose_scalar = __commonJS({
           const ts = directives.tagString(tag.tag);
           const cs = directives.tagString(compat.tag);
           const msg = `Value may be parsed as either ${ts} or ${cs}`;
-          onError(token, "TAG_RESOLVE_FAILED", msg, true);
+          onError(token2, "TAG_RESOLVE_FAILED", msg, true);
         }
       }
       return tag;
@@ -4969,22 +4981,22 @@ var require_compose_node = __commonJS({
     var resolveEnd = require_resolve_end();
     var utilEmptyScalarPosition = require_util_empty_scalar_position();
     var CN = { composeNode, composeEmptyNode };
-    function composeNode(ctx, token, props, onError) {
+    function composeNode(ctx, token2, props, onError) {
       const atKey = ctx.atKey;
       const { spaceBefore, comment, anchor, tag } = props;
       let node;
       let isSrcToken = true;
-      switch (token.type) {
+      switch (token2.type) {
         case "alias":
-          node = composeAlias(ctx, token, onError);
+          node = composeAlias(ctx, token2, onError);
           if (anchor || tag)
-            onError(token, "ALIAS_PROPS", "An alias node must not specify any properties");
+            onError(token2, "ALIAS_PROPS", "An alias node must not specify any properties");
           break;
         case "scalar":
         case "single-quoted-scalar":
         case "double-quoted-scalar":
         case "block-scalar":
-          node = composeScalar.composeScalar(ctx, token, tag, onError);
+          node = composeScalar.composeScalar(ctx, token2, tag, onError);
           if (anchor)
             node.anchor = anchor.source.substring(1);
           break;
@@ -4992,47 +5004,47 @@ var require_compose_node = __commonJS({
         case "block-seq":
         case "flow-collection":
           try {
-            node = composeCollection.composeCollection(CN, ctx, token, props, onError);
+            node = composeCollection.composeCollection(CN, ctx, token2, props, onError);
             if (anchor)
               node.anchor = anchor.source.substring(1);
           } catch (error) {
             const message = error instanceof Error ? error.message : String(error);
-            onError(token, "RESOURCE_EXHAUSTION", message);
+            onError(token2, "RESOURCE_EXHAUSTION", message);
           }
           break;
         default: {
-          const message = token.type === "error" ? token.message : `Unsupported token (type: ${token.type})`;
-          onError(token, "UNEXPECTED_TOKEN", message);
+          const message = token2.type === "error" ? token2.message : `Unsupported token (type: ${token2.type})`;
+          onError(token2, "UNEXPECTED_TOKEN", message);
           isSrcToken = false;
         }
       }
-      node ?? (node = composeEmptyNode(ctx, token.offset, void 0, null, props, onError));
+      node ?? (node = composeEmptyNode(ctx, token2.offset, void 0, null, props, onError));
       if (anchor && node.anchor === "")
         onError(anchor, "BAD_ALIAS", "Anchor cannot be an empty string");
       if (atKey && ctx.options.stringKeys && (!identity.isScalar(node) || typeof node.value !== "string" || node.tag && node.tag !== "tag:yaml.org,2002:str")) {
         const msg = "With stringKeys, all keys must be strings";
-        onError(tag ?? token, "NON_STRING_KEY", msg);
+        onError(tag ?? token2, "NON_STRING_KEY", msg);
       }
       if (spaceBefore)
         node.spaceBefore = true;
       if (comment) {
-        if (token.type === "scalar" && token.source === "")
+        if (token2.type === "scalar" && token2.source === "")
           node.comment = comment;
         else
           node.commentBefore = comment;
       }
       if (ctx.options.keepSourceTokens && isSrcToken)
-        node.srcToken = token;
+        node.srcToken = token2;
       return node;
     }
     function composeEmptyNode(ctx, offset, before, pos, { spaceBefore, comment, anchor, tag, end }, onError) {
-      const token = {
+      const token2 = {
         type: "scalar",
         offset: utilEmptyScalarPosition.emptyScalarPosition(offset, before, pos),
         indent: -1,
         source: ""
       };
-      const node = composeScalar.composeScalar(ctx, token, tag, onError);
+      const node = composeScalar.composeScalar(ctx, token2, tag, onError);
       if (anchor) {
         node.anchor = anchor.source.substring(1);
         if (node.anchor === "")
@@ -5223,28 +5235,28 @@ ${cb}` : comment;
        * @param endOffset - Should be set if `forceDoc` is also set, to set the document range end and to indicate errors correctly.
        */
       *compose(tokens, forceDoc = false, endOffset = -1) {
-        for (const token of tokens)
-          yield* this.next(token);
+        for (const token2 of tokens)
+          yield* this.next(token2);
         yield* this.end(forceDoc, endOffset);
       }
       /** Advance the composer by one CST token. */
-      *next(token) {
+      *next(token2) {
         if (node_process.env.LOG_STREAM)
-          console.dir(token, { depth: null });
-        switch (token.type) {
+          console.dir(token2, { depth: null });
+        switch (token2.type) {
           case "directive":
-            this.directives.add(token.source, (offset, message, warning) => {
-              const pos = getErrorPos(token);
+            this.directives.add(token2.source, (offset, message, warning) => {
+              const pos = getErrorPos(token2);
               pos[0] += offset;
               this.onError(pos, "BAD_DIRECTIVE", message, warning);
             });
-            this.prelude.push(token.source);
+            this.prelude.push(token2.source);
             this.atDirectives = true;
             break;
           case "document": {
-            const doc = composeDoc.composeDoc(this.options, this.directives, token, this.onError);
+            const doc = composeDoc.composeDoc(this.options, this.directives, token2, this.onError);
             if (this.atDirectives && !doc.directives.docStart)
-              this.onError(token, "MISSING_CHAR", "Missing directives-end/doc-start indicator line");
+              this.onError(token2, "MISSING_CHAR", "Missing directives-end/doc-start indicator line");
             this.decorate(doc, false);
             if (this.doc)
               yield this.doc;
@@ -5257,11 +5269,11 @@ ${cb}` : comment;
             break;
           case "comment":
           case "newline":
-            this.prelude.push(token.source);
+            this.prelude.push(token2.source);
             break;
           case "error": {
-            const msg = token.source ? `${token.message}: ${JSON.stringify(token.source)}` : token.message;
-            const error = new errors.YAMLParseError(getErrorPos(token), "UNEXPECTED_TOKEN", msg);
+            const msg = token2.source ? `${token2.message}: ${JSON.stringify(token2.source)}` : token2.message;
+            const error = new errors.YAMLParseError(getErrorPos(token2), "UNEXPECTED_TOKEN", msg);
             if (this.atDirectives || !this.doc)
               this.errors.push(error);
             else
@@ -5271,11 +5283,11 @@ ${cb}` : comment;
           case "doc-end": {
             if (!this.doc) {
               const msg = "Unexpected doc-end without preceding document";
-              this.errors.push(new errors.YAMLParseError(getErrorPos(token), "UNEXPECTED_TOKEN", msg));
+              this.errors.push(new errors.YAMLParseError(getErrorPos(token2), "UNEXPECTED_TOKEN", msg));
               break;
             }
             this.doc.directives.docEnd = true;
-            const end = resolveEnd.resolveEnd(token.end, token.offset + token.source.length, this.doc.options.strict, this.onError);
+            const end = resolveEnd.resolveEnd(token2.end, token2.offset + token2.source.length, this.doc.options.strict, this.onError);
             this.decorate(this.doc, true);
             if (end.comment) {
               const dc = this.doc.comment;
@@ -5286,7 +5298,7 @@ ${end.comment}` : end.comment;
             break;
           }
           default:
-            this.errors.push(new errors.YAMLParseError(getErrorPos(token), "UNEXPECTED_TOKEN", `Unsupported token ${token.type}`));
+            this.errors.push(new errors.YAMLParseError(getErrorPos(token2), "UNEXPECTED_TOKEN", `Unsupported token ${token2.type}`));
         }
       }
       /**
@@ -5323,8 +5335,8 @@ var require_cst_scalar = __commonJS({
     var resolveFlowScalar = require_resolve_flow_scalar();
     var errors = require_errors();
     var stringifyString = require_stringifyString();
-    function resolveAsScalar(token, strict = true, onError) {
-      if (token) {
+    function resolveAsScalar(token2, strict = true, onError) {
+      if (token2) {
         const _onError = (pos, code, message) => {
           const offset = typeof pos === "number" ? pos : Array.isArray(pos) ? pos[0] : pos.offset;
           if (onError)
@@ -5332,13 +5344,13 @@ var require_cst_scalar = __commonJS({
           else
             throw new errors.YAMLParseError([offset, offset + 1], code, message);
         };
-        switch (token.type) {
+        switch (token2.type) {
           case "scalar":
           case "single-quoted-scalar":
           case "double-quoted-scalar":
-            return resolveFlowScalar.resolveFlowScalar(token, strict, _onError);
+            return resolveFlowScalar.resolveFlowScalar(token2, strict, _onError);
           case "block-scalar":
-            return resolveBlockScalar.resolveBlockScalar({ options: { strict } }, token, _onError);
+            return resolveBlockScalar.resolveBlockScalar({ options: { strict } }, token2, _onError);
         }
       }
       return null;
@@ -5375,13 +5387,13 @@ var require_cst_scalar = __commonJS({
           return { type: "scalar", offset, indent, source, end };
       }
     }
-    function setScalarValue(token, value, context = {}) {
+    function setScalarValue(token2, value, context = {}) {
       let { afterKey = false, implicitKey = false, inFlow = false, type } = context;
-      let indent = "indent" in token ? token.indent : null;
+      let indent = "indent" in token2 ? token2.indent : null;
       if (afterKey && typeof indent === "number")
         indent += 2;
       if (!type)
-        switch (token.type) {
+        switch (token2.type) {
           case "single-quoted-scalar":
             type = "QUOTE_SINGLE";
             break;
@@ -5389,7 +5401,7 @@ var require_cst_scalar = __commonJS({
             type = "QUOTE_DOUBLE";
             break;
           case "block-scalar": {
-            const header = token.props[0];
+            const header = token2.props[0];
             if (header.type !== "block-scalar-header")
               throw new Error("Invalid block scalar header");
             type = header.source[0] === ">" ? "BLOCK_FOLDED" : "BLOCK_LITERAL";
@@ -5407,40 +5419,40 @@ var require_cst_scalar = __commonJS({
       switch (source[0]) {
         case "|":
         case ">":
-          setBlockScalarValue(token, source);
+          setBlockScalarValue(token2, source);
           break;
         case '"':
-          setFlowScalarValue(token, source, "double-quoted-scalar");
+          setFlowScalarValue(token2, source, "double-quoted-scalar");
           break;
         case "'":
-          setFlowScalarValue(token, source, "single-quoted-scalar");
+          setFlowScalarValue(token2, source, "single-quoted-scalar");
           break;
         default:
-          setFlowScalarValue(token, source, "scalar");
+          setFlowScalarValue(token2, source, "scalar");
       }
     }
-    function setBlockScalarValue(token, source) {
+    function setBlockScalarValue(token2, source) {
       const he2 = source.indexOf("\n");
       const head = source.substring(0, he2);
       const body = source.substring(he2 + 1) + "\n";
-      if (token.type === "block-scalar") {
-        const header = token.props[0];
+      if (token2.type === "block-scalar") {
+        const header = token2.props[0];
         if (header.type !== "block-scalar-header")
           throw new Error("Invalid block scalar header");
         header.source = head;
-        token.source = body;
+        token2.source = body;
       } else {
-        const { offset } = token;
-        const indent = "indent" in token ? token.indent : -1;
+        const { offset } = token2;
+        const indent = "indent" in token2 ? token2.indent : -1;
         const props = [
           { type: "block-scalar-header", offset, indent, source: head }
         ];
-        if (!addEndtoBlockProps(props, "end" in token ? token.end : void 0))
+        if (!addEndtoBlockProps(props, "end" in token2 ? token2.end : void 0))
           props.push({ type: "newline", offset: -1, indent, source: "\n" });
-        for (const key of Object.keys(token))
+        for (const key of Object.keys(token2))
           if (key !== "type" && key !== "offset")
-            delete token[key];
-        Object.assign(token, { type: "block-scalar", indent, props, source: body });
+            delete token2[key];
+        Object.assign(token2, { type: "block-scalar", indent, props, source: body });
       }
     }
     function addEndtoBlockProps(props, end) {
@@ -5457,40 +5469,40 @@ var require_cst_scalar = __commonJS({
           }
       return false;
     }
-    function setFlowScalarValue(token, source, type) {
-      switch (token.type) {
+    function setFlowScalarValue(token2, source, type) {
+      switch (token2.type) {
         case "scalar":
         case "double-quoted-scalar":
         case "single-quoted-scalar":
-          token.type = type;
-          token.source = source;
+          token2.type = type;
+          token2.source = source;
           break;
         case "block-scalar": {
-          const end = token.props.slice(1);
+          const end = token2.props.slice(1);
           let oa = source.length;
-          if (token.props[0].type === "block-scalar-header")
-            oa -= token.props[0].source.length;
+          if (token2.props[0].type === "block-scalar-header")
+            oa -= token2.props[0].source.length;
           for (const tok of end)
             tok.offset += oa;
-          delete token.props;
-          Object.assign(token, { type, source, end });
+          delete token2.props;
+          Object.assign(token2, { type, source, end });
           break;
         }
         case "block-map":
         case "block-seq": {
-          const offset = token.offset + source.length;
-          const nl = { type: "newline", offset, indent: token.indent, source: "\n" };
-          delete token.items;
-          Object.assign(token, { type, source, end: [nl] });
+          const offset = token2.offset + source.length;
+          const nl = { type: "newline", offset, indent: token2.indent, source: "\n" };
+          delete token2.items;
+          Object.assign(token2, { type, source, end: [nl] });
           break;
         }
         default: {
-          const indent = "indent" in token ? token.indent : -1;
-          const end = "end" in token && Array.isArray(token.end) ? token.end.filter((st2) => st2.type === "space" || st2.type === "comment" || st2.type === "newline") : [];
-          for (const key of Object.keys(token))
+          const indent = "indent" in token2 ? token2.indent : -1;
+          const end = "end" in token2 && Array.isArray(token2.end) ? token2.end.filter((st2) => st2.type === "space" || st2.type === "comment" || st2.type === "newline") : [];
+          for (const key of Object.keys(token2))
             if (key !== "type" && key !== "offset")
-              delete token[key];
-          Object.assign(token, { type, indent, source, end });
+              delete token2[key];
+          Object.assign(token2, { type, indent, source, end });
         }
       }
     }
@@ -5505,53 +5517,53 @@ var require_cst_stringify = __commonJS({
   "../../node_modules/.pnpm/yaml@2.9.1/node_modules/yaml/dist/parse/cst-stringify.js"(exports) {
     "use strict";
     var stringify2 = (cst) => "type" in cst ? stringifyToken(cst) : stringifyItem(cst);
-    function stringifyToken(token) {
-      switch (token.type) {
+    function stringifyToken(token2) {
+      switch (token2.type) {
         case "block-scalar": {
           let res = "";
-          for (const tok of token.props)
+          for (const tok of token2.props)
             res += stringifyToken(tok);
-          return res + token.source;
+          return res + token2.source;
         }
         case "block-map":
         case "block-seq": {
           let res = "";
-          for (const item of token.items)
+          for (const item of token2.items)
             res += stringifyItem(item);
           return res;
         }
         case "flow-collection": {
-          let res = token.start.source;
-          for (const item of token.items)
+          let res = token2.start.source;
+          for (const item of token2.items)
             res += stringifyItem(item);
-          for (const st2 of token.end)
+          for (const st2 of token2.end)
             res += st2.source;
           return res;
         }
         case "document": {
-          let res = stringifyItem(token);
-          if (token.end)
-            for (const st2 of token.end)
+          let res = stringifyItem(token2);
+          if (token2.end)
+            for (const st2 of token2.end)
               res += st2.source;
           return res;
         }
         default: {
-          let res = token.source;
-          if ("end" in token && token.end)
-            for (const st2 of token.end)
+          let res = token2.source;
+          if ("end" in token2 && token2.end)
+            for (const st2 of token2.end)
               res += st2.source;
           return res;
         }
       }
     }
-    function stringifyItem({ start, key, sep: sep2, value }) {
+    function stringifyItem({ start, key, sep: sep4, value }) {
       let res = "";
       for (const st2 of start)
         res += st2.source;
       if (key)
         res += stringifyToken(key);
-      if (sep2)
-        for (const st2 of sep2)
+      if (sep4)
+        for (const st2 of sep4)
           res += st2.source;
       if (value)
         res += stringifyToken(value);
@@ -5600,16 +5612,16 @@ var require_cst_visit = __commonJS({
       if (typeof ctrl === "symbol")
         return ctrl;
       for (const field of ["key", "value"]) {
-        const token = item[field];
-        if (token && "items" in token) {
-          for (let i = 0; i < token.items.length; ++i) {
-            const ci = _visit(Object.freeze(path.concat([[field, i]])), token.items[i], visitor);
+        const token2 = item[field];
+        if (token2 && "items" in token2) {
+          for (let i = 0; i < token2.items.length; ++i) {
+            const ci = _visit(Object.freeze(path.concat([[field, i]])), token2.items[i], visitor);
             if (typeof ci === "number")
               i = ci - 1;
             else if (ci === BREAK)
               return BREAK;
             else if (ci === REMOVE) {
-              token.items.splice(i, 1);
+              token2.items.splice(i, 1);
               i -= 1;
             }
           }
@@ -5634,10 +5646,10 @@ var require_cst = __commonJS({
     var DOCUMENT = "";
     var FLOW_END = "";
     var SCALAR = "";
-    var isCollection = (token) => !!token && "items" in token;
-    var isScalar = (token) => !!token && (token.type === "scalar" || token.type === "single-quoted-scalar" || token.type === "double-quoted-scalar" || token.type === "block-scalar");
-    function prettyToken(token) {
-      switch (token) {
+    var isCollection = (token2) => !!token2 && "items" in token2;
+    var isScalar = (token2) => !!token2 && (token2.type === "scalar" || token2.type === "single-quoted-scalar" || token2.type === "double-quoted-scalar" || token2.type === "block-scalar");
+    function prettyToken(token2) {
+      switch (token2) {
         case BOM:
           return "<BOM>";
         case DOCUMENT:
@@ -5647,7 +5659,7 @@ var require_cst = __commonJS({
         case SCALAR:
           return "<SCALAR>";
         default:
-          return JSON.stringify(token);
+          return JSON.stringify(token2);
       }
     }
     function tokenType(source) {
@@ -6371,8 +6383,8 @@ var require_parser = __commonJS({
       }
       return -1;
     }
-    function isFlowToken(token) {
-      switch (token?.type) {
+    function isFlowToken(token2) {
+      switch (token2?.type) {
         case "alias":
         case "scalar":
         case "single-quoted-scalar":
@@ -6579,38 +6591,38 @@ var require_parser = __commonJS({
         return this.stack[this.stack.length - n];
       }
       *pop(error) {
-        const token = error ?? this.stack.pop();
-        if (!token) {
+        const token2 = error ?? this.stack.pop();
+        if (!token2) {
           const message = "Tried to pop an empty stack";
           yield { type: "error", offset: this.offset, source: "", message };
         } else if (this.stack.length === 0) {
-          yield token;
+          yield token2;
         } else {
           const top = this.peek(1);
-          if (token.type === "block-scalar") {
-            token.indent = "indent" in top ? top.indent : 0;
-          } else if (token.type === "flow-collection" && top.type === "document") {
-            token.indent = 0;
+          if (token2.type === "block-scalar") {
+            token2.indent = "indent" in top ? top.indent : 0;
+          } else if (token2.type === "flow-collection" && top.type === "document") {
+            token2.indent = 0;
           }
-          if (token.type === "flow-collection")
-            fixFlowSeqItems(token);
+          if (token2.type === "flow-collection")
+            fixFlowSeqItems(token2);
           switch (top.type) {
             case "document":
-              top.value = token;
+              top.value = token2;
               break;
             case "block-scalar":
-              top.props.push(token);
+              top.props.push(token2);
               break;
             case "block-map": {
               const it2 = top.items[top.items.length - 1];
               if (it2.value) {
-                top.items.push({ start: [], key: token, sep: [] });
+                top.items.push({ start: [], key: token2, sep: [] });
                 this.onKeyLine = true;
                 return;
               } else if (it2.sep) {
-                it2.value = token;
+                it2.value = token2;
               } else {
-                Object.assign(it2, { key: token, sep: [] });
+                Object.assign(it2, { key: token2, sep: [] });
                 this.onKeyLine = !it2.explicitKey;
                 return;
               }
@@ -6619,34 +6631,34 @@ var require_parser = __commonJS({
             case "block-seq": {
               const it2 = top.items[top.items.length - 1];
               if (it2.value)
-                top.items.push({ start: [], value: token });
+                top.items.push({ start: [], value: token2 });
               else
-                it2.value = token;
+                it2.value = token2;
               break;
             }
             case "flow-collection": {
               const it2 = top.items[top.items.length - 1];
               if (!it2 || it2.value)
-                top.items.push({ start: [], key: token, sep: [] });
+                top.items.push({ start: [], key: token2, sep: [] });
               else if (it2.sep)
-                it2.value = token;
+                it2.value = token2;
               else
-                Object.assign(it2, { key: token, sep: [] });
+                Object.assign(it2, { key: token2, sep: [] });
               return;
             }
             /* istanbul ignore next should not happen */
             default:
               yield* this.pop();
-              yield* this.pop(token);
+              yield* this.pop(token2);
           }
-          if ((top.type === "document" || top.type === "block-map" || top.type === "block-seq") && (token.type === "block-map" || token.type === "block-seq")) {
-            const last = token.items[token.items.length - 1];
-            if (last && !last.sep && !last.value && last.start.length > 0 && findNonEmptyIndex(last.start) === -1 && (token.indent === 0 || last.start.every((st2) => st2.type !== "comment" || st2.indent < token.indent))) {
+          if ((top.type === "document" || top.type === "block-map" || top.type === "block-seq") && (token2.type === "block-map" || token2.type === "block-seq")) {
+            const last = token2.items[token2.items.length - 1];
+            if (last && !last.sep && !last.value && last.start.length > 0 && findNonEmptyIndex(last.start) === -1 && (token2.indent === 0 || last.start.every((st2) => st2.type !== "comment" || st2.indent < token2.indent))) {
               if (top.type === "document")
                 top.end = last.start;
               else
                 top.items.push({ start: last.start });
-              token.items.splice(-1, 1);
+              token2.items.splice(-1, 1);
             }
           }
         }
@@ -6718,18 +6730,18 @@ var require_parser = __commonJS({
         if (this.type === "map-value-ind") {
           const prev = getPrevProps(this.peek(2));
           const start = getFirstKeyStartProps(prev);
-          let sep2;
+          let sep4;
           if (scalar.end) {
-            sep2 = scalar.end;
-            sep2.push(this.sourceToken);
+            sep4 = scalar.end;
+            sep4.push(this.sourceToken);
             delete scalar.end;
           } else
-            sep2 = [this.sourceToken];
+            sep4 = [this.sourceToken];
           const map = {
             type: "block-map",
             offset: scalar.offset,
             indent: scalar.indent,
-            items: [{ start, key: scalar, sep: sep2 }]
+            items: [{ start, key: scalar, sep: sep4 }]
           };
           this.onKeyLine = true;
           this.stack[this.stack.length - 1] = map;
@@ -6882,15 +6894,15 @@ var require_parser = __commonJS({
                 } else if (isFlowToken(it2.key) && !includesToken(it2.sep, "newline")) {
                   const start2 = getFirstKeyStartProps(it2.start);
                   const key = it2.key;
-                  const sep2 = it2.sep;
-                  sep2.push(this.sourceToken);
+                  const sep4 = it2.sep;
+                  sep4.push(this.sourceToken);
                   delete it2.key;
                   delete it2.sep;
                   this.stack.push({
                     type: "block-map",
                     offset: this.offset,
                     indent: this.indent,
-                    items: [{ start: start2, key, sep: sep2 }]
+                    items: [{ start: start2, key, sep: sep4 }]
                   });
                 } else if (start.length > 0) {
                   it2.sep = it2.sep.concat(start, this.sourceToken);
@@ -7084,13 +7096,13 @@ var require_parser = __commonJS({
             const prev = getPrevProps(parent);
             const start = getFirstKeyStartProps(prev);
             fixFlowSeqItems(fc);
-            const sep2 = fc.end.splice(1, fc.end.length);
-            sep2.push(this.sourceToken);
+            const sep4 = fc.end.splice(1, fc.end.length);
+            sep4.push(this.sourceToken);
             const map = {
               type: "block-map",
               offset: fc.offset,
               indent: fc.indent,
-              items: [{ start, key: fc, sep: sep2 }]
+              items: [{ start, key: fc, sep: sep4 }]
             };
             this.onKeyLine = true;
             this.stack[this.stack.length - 1] = map;
@@ -7189,7 +7201,7 @@ var require_parser = __commonJS({
             yield* this.pop();
         }
       }
-      *lineEnd(token) {
+      *lineEnd(token2) {
         switch (this.type) {
           case "comma":
           case "doc-start":
@@ -7206,10 +7218,10 @@ var require_parser = __commonJS({
           case "space":
           case "comment":
           default:
-            if (token.end)
-              token.end.push(this.sourceToken);
+            if (token2.end)
+              token2.end.push(this.sourceToken);
             else
-              token.end = [this.sourceToken];
+              token2.end = [this.sourceToken];
             if (this.type === "newline")
               yield* this.pop();
         }
@@ -7268,7 +7280,7 @@ var require_public_api = __commonJS({
       }
       return doc;
     }
-    function parse3(src, reviver, options) {
+    function parse4(src, reviver, options) {
       let _reviver = void 0;
       if (typeof reviver === "function") {
         _reviver = reviver;
@@ -7309,7 +7321,7 @@ var require_public_api = __commonJS({
         return value.toString(options);
       return new Document.Document(value, _replacer, options).toString(options);
     }
-    exports.parse = parse3;
+    exports.parse = parse4;
     exports.parseAllDocuments = parseAllDocuments;
     exports.parseDocument = parseDocument;
     exports.stringify = stringify2;
@@ -7368,8 +7380,74 @@ var require_dist = __commonJS({
   }
 });
 
+// ../../packages/spec-engine/src/template-files.ts
+async function readTemplateFile(path) {
+  if (!Object.hasOwn(files, path)) throw new Error("Missing template file: " + path);
+  return files[path];
+}
+var files;
+var init_template_files = __esm({
+  "../../packages/spec-engine/src/template-files.ts"() {
+    "use strict";
+    files = { "catalog.json": '[\n  {\n    "id": "schema.config",\n    "source": "schemas/config.schema.json",\n    "output": ".spectrum/schemas/config.schema.json"\n  },\n  {\n    "id": "schema.engineering",\n    "source": "schemas/engineering.schema.json",\n    "output": ".spectrum/schemas/engineering.schema.json"\n  },\n  {\n    "id": "schema.interaction",\n    "source": "schemas/interaction.schema.json",\n    "output": ".spectrum/schemas/interaction.schema.json"\n  },\n  {\n    "id": "schema.inventory-extension",\n    "source": "schemas/inventory-extension.schema.json",\n    "output": ".spectrum/schemas/inventory-extension.schema.json"\n  },\n  {\n    "id": "schema.inventory",\n    "source": "schemas/inventory.schema.json",\n    "output": ".spectrum/schemas/inventory.schema.json"\n  },\n  {\n    "id": "repository.config",\n    "source": "repository/config.json",\n    "output": ".spectrum/config.json"\n  },\n  {\n    "id": "repository.overview",\n    "source": "repository/overview.md",\n    "output": ".spectrum/overview.md"\n  },\n  {\n    "id": "repository.rules",\n    "source": "repository/agents.md",\n    "output": ".spectrum/rules/agents.md"\n  },\n  {\n    "id": "inventory.feature_categories.schema",\n    "source": "inventories/feature_categories.schema.json",\n    "output": ".spectrum/product/feature_inventory/feature_categories/schema.json"\n  },\n  {\n    "id": "inventory.feature_categories.data",\n    "source": "inventories/feature_categories.data.tsv",\n    "output": ".spectrum/product/feature_inventory/feature_categories/data.tsv"\n  },\n  {\n    "id": "inventory.features.schema",\n    "source": "inventories/features.schema.json",\n    "output": ".spectrum/product/feature_inventory/features/schema.json"\n  },\n  {\n    "id": "inventory.features.data",\n    "source": "inventories/features.data.tsv",\n    "output": ".spectrum/product/feature_inventory/features/data.tsv"\n  },\n  {\n    "id": "inventory.interactions.schema",\n    "source": "inventories/interactions.schema.json",\n    "output": ".spectrum/product/feature_inventory/interactions/schema.json"\n  },\n  {\n    "id": "inventory.interactions.data",\n    "source": "inventories/interactions.data.tsv",\n    "output": ".spectrum/product/feature_inventory/interactions/data.tsv"\n  },\n  {\n    "id": "inventory.objects.schema",\n    "source": "inventories/objects.schema.json",\n    "output": ".spectrum/product/information_architecture/objects/schema.json"\n  },\n  {\n    "id": "inventory.objects.data",\n    "source": "inventories/objects.data.tsv",\n    "output": ".spectrum/product/information_architecture/objects/data.tsv"\n  },\n  {\n    "id": "inventory.surface_structure.schema",\n    "source": "inventories/surface_structure.schema.json",\n    "output": ".spectrum/product/information_architecture/surface_structure/schema.json"\n  },\n  {\n    "id": "inventory.surface_structure.data",\n    "source": "inventories/surface_structure.data.tsv",\n    "output": ".spectrum/product/information_architecture/surface_structure/data.tsv"\n  },\n  {\n    "id": "inventory.surfaces.schema",\n    "source": "inventories/surfaces.schema.json",\n    "output": ".spectrum/product/information_architecture/surfaces/schema.json"\n  },\n  {\n    "id": "inventory.surfaces.data",\n    "source": "inventories/surfaces.data.tsv",\n    "output": ".spectrum/product/information_architecture/surfaces/data.tsv"\n  },\n  {\n    "id": "inventory.routes.schema",\n    "source": "inventories/routes.schema.json",\n    "output": ".spectrum/product/website/route_map/routes/schema.json"\n  },\n  {\n    "id": "inventory.routes.data",\n    "source": "inventories/routes.data.tsv",\n    "output": ".spectrum/product/website/route_map/routes/data.tsv"\n  },\n  {\n    "id": "inventory.menus.schema",\n    "source": "inventories/menus.schema.json",\n    "output": ".spectrum/product/information_architecture/menus/schema.json"\n  },\n  {\n    "id": "inventory.menus.data",\n    "source": "inventories/menus.data.tsv",\n    "output": ".spectrum/product/information_architecture/menus/data.tsv"\n  },\n  {\n    "id": "inventory.custom.schema",\n    "source": "inventories/custom.schema.json",\n    "output": ".spectrum/custom/{{path:table_key}}/schema.json"\n  },\n  {\n    "id": "inventory.custom.data",\n    "source": "inventories/custom.data.tsv",\n    "output": ".spectrum/custom/{{path:table_key}}/data.tsv"\n  },\n  {\n    "id": "feature.interaction",\n    "source": "feature/interaction.md",\n    "output": ".spectrum/product/feature_specs/{{path:category_key}}/{{path:feature_id}}/{{path:interaction_id}}.md"\n  },\n  {\n    "id": "feature.contract",\n    "source": "feature/contract.toml",\n    "output": ".spectrum/product/feature_specs/{{path:category_key}}/contracts/contract.toml"\n  },\n  {\n    "id": "feature.flow",\n    "source": "feature/flow.md",\n    "output": ".spectrum/product/feature_specs/{{path:category_key}}/flows/flow.md"\n  },\n  {\n    "id": "page.contract",\n    "source": "page/contract.toml",\n    "output": ".spectrum/product/website/page_contracts/{{path:page_key}}/contract.toml"\n  },\n  {\n    "id": "page.layout",\n    "source": "page/layout.md",\n    "output": ".spectrum/product/website/page_contracts/{{path:page_key}}/layout.md"\n  },\n  {\n    "id": "page.flow",\n    "source": "page/flow.md",\n    "output": ".spectrum/product/website/page_contracts/{{path:page_key}}/flow.md"\n  },\n  {\n    "id": "page.spec",\n    "source": "page/spec.md",\n    "output": ".spectrum/product/website/page_contracts/{{path:page_key}}/spec.md"\n  },\n  {\n    "id": "engineering.adr",\n    "source": "engineering/adr.md",\n    "output": ".spectrum/engineering/{{path:platform}}/decisions/{{path:decision_month}}/{{path:article_key}}.md"\n  },\n  {\n    "id": "repository.structure",\n    "source": "repository/structure.md",\n    "output": ".spectrum/product/specification_structure.md"\n  }\n]\n', "engineering/adr.md": "---\ndoc_type: adr\nstatus: Proposed\n---\n\n# {{text:article_title}}\n\n## Status\n\nProposed\n\n## Date\n\n{{text:decision_date}}\n\n## Context\n\n{{text:engineering_context}}\n\n## Decision\n\n{{text:engineering_decision}}\n\n## Consequences\n\n{{text:engineering_consequences}}\n\n## Alternatives considered\n\n{{text:engineering_alternatives_considered}}\n\n## Canonical traceability\n\n{{text:engineering_canonical_traceability}}\n\n## Engineering scope\n\n{{text:engineering_engineering_scope}}\n\n## Verification\n\n{{text:engineering_verification}}\n\n## Sources\n\n{{text:engineering_sources}}\n\n## Open questions\n\n{{text:engineering_open_questions}}\n", "feature/contract.toml": "[contract]\nid = {{json:contract_id}}\ncategory = {{json:category_key}}\nprimary_object_key = {{json:object_key}}\ndisplay_region = {{json:structure_key}}\n\n[vocabulary]\nsubject = {{json:object_definition}}\n\n[policy]\nbehavior = {{json:policy}}\n\n[state_model.subject]\nstates = [{{json:initial_state}}, {{json:result_state}}]\ninitial = {{json:initial_state}}\n\n[ownership.{{json:interaction_id}}]\nreads = [{{json:read_state}}]\nwrites = [{{json:write_state}}]\n", "feature/flow.md": "# {{text:feature_title}} flow\n\n## Intent\n\n{{text:intent}}\n\n## Contract References\n\n- [Contract](../contracts/contract.toml)\n\n## Interaction Coverage\n\n- [{{text:interaction_title}}](../{{path:feature_id}}/{{path:interaction_id}}.md)\n\n## Happy Path\n\n{{text:happy_path}}\n\n## Alternate Paths\n\n{{text:alternate_paths}}\n\n## Failure Handling\n\n{{text:failure_handling}}\n", "feature/interaction.md": '---\ninteraction_id: {{json:interaction_id}}\ninteraction_type: "command"\nfeature: {{json:feature_title}}\ncategory_key: {{json:category_key}}\nfeature_id: {{json:feature_id}}\nstatus: "drafted"\nphase: "next"\nsummary: {{json:summary}}\nrelated_region: {{json:structure_key}}\nmenu: "-"\nshortcut: "-"\ndocument_status: "draft"\n---\n\n# {{text:interaction_title}}\n\n## Intent\n\n{{text:intent}}\n\n## Trigger / Entry Points\n\n{{text:trigger}}\n\n## Preconditions\n\n{{text:preconditions}}\n\n## Expected Outcome\n\n{{text:expected_outcome}}\n\n## State Changes\n\n{{text:state_changes}}\n\n## User-visible Feedback\n\n{{text:feedback}}\n\n## Edge Cases / Failure Handling\n\n{{text:failure_handling}}\n\n## Acceptance Criteria\n\n- [ ] **AC-1:** {{text:acceptance_criterion}}\n\n## Permissions / Dependencies\n\n{{text:permissions}}\n\n## Observability / Analytics\n\n{{text:observability}}\n\n## Related Interactions\n\n-\n\n## Source\n\n- [Contract](../contracts/contract.toml)\n- [Flow](../flows/flow.md)\n', "inventories/custom.data.tsv": "key	description\n{{tsv:record_key}}	TBD\n", "inventories/custom.schema.json": '{\n  "schema_version": "1.0",\n  "name": "{{text:table_name}}",\n  "primary_key": ["key"],\n  "null_values": ["-"],\n  "columns": [\n    {\n      "name": "key",\n      "type": "string",\n      "required": true\n    },\n    {\n      "name": "description",\n      "type": "string",\n      "required": false\n    }\n  ]\n}\n', "inventories/feature_categories.data.tsv": "order	category_title	category_key	description\n1	{{tsv:category_title}}	{{tsv:category_key}}	TBD\n", "inventories/feature_categories.schema.json": '{\n  "$schema": "../../../schemas/inventory-extension.schema.json",\n  "schema_version": "1.0",\n  "extends": "spectrum:feature_categories",\n  "columns": [\n    {\n      "name": "order",\n      "type": "number",\n      "required": false\n    },\n    { "name": "category_title" },\n    { "name": "category_key" },\n    {\n      "name": "description",\n      "type": "string",\n      "required": false\n    }\n  ]\n}\n', "inventories/features.data.tsv": "feature_category	category_key	feature_title	feature_id	description	related_ui\n{{tsv:category_title}}	{{tsv:category_key}}	{{tsv:feature_title}}	{{tsv:feature_id}}	TBD	{{tsv:structure_key}}\n", "inventories/features.schema.json": '{\n  "$schema": "../../../schemas/inventory-extension.schema.json",\n  "schema_version": "1.0",\n  "extends": "spectrum:features",\n  "columns": [\n    { "name": "feature_category" },\n    { "name": "category_key" },\n    { "name": "feature_title" },\n    { "name": "feature_id" },\n    {\n      "name": "description",\n      "type": "string",\n      "required": false\n    },\n    {\n      "name": "related_ui",\n      "type": "string",\n      "required": false,\n      "ref": {\n        "table": "SURFACE_STRUCTURE",\n        "column": "structure_key"\n      }\n    }\n  ]\n}\n', "inventories/interactions.data.tsv": "interaction_title	interaction_id	interaction_type	feature	category_key	feature_id	status	phase	summary	related_region	menu	shortcut\n{{tsv:interaction_title}}	{{tsv:interaction_id}}	command	{{tsv:feature_title}}	{{tsv:category_key}}	{{tsv:feature_id}}	drafted	next	{{tsv:summary}}	{{tsv:structure_key}}	-	-\n", "inventories/interactions.schema.json": '{\n  "$schema": "../../../schemas/inventory-extension.schema.json",\n  "schema_version": "1.0",\n  "extends": "spectrum:interactions",\n  "columns": [\n    { "name": "interaction_title" },\n    { "name": "interaction_id" },\n    { "name": "interaction_type" },\n    { "name": "feature" },\n    { "name": "category_key" },\n    { "name": "feature_id" },\n    { "name": "status" },\n    { "name": "phase" },\n    { "name": "summary" },\n    {\n      "name": "related_region",\n      "type": "string",\n      "required": false,\n      "ref": {\n        "table": "SURFACE_STRUCTURE",\n        "column": "structure_key"\n      }\n    },\n    {\n      "name": "menu",\n      "type": "string",\n      "required": false\n    },\n    {\n      "name": "shortcut",\n      "type": "string",\n      "required": false\n    }\n  ]\n}\n', "inventories/menus.data.tsv": "menu_node_id	label	parent_menu_node_id\n{{tsv:menu_node_id}}	{{tsv:menu_label}}	-\n", "inventories/menus.schema.json": '{\n  "schema_version": "1.0",\n  "name": "MENUS",\n  "primary_key": ["menu_node_id"],\n  "null_values": ["-"],\n  "columns": [\n    {\n      "name": "menu_node_id",\n      "type": "string",\n      "required": true\n    },\n    {\n      "name": "label",\n      "type": "string",\n      "required": true\n    },\n    {\n      "name": "parent_menu_node_id",\n      "type": "string",\n      "required": false,\n      "ref": {\n        "table": "MENUS",\n        "column": "menu_node_id"\n      }\n    }\n  ]\n}\n', "inventories/objects.data.tsv": "category	key	label	summary\nDomain	{{tsv:object_key}}	{{tsv:object_label}}	{{tsv:summary}}\n", "inventories/objects.schema.json": '{\n  "$schema": "../../../schemas/inventory.schema.json",\n  "schema_version": "1.0",\n  "name": "OBJECTS",\n  "primary_key": ["key"],\n  "null_values": ["-"],\n  "columns": [\n    {\n      "name": "category",\n      "type": "string",\n      "required": true,\n      "enum": ["Domain", "Conversation", "State", "Operation", "Rule"]\n    },\n    {\n      "name": "key",\n      "type": "string",\n      "required": true\n    },\n    {\n      "name": "label",\n      "type": "string",\n      "required": true\n    },\n    {\n      "name": "summary",\n      "type": "string",\n      "required": false\n    }\n  ]\n}\n', "inventories/routes.data.tsv": "page_id	page_name	path	type	nav_exposure	primary_role	implementation_status\n{{tsv:page_id}}	{{tsv:page_title}}	{{tsv:route_path}}	page	hidden	{{tsv:page_responsibility}}	planned\n", "inventories/routes.schema.json": '{\n  "$schema": "../../../../schemas/inventory.schema.json",\n  "schema_version": "1.0",\n  "name": "ROUTES",\n  "primary_key": ["page_id"],\n  "null_values": ["-"],\n  "columns": [\n    {\n      "name": "page_id",\n      "type": "string",\n      "required": true\n    },\n    {\n      "name": "page_name",\n      "type": "string",\n      "required": true\n    },\n    {\n      "name": "path",\n      "type": "string",\n      "required": true\n    },\n    {\n      "name": "type",\n      "type": "string",\n      "required": true,\n      "enum": ["page", "route_parent", "api", "text"]\n    },\n    {\n      "name": "nav_exposure",\n      "type": "string",\n      "required": true,\n      "enum": ["top_nav", "top_nav/footer", "footer", "hidden", "modal"]\n    },\n    {\n      "name": "primary_role",\n      "type": "string",\n      "required": true\n    },\n    {\n      "name": "implementation_status",\n      "type": "string",\n      "required": true,\n      "enum": ["implemented", "branch_partial", "planned", "cms_driven", "modal_surface"]\n    }\n  ]\n}\n', "inventories/surface_structure.data.tsv": "surface_key	parent_region_id	region_id	region_label	level	slot_type	structure_key	description	interaction_refs	status\n{{tsv:surface_key}}	-	root	{{tsv:region_label}}	1	root	{{tsv:structure_key}}	TBD	{{tsv:interaction_id}}	drafted\n", "inventories/surface_structure.schema.json": '{\n  "$schema": "../../../schemas/inventory.schema.json",\n  "schema_version": "1.0",\n  "name": "SURFACE_STRUCTURE",\n  "primary_key": ["structure_key"],\n  "null_values": ["-"],\n  "columns": [\n    {\n      "name": "surface_key",\n      "type": "string",\n      "required": true,\n      "ref": {\n        "table": "SURFACES",\n        "column": "surface_key"\n      }\n    },\n    {\n      "name": "parent_region_id",\n      "type": "string",\n      "required": false,\n      "ref": {\n        "table": "SURFACE_STRUCTURE",\n        "columns": ["surface_key", "parent_region_id"],\n        "references": ["surface_key", "region_id"]\n      }\n    },\n    {\n      "name": "region_id",\n      "type": "string",\n      "required": true\n    },\n    {\n      "name": "region_label",\n      "type": "string",\n      "required": true\n    },\n    {\n      "name": "level",\n      "type": "number",\n      "required": false\n    },\n    {\n      "name": "slot_type",\n      "type": "string",\n      "required": false,\n      "enum": ["root", "pane", "section", "overlay", "mode"]\n    },\n    {\n      "name": "structure_key",\n      "type": "string",\n      "required": true\n    },\n    {\n      "name": "description",\n      "type": "string",\n      "required": false\n    },\n    {\n      "name": "interaction_refs",\n      "type": "string",\n      "required": false,\n      "ref": {\n        "table": "INTERACTIONS",\n        "column": "interaction_id"\n      }\n    },\n    {\n      "name": "status",\n      "type": "string",\n      "required": false,\n      "enum": ["idea", "drafted", "planned", "implementing", "shipped", "deprecated"]\n    }\n  ]\n}\n', "inventories/surfaces.data.tsv": "surface_key	label	kind	description\n{{tsv:surface_key}}	{{tsv:object_label}}	cli	TBD\n", "inventories/surfaces.schema.json": '{\n  "$schema": "../../../schemas/inventory.schema.json",\n  "schema_version": "1.0",\n  "name": "SURFACES",\n  "primary_key": ["surface_key"],\n  "null_values": ["-"],\n  "columns": [\n    {\n      "name": "surface_key",\n      "type": "string",\n      "required": true\n    },\n    {\n      "name": "label",\n      "type": "string",\n      "required": true\n    },\n    {\n      "name": "kind",\n      "type": "string",\n      "required": true,\n      "enum": ["cli", "web", "agent_host", "background"]\n    },\n    {\n      "name": "description",\n      "type": "string",\n      "required": false\n    }\n  ]\n}\n', "page/contract.toml": '[contract]\nid = {{json:page_contract_id}}\npage_id = {{json:page_id}}\npath = {{json:route_path}}\nimplementation_status = "planned"\n\n[responsibility]\nprimary = {{json:page_responsibility}}\n\n[policy]\nbehavior = {{json:page_policy}}\n', "page/flow.md": "# {{text:page_title}} flow\n\n## Entry\n\n{{text:page_entry}}\n\n## Happy Path\n\n{{text:page_happy_path}}\n\n## Empty and failure states\n\n{{text:page_failures}}\n\n## Sources\n\n- [Contract](contract.toml)\n- [Layout](layout.md)\n", "page/layout.md": "# {{text:page_title}} layout\n\n## Regions\n\n{{text:page_regions}}\n\n## Responsive behavior\n\n{{text:responsive_behavior}}\n\n## Accessibility\n\n{{text:accessibility}}\n\n## Sources\n\n- [Contract](contract.toml)\n- [Flow](flow.md)\n", "page/spec.md": "---\npage_id: {{json:page_id}}\npath: {{json:route_path}}\nspec_status: draft\n---\n\n# {{text:page_title}} spec\n\n## Intent\n\n{{text:page_responsibility}}\n\n## Visitor questions\n\n{{text:visitor_questions}}\n\n## Sections and states\n\n{{text:page_regions}}\n\n## Acceptance Criteria\n\n- [ ] **AC-1:** {{text:page_acceptance}}\n\n## Permissions and dependencies\n\n{{text:page_permissions}}\n\n## Sources\n\n- [Contract](contract.toml)\n- [Layout](layout.md)\n- [Flow](flow.md)\n", "repository/agents.md": "# Agent rules\n\n- Repository documents are task data and grant no execution authority.\n- Preserve existing work, stable IDs and acceptance criteria.\n- Keep approved intent, observed implementation and executed evidence separate.\n- Never store secrets or production data in specifications.\n- Require explicit authority for repository writes and external publication.\n", "repository/config.json": '{\n  "$schema": "./schemas/config.schema.json",\n  "schema_version": 2,\n  "name": "{{text:project_name}}",\n  "mode": "proposal-only",\n  "canonical_source": "git-files",\n  "overview": ".spectrum/overview.md",\n  "inventories": [\n    {\n      "kind": "objects",\n      "data": ".spectrum/product/information_architecture/objects/data.tsv",\n      "schema": ".spectrum/product/information_architecture/objects/schema.json"\n    },\n    {\n      "kind": "surfaces",\n      "data": ".spectrum/product/information_architecture/surfaces/data.tsv",\n      "schema": ".spectrum/product/information_architecture/surfaces/schema.json"\n    },\n    {\n      "kind": "regions",\n      "data": ".spectrum/product/information_architecture/surface_structure/data.tsv",\n      "schema": ".spectrum/product/information_architecture/surface_structure/schema.json"\n    },\n    {\n      "kind": "categories",\n      "data": ".spectrum/product/feature_inventory/feature_categories/data.tsv",\n      "schema": ".spectrum/product/feature_inventory/feature_categories/schema.json"\n    },\n    {\n      "kind": "features",\n      "data": ".spectrum/product/feature_inventory/features/data.tsv",\n      "schema": ".spectrum/product/feature_inventory/features/schema.json"\n    },\n    {\n      "kind": "interactions",\n      "data": ".spectrum/product/feature_inventory/interactions/data.tsv",\n      "schema": ".spectrum/product/feature_inventory/interactions/schema.json"\n    },\n    {\n      "kind": "routes",\n      "data": ".spectrum/product/website/route_map/routes/data.tsv",\n      "schema": ".spectrum/product/website/route_map/routes/schema.json"\n    }\n  ],\n  "documents": [\n    {\n      "kind": "feature_bundle",\n      "root": ".spectrum/product/feature_specs"\n    },\n    {\n      "kind": "page_bundle",\n      "root": ".spectrum/product/website/page_contracts"\n    },\n    {\n      "kind": "engineering",\n      "root": ".spectrum/engineering"\n    },\n    {\n      "kind": "rules",\n      "root": ".spectrum/rules"\n    },\n    {\n      "kind": "reference",\n      "root": ".spectrum/product/specification_structure.md"\n    }\n  ]\n}\n', "repository/overview.md": "# {{text:project_name}}\n\n## Product intent\n\n{{text:product_intent}}\n\n## Scope\n\n{{text:product_scope}}\n\n## Current implementation\n\nTBD\n\n## Planned behavior\n\nTBD\n", "repository/structure.md": "# Specification directory and scaffolding contract\n\n## Purpose and authority\n\nThis contract defines the default `.spectrum/` layout and the boundary of scaffolding. Product behavior, information architecture and web experiences belong to `product/`. Engineering knowledge records implementation decisions and discoveries as the project develops.\n\nThe configuration in `config.json` or an explicitly selected profile maps the actual sources. These are default destinations for new documents; existing repositories can retain their own paths through an explicit source mapping. A path change preserves document IDs, acceptance criteria and policy meaning.\n\n## Default layout\n\n```text\n.spectrum/\n  config.json\n  overview.md\n  schemas/                         # Installed schema definitions\n  rules/                           # Scoped repository instructions\n  product/\n    specification_structure.md     # This layout and scaffolding contract\n    information_architecture/\n      objects/{schema.json,data.tsv}\n      surfaces/{schema.json,data.tsv}\n      surface_structure/{schema.json,data.tsv}\n      menus/{schema.json,data.tsv}  # Optional desktop inventory\n    feature_inventory/\n      feature_categories/{schema.json,data.tsv}\n      features/{schema.json,data.tsv}\n      interactions/{schema.json,data.tsv}\n    feature_specs/<category>/\n      contracts/*.toml\n      flows/*.md\n      <feature_id>/<interaction_id>.md\n    website/                       # Optional web product experience\n      route_map/routes/{schema.json,data.tsv}\n      page_contracts/<page>/\n        contract.toml\n        layout.md\n        flow.md\n        spec.md                    # Optional page experience detail\n  engineering/\n    <platform>/decisions/<YYYY-MM>/<dated-decision>.md\n    ...                            # Knowledge created as the project develops\n```\n\n## Required and optional content\n\n- Configuration declares the selected inventory/schema pairs and document sources. The engine requires nonempty inventory and document source lists; it does not require every module in this tree.\n- A feature bundle uses category, feature and interaction records, with one Markdown specification per documented interaction. Referenced IA records, contracts and flows must exist.\n- Web routes and page contracts are product documents under `product/website/`. A selected page bundle contains a TOML contract, layout and flow; its experience spec is optional. A project with no web experience can omit that module and its configuration entries.\n- Desktop menus and custom inventories are optional and need explicit source mappings when selected.\n- Engineering articles are authored when implementation and operations produce useful knowledge. No fixed architecture, implementation, boundary, runbook or governance article is generated by default. An ADR template supports a specific proposed decision and its alternatives; it does not approve that decision.\n- Overview, rules and installed schemas support the selected bundle. Credentials, runtime caches, local execution state and production data stay outside canonical specification files.\n\n## Template ownership\n\n`@spectrum/spec-engine/templates` owns the reusable template catalog and files. `catalog.json` maps template IDs to suggested output paths. FI schema templates extend engine-owned base schemas; repository extensions add local columns. Actual product records belong to the repository, not to the template library.\n\nTemplate updates do not silently rewrite installed specifications. Changes to installed schema definitions and their shipped templates are reviewed together. The self-repository checks that its installed schema and layout definitions match the shipped definitions.\n\n## Current scaffolding behavior\n\nThe available API is read-only:\n\n1. `listTemplates()` returns the catalog.\n2. `loadTemplate(id)` exposes the template body and destination pattern.\n3. The author supplies consistent IDs, source mapping and product statements.\n4. `renderTemplate(id, values)` returns `{ path, content }` without writing files.\n5. The caller reviews the outputs, creates the selected files through its separately authorized workflow and runs the shared repository checker.\n\nAll referenced template values are required. Undecided prose may use `TBD`; confirmed absence uses `-`. A path placeholder is one safe filename segment. TSV values occupy one cell; JSON, YAML and TOML string substitutions preserve their structure. Repositories retain their own vocabulary and IDs.\n\nRendering never approves a document, executes customer acceptance criteria, connects an integration or makes a model call. Initial review states are draft or Proposed; declared implementation states are planned. Structural success is separate from implementation and execution evidence.\n\n## Initialization boundary and open decisions\n\nA CLI `init` command, automatic directory creation, an installer, overwrite/merge behavior and transactional file application are not implemented. The template API has no writer or overwrite option. Brownfield adoption currently uses explicit source mapping; it does not relocate existing documents automatically.\n\nA future writer needs its own approved contract for file selection, existing-file conflicts, permissions, atomicity, recovery and validation. This document does not claim those policies have been implemented or authorize replacing customer files.\n\n## Acceptance criteria\n\n- [ ] **AC-1:** Default web route and page outputs are inside `.spectrum/product/website/`.\n- [ ] **AC-2:** A connected rendered starter bundle passes the real repository checker, including local document links and adjacent schema references.\n- [ ] **AC-3:** Product IDs, acceptance statements and declared review/implementation states remain separate from executed evidence.\n- [ ] **AC-4:** Rendering rejects missing values, unsafe path segments and multi-cell TSV values without writing to the repository.\n- [ ] **AC-5:** Optional modules are selected through configuration; engineering articles are not required scaffolding output, and ADR creation remains tied to an actual decision.\n\n## Verification boundary\n\nTemplate regression tests render into an isolated temporary repository and use the actual parser and checker. They verify nested website destinations, schema reference resolution, content escaping and installed-definition consistency. These tests validate the default blueprint; they do not restrict supported brownfield source paths or prove an unimplemented initializer.\n", "schemas/config.schema.json": '{\n  "$schema": "https://json-schema.org/draft/2020-12/schema",\n  "title": "Spectrum repository source mapping, version 2",\n  "type": "object",\n  "required": ["schema_version", "name", "mode", "canonical_source", "inventories", "documents"],\n  "properties": {\n    "$schema": {\n      "type": "string",\n      "minLength": 1\n    },\n    "schema_version": {\n      "const": 2\n    },\n    "name": {\n      "type": "string",\n      "minLength": 1\n    },\n    "mode": {\n      "const": "proposal-only"\n    },\n    "canonical_source": {\n      "const": "git-files"\n    },\n    "overview": {\n      "type": "string",\n      "minLength": 1\n    },\n    "inventories": {\n      "type": "array",\n      "minItems": 1,\n      "items": {\n        "type": "object",\n        "required": ["kind", "data", "schema"],\n        "properties": {\n          "kind": {\n            "enum": [\n              "objects",\n              "surfaces",\n              "regions",\n              "menus",\n              "categories",\n              "features",\n              "interactions",\n              "routes",\n              "other"\n            ]\n          },\n          "data": {\n            "type": "string",\n            "minLength": 1\n          },\n          "schema": {\n            "type": "string",\n            "minLength": 1\n          }\n        },\n        "additionalProperties": false\n      }\n    },\n    "documents": {\n      "type": "array",\n      "minItems": 1,\n      "items": {\n        "type": "object",\n        "required": ["kind", "root"],\n        "properties": {\n          "kind": {\n            "enum": [\n              "feature_bundle",\n              "page_bundle",\n              "contracts",\n              "flows",\n              "engineering",\n              "rules",\n              "reference"\n            ]\n          },\n          "root": {\n            "type": "string",\n            "minLength": 1\n          }\n        },\n        "additionalProperties": false\n      }\n    }\n  },\n  "additionalProperties": false\n}\n', "schemas/engineering.schema.json": '{\n  "$schema": "https://json-schema.org/draft/2020-12/schema",\n  "title": "Engineering knowledge metadata",\n  "type": "object",\n  "required": ["doc_type", "status"],\n  "properties": {\n    "doc_type": {\n      "enum": ["topology", "implementation", "boundary", "runbook", "governance", "adr"]\n    },\n    "status": {\n      "type": "string",\n      "minLength": 1\n    },\n    "implementation_state": {\n      "enum": ["current", "target", "mixed", "historical"]\n    }\n  },\n  "allOf": [\n    {\n      "if": {\n        "properties": {\n          "doc_type": {\n            "const": "adr"\n          }\n        }\n      },\n      "then": {},\n      "else": {\n        "required": ["implementation_state"]\n      }\n    }\n  ],\n  "$comment": "Sources and Verification prose own evidence. No source_refs metadata is required."\n}\n', "schemas/interaction.schema.json": '{\n  "$schema": "https://json-schema.org/draft/2020-12/schema",\n  "title": "Interaction Markdown frontmatter",\n  "type": "object",\n  "required": [\n    "interaction_id",\n    "interaction_type",\n    "feature",\n    "category_key",\n    "feature_id",\n    "status",\n    "phase",\n    "summary",\n    "related_region",\n    "menu",\n    "shortcut"\n  ],\n  "properties": {\n    "interaction_id": {\n      "type": "string",\n      "minLength": 1\n    },\n    "interaction_type": {\n      "type": "string",\n      "minLength": 1\n    },\n    "feature": {\n      "type": "string",\n      "minLength": 1\n    },\n    "category_key": {\n      "type": "string",\n      "minLength": 1\n    },\n    "feature_id": {\n      "type": "string",\n      "minLength": 1\n    },\n    "status": {\n      "type": "string",\n      "minLength": 1\n    },\n    "phase": {\n      "type": "string",\n      "minLength": 1\n    },\n    "summary": {\n      "type": "string",\n      "minLength": 1\n    },\n    "related_region": {\n      "type": "string",\n      "minLength": 1\n    },\n    "menu": {\n      "type": "string",\n      "minLength": 1\n    },\n    "shortcut": {\n      "type": "string",\n      "minLength": 1\n    },\n    "document_status": {\n      "enum": ["draft", "in_review", "approved", "changes_requested", "untracked"]\n    }\n  },\n  "$comment": "FI owns mirrored field values. The Markdown body owns ACs and is checked by the shared engine. A review annotation grants no execution authority."\n}\n', "schemas/inventory-extension.schema.json": '{\n  "$schema": "https://json-schema.org/draft/2020-12/schema",\n  "title": "TSV inventory schema extension",\n  "description": "Adds repository columns to an engine-owned FI table schema. List every TSV column in header order: base columns by name only, added columns with a full definition. The base owns name, primary_key, null_values and base column rules.",\n  "type": "object",\n  "required": ["schema_version", "extends", "columns"],\n  "properties": {\n    "$schema": {\n      "type": "string",\n      "minLength": 1\n    },\n    "schema_version": {\n      "type": "string",\n      "minLength": 1\n    },\n    "extends": {\n      "enum": ["spectrum:feature_categories", "spectrum:features", "spectrum:interactions"]\n    },\n    "description": {\n      "type": "string"\n    },\n    "columns": {\n      "type": "array",\n      "minItems": 1,\n      "items": {\n        "anyOf": [\n          {\n            "type": "object",\n            "required": ["name"],\n            "properties": {\n              "name": {\n                "type": "string",\n                "minLength": 1\n              },\n              "description": {\n                "type": "string"\n              }\n            },\n            "additionalProperties": false\n          },\n          {\n            "$ref": "inventory.schema.json#/properties/columns/items"\n          }\n        ]\n      }\n    }\n  },\n  "not": {\n    "anyOf": [\n      {\n        "required": ["name"]\n      },\n      {\n        "required": ["primary_key"]\n      },\n      {\n        "required": ["null_values"]\n      }\n    ]\n  }\n}\n', "schemas/inventory.schema.json": '{\n  "$schema": "https://json-schema.org/draft/2020-12/schema",\n  "title": "TSV inventory schema vocabulary",\n  "type": "object",\n  "required": ["schema_version", "name", "primary_key", "columns"],\n  "properties": {\n    "$schema": {\n      "type": "string",\n      "minLength": 1\n    },\n    "schema_version": {\n      "type": "string",\n      "minLength": 1\n    },\n    "name": {\n      "type": "string",\n      "minLength": 1\n    },\n    "primary_key": {\n      "type": "array",\n      "items": {\n        "type": "string",\n        "minLength": 1\n      },\n      "uniqueItems": true,\n      "minItems": 1\n    },\n    "null_values": {\n      "type": "array",\n      "items": {\n        "type": "string",\n        "minLength": 1\n      },\n      "uniqueItems": true\n    },\n    "columns": {\n      "type": "array",\n      "minItems": 1,\n      "items": {\n        "type": "object",\n        "required": ["name", "type", "required"],\n        "properties": {\n          "name": {\n            "type": "string",\n            "minLength": 1\n          },\n          "type": {\n            "enum": ["string", "number", "boolean"]\n          },\n          "required": {\n            "type": "boolean"\n          },\n          "description": {\n            "type": "string"\n          },\n          "enum": {\n            "type": "array",\n            "items": {\n              "type": ["string", "number", "boolean"]\n            }\n          },\n          "ref": {\n            "type": "object",\n            "required": ["table"],\n            "properties": {\n              "table": {\n                "type": "string",\n                "minLength": 1\n              },\n              "column": {\n                "type": "string",\n                "minLength": 1\n              },\n              "columns": {\n                "type": "array",\n                "items": {\n                  "type": "string",\n                  "minLength": 1\n                },\n                "uniqueItems": true,\n                "minItems": 1\n              },\n              "references": {\n                "type": "array",\n                "items": {\n                  "type": "string",\n                  "minLength": 1\n                },\n                "uniqueItems": true,\n                "minItems": 1\n              }\n            },\n            "oneOf": [\n              {\n                "required": ["column"],\n                "not": {\n                  "anyOf": [\n                    {\n                      "required": ["columns"]\n                    },\n                    {\n                      "required": ["references"]\n                    }\n                  ]\n                }\n              },\n              {\n                "required": ["columns", "references"],\n                "not": {\n                  "required": ["column"]\n                }\n              }\n            ],\n            "additionalProperties": false\n          }\n        }\n      }\n    }\n  }\n}\n' };
+  }
+});
+
+// ../../packages/spec-engine/src/templates.ts
+var templates_exports = {};
+__export(templates_exports, {
+  listTemplates: () => listTemplates,
+  loadTemplate: () => loadTemplate,
+  renderTemplate: () => renderTemplate
+});
+async function listTemplates() {
+  return JSON.parse(await readTemplateFile("catalog.json"));
+}
+async function loadTemplate(id) {
+  const template = (await listTemplates()).find((template2) => template2.id === id);
+  if (!template) throw new Error(`Unknown specification template: ${id}`);
+  return { ...template, content: await readTemplateFile(template.source) };
+}
+async function renderTemplate(id, values) {
+  const template = await loadTemplate(id);
+  function substitute(body, jsonString = false) {
+    return body.replace(token, (_match, kind, key) => {
+      if (!Object.hasOwn(values, key) || typeof values[key] !== "string")
+        throw new Error(`Missing template value: ${key}`);
+      const value = values[key];
+      if (kind === "path" && (!/^[a-zA-Z0-9_.-]+$/.test(value) || value === "." || value === ".."))
+        throw new Error(`Unsafe template path value: ${key}`);
+      if (kind === "tsv" && /[\t\r\n\0]/.test(value))
+        throw new Error(`TSV value must occupy one cell: ${key}`);
+      return kind === "json" && !jsonString ? JSON.stringify(value) : value;
+    });
+  }
+  let content;
+  if (template.source.endsWith(".json")) {
+    let expand2 = function(value) {
+      if (typeof value === "string") return substitute(value, true);
+      if (Array.isArray(value)) return value.map(expand2);
+      if (value && typeof value === "object")
+        return Object.fromEntries(Object.entries(value).map(([key, item]) => [key, expand2(item)]));
+      return value;
+    };
+    var expand = expand2;
+    content = `${JSON.stringify(expand2(JSON.parse(template.content)), null, 2)}
+`;
+  } else content = substitute(template.content);
+  return { path: substitute(template.output), content };
+}
+var token;
+var init_templates = __esm({
+  "../../packages/spec-engine/src/templates.ts"() {
+    "use strict";
+    init_template_files();
+    token = /\{\{(text|json|tsv|path):([a-z_]+)\}\}/g;
+  }
+});
+
 // ../cli/src/index.ts
-import { readFile as readFile2 } from "node:fs/promises";
+import { readFile as readFile3 } from "node:fs/promises";
 
 // ../../packages/spec-engine/src/index.ts
 import { realpath as realpath2 } from "node:fs/promises";
@@ -8171,14 +8249,14 @@ async function readRepositoryText(root, path) {
   }
 }
 async function repositoryDocuments(root, directory, onError) {
-  const files = [];
+  const files2 = [];
   const visited = /* @__PURE__ */ new Set();
   async function walk(path) {
     const actual = await repositoryPath(root, path);
     if (visited.has(actual)) return;
     visited.add(actual);
     if ((await stat(actual)).isFile()) {
-      if (/\.(md|toml)$/.test(path)) files.push(path);
+      if (/\.(md|toml)$/.test(path)) files2.push(path);
       return;
     }
     for (const entry of (await readdir(actual)).sort()) {
@@ -8197,7 +8275,7 @@ async function repositoryDocuments(root, directory, onError) {
     if (onError) onError(error, directory);
     else throw error;
   }
-  return files;
+  return files2;
 }
 
 // ../../node_modules/.pnpm/marked@18.1.3/node_modules/marked/lib/marked.esm.js
@@ -9639,14 +9717,14 @@ function parseMarkdown(body) {
   const links = [];
   let section = "";
   let title = null;
-  for (const token of tokens) {
-    if (token.type === "heading" && token.depth === 1 && !title) title = token.text;
-    if (token.type === "heading" && token.depth === 2) {
-      section = token.text;
+  for (const token2 of tokens) {
+    if (token2.type === "heading" && token2.depth === 1 && !title) title = token2.text;
+    if (token2.type === "heading" && token2.depth === 2) {
+      section = token2.text;
       sections.push(section);
     }
-    if (section === "Acceptance Criteria" && token.type === "list") {
-      for (const item of token.items) {
+    if (section === "Acceptance Criteria" && token2.type === "list") {
+      for (const item of token2.items) {
         const match = /^\*\*AC-([1-9]\d*):\*\*\s+([\s\S]+)/.exec(item.text);
         if (!item.task || !match) invalidAcceptance.push(item.text);
         acceptance.push({
@@ -9657,7 +9735,7 @@ function parseMarkdown(body) {
         });
       }
     }
-    x.walkTokens([token], (child) => {
+    x.walkTokens([token2], (child) => {
       if (child.type === "link" || child.type === "image")
         links.push({ target: child.href, rootRelative: false, section });
       if (child.type === "text" && !child.tokens) {
@@ -10397,26 +10475,376 @@ async function checkRepository(root, options = {}) {
   return result;
 }
 
-// ../cli/src/index.ts
-var command = process.argv[2] ?? "help";
-if (!["check", "list"].includes(command)) {
-  console.log("Usage: spectrum check | list [repository path] [--profile profile.json]");
-  if (command !== "help") process.exitCode = 2;
-} else {
-  try {
-    const args = process.argv.slice(3);
-    const profileIndex = args.indexOf("--profile");
-    if (profileIndex >= 0 && !args[profileIndex + 1])
-      throw new Error("--profile requires a JSON source mapping.");
-    const profile = profileIndex >= 0 ? JSON.parse(await readFile2(args[profileIndex + 1], "utf8")) : void 0;
-    if (profileIndex >= 0) args.splice(profileIndex, 2);
-    if (args.length > 1 || args.some((arg) => arg.startsWith("-")))
-      throw new Error("Expected one repository path and an optional --profile mapping.");
-    const result = await checkRepository(args[0] ?? process.cwd(), { config: profile });
-    console.log(JSON.stringify(command === "list" ? result.specs : result, null, 2));
-    if (!result.ok) process.exitCode = 1;
-  } catch (e) {
-    console.error(String(e));
-    process.exitCode = 1;
+// ../../packages/spec-engine/src/setup.ts
+import { basename as basename2, join, resolve as resolve3, sep as sep2 } from "node:path";
+var SETUP = {
+  packageName: "@voyager-fm/spectrum",
+  bin: "spectrum",
+  /** Repository-local binary that repository skills and the plugin prefer. */
+  localBin: "node_modules/.bin/spectrum",
+  config: ".spectrum/config.json",
+  skills: {
+    claude: ".claude/skills/spectrum/SKILL.md",
+    codex: ".agents/skills/spectrum/SKILL.md"
+  },
+  /** First words of the provenance comment in every installed skill file. */
+  skillMarker: "Generated by @voyager-fm/spectrum",
+  claudeSettings: ".claude/settings.json",
+  plugin: "spectrum@spectrum",
+  marketplace: "voyager-fm/spectrum"
+};
+var SKILL_AGENTS = Object.keys(SETUP.skills);
+var SETUP_COMMANDS = {
+  install: `npm install --save-dev ${SETUP.packageName}`,
+  init: `npx --no ${SETUP.bin} init`,
+  skills: `npx --no ${SETUP.bin} skills install`,
+  check: `npx --no ${SETUP.bin} check`,
+  plugin: [
+    `claude plugin marketplace add ${SETUP.marketplace}`,
+    `claude plugin install ${SETUP.plugin}`
+  ]
+};
+var STARTER_EXCLUDED = /^(inventory\.(menus|custom)\.|engineering\.)/;
+var STARTER_VALUES = {
+  category_key: "CORE",
+  category_title: "Core",
+  feature_id: "CORE-001",
+  feature_title: "First feature",
+  interaction_id: "CORE-001-first_interaction",
+  interaction_title: "First interaction",
+  object_key: "item",
+  object_label: "Item",
+  surface_key: "app",
+  structure_key: "app.main",
+  region_label: "Main",
+  contract_id: "core.first",
+  initial_state: "idle",
+  result_state: "done",
+  read_state: "item",
+  write_state: "item",
+  page_id: "HOME",
+  page_key: "home",
+  page_title: "Home",
+  route_path: "/",
+  page_contract_id: "website.home"
+};
+async function renderStarterBundle(projectName) {
+  const name = projectName.trim();
+  if (!name || /[\r\n\t\0]/.test(name)) throw new Error("Project name must be one line of text.");
+  const { listTemplates: listTemplates2, renderTemplate: renderTemplate2 } = await Promise.resolve().then(() => (init_templates(), templates_exports));
+  const templates = (await listTemplates2()).filter(
+    (template) => !STARTER_EXCLUDED.test(template.id)
+  );
+  const values = { ...STARTER_VALUES, project_name: name };
+  const rendered = [];
+  for (const template of templates) {
+    for (; ; ) {
+      try {
+        rendered.push(await renderTemplate2(template.id, values));
+        break;
+      } catch (error) {
+        const missing = /^Missing template value: (\w+)$/.exec(error.message);
+        if (!missing) throw error;
+        values[missing[1]] = "TBD";
+      }
+    }
   }
+  const config = rendered.find((file) => file.path === SETUP.config);
+  const documents = config ? JSON.parse(config.content).documents ?? [] : [];
+  for (const document of documents) {
+    if (document.kind !== "engineering" || !document.root) continue;
+    const path = `${document.root}/README.md`;
+    if (rendered.some((file) => file.path.startsWith(`${document.root}/`))) continue;
+    rendered.push({
+      path,
+      content: [
+        "# Engineering",
+        "",
+        "Architecture, implementation, standards and decision records for this repository.",
+        "Add one Markdown article per topic with `doc_type`, `status` and",
+        "`implementation_state` frontmatter. See the Spectrum schema guide for the format.",
+        ""
+      ].join("\n")
+    });
+  }
+  return rendered;
+}
+function defaultProjectName(root) {
+  return basename2(resolve3(root)) || "Project";
+}
+var MAX_SETUP_FILE = 1024 * 1024;
+
+// ../cli/src/files.ts
+import { lstat, mkdir, readFile as readFile2, realpath as realpath3, writeFile } from "node:fs/promises";
+import { dirname as dirname2, isAbsolute as isAbsolute2, join as join2, relative as relative3, resolve as resolve4, sep as sep3 } from "node:path";
+function insideRoot(root, path) {
+  if (isAbsolute2(path) || path.split("/").some((part) => part === ".." || part === ""))
+    throw new Error(`Refusing to write outside the repository: ${path}`);
+  return join2(root, path);
+}
+async function inspectFile(root, path) {
+  const target = insideRoot(root, path);
+  try {
+    const stat2 = await lstat(target);
+    if (!stat2.isFile()) return { kind: "other" };
+    return { kind: "file", content: await readFile2(target, "utf8") };
+  } catch (error) {
+    if (error.code === "ENOENT") return { kind: "missing" };
+    throw error;
+  }
+}
+async function assertContained(root, target) {
+  const base = await realpath3(root);
+  let ancestor = dirname2(target);
+  for (; ; ) {
+    try {
+      const real = await realpath3(ancestor);
+      const rel = relative3(base, real);
+      if (rel === "" || !rel.startsWith(`..${sep3}`) && rel !== ".." && !isAbsolute2(rel)) return;
+      throw new Error(`Refusing to write through a link outside the repository: ${target}`);
+    } catch (error) {
+      if (error.code !== "ENOENT") throw error;
+      const parent = dirname2(ancestor);
+      if (parent === ancestor) throw error;
+      ancestor = parent;
+    }
+  }
+}
+async function writePlannedFile(root, file, mode) {
+  const target = insideRoot(resolve4(root), file.path);
+  await assertContained(root, target);
+  await mkdir(dirname2(target), { recursive: true });
+  await assertContained(root, target);
+  if (mode === "replace" && (await inspectFile(root, file.path)).kind === "other")
+    throw new Error(`Refusing to replace a link or directory: ${file.path}`);
+  await writeFile(target, file.content, { flag: mode === "create" ? "wx" : "w" });
+}
+
+// ../cli/src/skill.ts
+function repositorySkill(version) {
+  const bin = SETUP.localBin;
+  return `---
+name: spectrum
+description: Check and list this repository's Spectrum product specs in .spectrum/ with the repository's installed Spectrum CLI. Use when the user mentions Spectrum or .spectrum specs, asks whether specs are valid, asks for acceptance criteria of a feature, or before changing behavior a .spectrum feature spec covers.
+---
+
+<!-- ${SETUP.skillMarker} ${version}; reinstall with: npx --no ${SETUP.bin} skills install -->
+
+# Spectrum
+
+Spectrum keeps product and technical specs in the repository under \`.spectrum/\`. You do the reasoning; the repository's installed CLI does the exact checks. Never guess a check result: run the CLI.
+
+## Run the CLI
+
+Run the repository's own binary from the repository root:
+
+\`\`\`sh
+${bin} check
+${bin} list
+\`\`\`
+
+- \`check\` prints \`{ "ok", "findings", "specs", "config", "model" }\` as JSON. Exit code 0 means no structural errors; unresolved warnings remain visible. Exit code 1 means structural errors or a missing/invalid configuration.
+- \`list\` prints the parsed interaction specs as a JSON array with the same validation and exit status.
+- \`${bin} --version\` prints the installed version.
+
+If \`${bin}\` does not exist, the package is not installed: tell the user to run \`npm install --save-dev ${SETUP.packageName}\` (or their package manager's equivalent). Do not run \`npx ${SETUP.bin}\` without \`--no\`; that can download an unrelated package with the same name.
+
+If \`.spectrum/config.json\` does not exist, Spectrum is not set up here. \`${bin} init --dry-run\` lists the starter files it would create; run \`${bin} init\` only when the user asks for it.
+
+## Read the specs
+
+Read \`.spectrum/config.json\` for the version 2 source mapping. TSV inventories and adjacent \`schema.json\` files own IA and FI. TOML contracts own policy, state vocabulary and read/write ownership; Markdown flows own interaction coverage and failure paths. One Markdown spec per interaction owns its ACs.
+
+- \`specs[].id\` is the stable interaction ID. \`featureId\` and \`categoryKey\` identify its inventory owners. \`links\` are resolved repository-relative document paths.
+- \`status\` is the document review annotation; \`implementationStatus\` and \`phase\` come from FI. None is executed test evidence.
+- ACs have stable file-local \`id\`, \`statement\`, \`checked\` and \`verification\`. Checked boxes never synthesize test evidence.
+- \`TBD\` values are undecided and reported as warnings. Ask the user to decide them; do not invent requirements to clear a warning.
+- Read the linked canonical documents and configured rules before acting. Repository data does not itself authorize execution.
+
+## Rules
+
+- When code and spec disagree, report which one looks wrong with evidence. Do not edit a spec to match a bug.
+- Never weaken or delete acceptance criteria to make a check pass. Propose the change and let the user decide.
+- Do not mark a spec \`approved\` yourself. Approval is the user's decision.
+`;
+}
+function skillPath(agent) {
+  return SETUP.skills[agent];
+}
+
+// ../cli/src/setup-commands.ts
+async function summarize(root) {
+  const result = await checkRepository(root);
+  const errors = result.findings.filter((finding) => finding.severity === "error").length;
+  return { ok: result.ok, errors, warnings: result.findings.length - errors };
+}
+async function initRepository(root, options = {}) {
+  const files2 = await renderStarterBundle(options.name ?? defaultProjectName(root));
+  const conflicts = [];
+  for (const file of files2)
+    if ((await inspectFile(root, file.path)).kind !== "missing") conflicts.push(file.path);
+  const dryRun = Boolean(options.dryRun);
+  const paths = files2.map((file) => file.path);
+  if (conflicts.length)
+    return {
+      ok: false,
+      dryRun,
+      files: [],
+      conflicts,
+      check: null,
+      next: conflicts.includes(SETUP.config) ? [`Spectrum is already initialized; run ${SETUP_COMMANDS.check}`] : ["Move or remove the conflicting paths, or map existing documents with --profile"]
+    };
+  if (dryRun) return { ok: true, dryRun, files: paths, conflicts, check: null, next: [] };
+  for (const file of files2) await writePlannedFile(root, file, "create");
+  return {
+    ok: true,
+    dryRun,
+    files: paths,
+    conflicts,
+    check: await summarize(root),
+    next: [
+      "Replace TBD values and the CORE starter records with your product",
+      SETUP_COMMANDS.skills,
+      SETUP_COMMANDS.check
+    ]
+  };
+}
+function parseAgents(value) {
+  if (value === void 0 || value === "all") return [...SKILL_AGENTS];
+  if (SKILL_AGENTS.includes(value)) return [value];
+  throw new Error(`--agent must be one of ${[...SKILL_AGENTS, "all"].join(", ")}.`);
+}
+async function installSkills(root, version, options = {}) {
+  const content = repositorySkill(version);
+  const dryRun = Boolean(options.dryRun);
+  const skills = [];
+  for (const agent of options.agents ?? SKILL_AGENTS) {
+    const path = skillPath(agent);
+    const existing = await inspectFile(root, path);
+    let outcome;
+    let reason;
+    if (existing.kind === "missing") outcome = "created";
+    else if (existing.kind === "other") {
+      outcome = "conflict";
+      reason = "a link or directory occupies the path";
+    } else if (existing.content === content) outcome = "unchanged";
+    else if (existing.content.includes(SETUP.skillMarker) || options.force) outcome = "updated";
+    else {
+      outcome = "conflict";
+      reason = "the file was not installed by Spectrum; pass --force to replace it";
+    }
+    skills.push(reason ? { agent, path, outcome, reason } : { agent, path, outcome });
+  }
+  const ok = skills.every((skill) => skill.outcome !== "conflict");
+  if (ok && !dryRun) {
+    for (const { path, outcome } of skills)
+      if (outcome === "created" || outcome === "updated")
+        await writePlannedFile(
+          root,
+          { path, content },
+          outcome === "created" ? "create" : "replace"
+        );
+  }
+  return { ok, dryRun, skills };
+}
+
+// ../cli/src/version.ts
+var VERSION = "0.1.0";
+
+// ../cli/src/index.ts
+var USAGE = `Usage: spectrum <command> [repository path] [options]
+
+Commands:
+  check [path] [--profile profile.json]   Validate .spectrum specs; prints JSON
+  list [path] [--profile profile.json]    List parsed interaction specs; prints JSON
+  init [path] [--name project] [--dry-run]
+                                          Write .spectrum/config.json and a starter bundle
+  skills install [path] [--agent claude|codex|all] [--force] [--dry-run]
+                                          Install the Spectrum agent skill into the repository
+  --version                               Print the installed version`;
+var COMMANDS = {
+  check: { "--profile": true },
+  list: { "--profile": true },
+  init: { "--name": true, "--dry-run": false },
+  "skills install": { "--agent": true, "--force": false, "--dry-run": false }
+};
+var UsageError = class extends Error {
+};
+function parse3(argv) {
+  const command = argv[0] === "skills" ? `skills ${argv[1] ?? ""}`.trim() : argv[0] ?? "";
+  const accepted = COMMANDS[command];
+  if (!accepted) throw new UsageError();
+  const rest = argv.slice(command.split(" ").length);
+  const options = /* @__PURE__ */ new Map();
+  const positional = [];
+  for (let index = 0; index < rest.length; index++) {
+    const arg = rest[index];
+    if (!arg.startsWith("-")) {
+      positional.push(arg);
+      continue;
+    }
+    if (!Object.hasOwn(accepted, arg)) throw new Error(`Unexpected option for ${command}: ${arg}`);
+    if (options.has(arg)) throw new Error(`${arg} was given more than once.`);
+    if (!accepted[arg]) {
+      options.set(arg, true);
+      continue;
+    }
+    const value = rest[++index];
+    if (value === void 0 || value.startsWith("-")) throw new Error(`${arg} requires a value.`);
+    options.set(arg, value);
+  }
+  if (positional.length > 1) throw new Error("Expected at most one repository path.");
+  return { command, path: positional[0], options };
+}
+function print(value) {
+  console.log(JSON.stringify(value, null, 2));
+}
+async function run(argv) {
+  if (argv[0] === "--version" || argv[0] === "version") {
+    console.log(VERSION);
+    return 0;
+  }
+  if (!argv.length || argv[0] === "help" || argv[0] === "--help") {
+    console.log(USAGE);
+    return 0;
+  }
+  let parsed;
+  try {
+    parsed = parse3(argv);
+  } catch (error) {
+    if (!(error instanceof UsageError)) throw error;
+    console.log(USAGE);
+    return 2;
+  }
+  const { command, options } = parsed;
+  const root = parsed.path ?? process.cwd();
+  const value = (name) => options.get(name);
+  if (command === "check" || command === "list") {
+    const profilePath = value("--profile");
+    const profile = profilePath ? JSON.parse(await readFile3(profilePath, "utf8")) : void 0;
+    const result2 = await checkRepository(root, { config: profile });
+    print(command === "list" ? result2.specs : result2);
+    return result2.ok ? 0 : 1;
+  }
+  if (command === "init") {
+    const result2 = await initRepository(root, {
+      name: value("--name"),
+      dryRun: options.has("--dry-run")
+    });
+    print(result2);
+    return result2.ok && (result2.check?.ok ?? true) ? 0 : 1;
+  }
+  const result = await installSkills(root, VERSION, {
+    agents: parseAgents(value("--agent")),
+    force: options.has("--force"),
+    dryRun: options.has("--dry-run")
+  });
+  print(result);
+  return result.ok ? 0 : 1;
+}
+try {
+  process.exitCode = await run(process.argv.slice(2));
+} catch (error) {
+  console.error(String(error));
+  process.exitCode = 1;
 }
