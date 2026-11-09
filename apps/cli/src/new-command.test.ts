@@ -81,7 +81,7 @@ test('practical aliases and explicit catalog IDs use exactly the canonical rende
         'repository.overview',
         { project_name: 'Notes', product_intent: 'Read notes.', product_scope: 'Local reading.' },
       ],
-      ['schema.config', 'schema.config', {}],
+      ['feature.interaction', 'feature.interaction', featureValues],
     ] as const) {
       const result = await createDraft(root, kind, { values, dryRun: true });
       assert.deepEqual(result.templates, [id]);
@@ -91,6 +91,10 @@ test('practical aliases and explicit catalog IDs use exactly the canonical rende
       assert.deepEqual(result.created, []);
     }
     assert.deepEqual(await readdir(root), []);
+    await assert.rejects(
+      createDraft(root, 'schema.config', { values: {}, dryRun: true }),
+      /Unknown specification template/,
+    );
   });
 });
 
@@ -154,7 +158,7 @@ test('feature is the three-file draft bundle and preserves related links without
     for (const file of expected)
       assert.equal(await readFile(join(root, file.path), 'utf8'), file.content);
     await assert.rejects(lstat(join(root, '.spectrum/config.json')), { code: 'ENOENT' });
-    await assert.rejects(lstat(join(root, '.spectrum/product/feature_inventory')), {
+    await assert.rejects(lstat(join(root, '.spectrum/product/feature_inventory/features.tsv')), {
       code: 'ENOENT',
     });
   });
@@ -455,8 +459,13 @@ test('brownfield configuration and inventory bytes are preserved rather than gue
     await store(root, 'existing/inventory.tsv', inventory);
     await store(root, 'existing/specifications/reference.md', '# Existing behavior\r\n');
     const result = await createDraft(root, 'feature', { values: featureValues });
-    assert.ok(
-      result.files.every((file) => file.path.startsWith('.spectrum/product/feature_specs/')),
+    assert.deepEqual(
+      result.files,
+      await Promise.all(
+        ['feature.interaction', 'feature.contract', 'feature.flow'].map((id) =>
+          renderTemplate(id, featureValues),
+        ),
+      ),
     );
     assert.equal(await readFile(join(root, '.spectrum/config.json'), 'utf8'), config);
     assert.equal(await readFile(join(root, 'existing/inventory.tsv'), 'utf8'), inventory);
