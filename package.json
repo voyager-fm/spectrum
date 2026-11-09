@@ -12,6 +12,8 @@
     "spec:check": "node apps/cli/src/index.ts check",
     "spec:list": "node apps/cli/src/index.ts list",
     "test": "node --test \"{apps,packages}/*/src/**/*.test.ts\" && pnpm test:documents",
+    "test:e2e": "pnpm --filter @spectrum/web test:e2e",
+    "test:e2e:ui": "pnpm --filter @spectrum/web test:e2e:ui",
     "test:documents": "node scripts/test-document-snapshot.ts && node scripts/test-document-parsing.ts",
     "typecheck": "tsc --noEmit && pnpm --filter @spectrum/web typecheck",
     "check": "pnpm typecheck && pnpm test && pnpm spec:check && pnpm plugin:check",

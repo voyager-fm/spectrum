@@ -16,3 +16,7 @@ apm_modules/
 .next/
 next-env.d.ts
 *.tsbuildinfo
+# Playwright browser-test artifacts
+/apps/web/playwright-report/
+/apps/web/test-results/
+/apps/web/blob-report/
