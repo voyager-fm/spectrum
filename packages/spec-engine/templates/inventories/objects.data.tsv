@@ -1,0 +1,2 @@
+category	key	label	summary
+Domain	{{tsv:object_key}}	{{tsv:object_label}}	{{tsv:summary}}

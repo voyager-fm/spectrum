@@ -1,0 +1,11 @@
+[contract]
+id = {{json:page_contract_id}}
+page_id = {{json:page_id}}
+path = {{json:route_path}}
+implementation_status = "planned"
+
+[responsibility]
+primary = {{json:page_responsibility}}
+
+[policy]
+behavior = {{json:page_policy}}

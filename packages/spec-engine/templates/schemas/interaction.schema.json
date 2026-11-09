@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Interaction Markdown frontmatter",
+  "type": "object",
+  "required": [
+    "interaction_id",
+    "interaction_type",
+    "feature",
+    "category_key",
+    "feature_id",
+    "status",
+    "phase",
+    "summary",
+    "related_region",
+    "menu",
+    "shortcut"
+  ],
+  "properties": {
+    "interaction_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "interaction_type": {
+      "type": "string",
+      "minLength": 1
+    },
+    "feature": {
+      "type": "string",
+      "minLength": 1
+    },
+    "category_key": {
+      "type": "string",
+      "minLength": 1
+    },
+    "feature_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "status": {
+      "type": "string",
+      "minLength": 1
+    },
+    "phase": {
+      "type": "string",
+      "minLength": 1
+    },
+    "summary": {
+      "type": "string",
+      "minLength": 1
+    },
+    "related_region": {
+      "type": "string",
+      "minLength": 1
+    },
+    "menu": {
+      "type": "string",
+      "minLength": 1
+    },
+    "shortcut": {
+      "type": "string",
+      "minLength": 1
+    },
+    "document_status": {
+      "enum": ["draft", "in_review", "approved", "changes_requested", "untracked"]
+    }
+  },
+  "$comment": "FI owns mirrored field values. The Markdown body owns ACs and is checked by the shared engine. A review annotation grants no execution authority."
+}

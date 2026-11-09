@@ -1,0 +1,27 @@
+{
+  "schema_version": "1.0",
+  "name": "MENUS",
+  "primary_key": ["menu_node_id"],
+  "null_values": ["-"],
+  "columns": [
+    {
+      "name": "menu_node_id",
+      "type": "string",
+      "required": true
+    },
+    {
+      "name": "label",
+      "type": "string",
+      "required": true
+    },
+    {
+      "name": "parent_menu_node_id",
+      "type": "string",
+      "required": false,
+      "ref": {
+        "table": "MENUS",
+        "column": "menu_node_id"
+      }
+    }
+  ]
+}

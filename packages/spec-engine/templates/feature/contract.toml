@@ -1,0 +1,19 @@
+[contract]
+id = {{json:contract_id}}
+category = {{json:category_key}}
+primary_object_key = {{json:object_key}}
+display_region = {{json:structure_key}}
+
+[vocabulary]
+subject = {{json:object_definition}}
+
+[policy]
+behavior = {{json:policy}}
+
+[state_model.subject]
+states = [{{json:initial_state}}, {{json:result_state}}]
+initial = {{json:initial_state}}
+
+[ownership.{{json:interaction_id}}]
+reads = [{{json:read_state}}]
+writes = [{{json:write_state}}]

@@ -1,0 +1,2 @@
+interaction_title	interaction_id	interaction_type	feature	category_key	feature_id	status	phase	summary	related_region	menu	shortcut
+{{tsv:interaction_title}}	{{tsv:interaction_id}}	command	{{tsv:feature_title}}	{{tsv:category_key}}	{{tsv:feature_id}}	drafted	next	{{tsv:summary}}	{{tsv:structure_key}}	-	-

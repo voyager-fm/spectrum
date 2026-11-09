@@ -1,0 +1,2 @@
+feature_category	category_key	feature_title	feature_id	description	related_ui
+{{tsv:category_title}}	{{tsv:category_key}}	{{tsv:feature_title}}	{{tsv:feature_id}}	TBD	{{tsv:structure_key}}
