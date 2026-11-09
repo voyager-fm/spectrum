@@ -1,2 +1,6 @@
 order	category_title	category_key	description
-1	Specification workspace	SP	Model, inspect, validate and review repository-native product specifications.
+1	Specification validation	VAL	Read, validate and list repository-native specifications with the shared deterministic engine.
+2	Specification dashboard	DSH	Inspect the shared repository model through read-only local web views.
+3	Agent plugin	AGT	Run Spectrum inside the user's coding agent with the bundled deterministic CLI.
+4	Agent loop	LOOP	Propose, run and review specification changes under explicit human authority.
+5	Connections	INT	Connect hosted repositories, issue trackers and model providers to the shared model.

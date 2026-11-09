@@ -1,5 +1,14 @@
 feature_category	category_key	feature_title	feature_id	description	related_ui
-Specification workspace	SP	Repository specification validation	SP-001	Read and validate a rich repository document model.	cli.output
-Specification workspace	SP	Repository dashboard	SP-002	Inspect repository-native documents through a read-only dashboard.	web.repository
-Specification workspace	SP	Review and improve Spectrum itself	SP-003	Propose, review and revalidate changes with explicit human authority.	web.repository
-Specification workspace	SP	Distribute Spectrum as an agent plugin	SP-004	Distribute deterministic tools through an agent-host plugin.	plugin.spectrum
+Specification validation	VAL	Repository specification validation	SP-001	Read and validate a rich repository document model.	cli.output
+Specification validation	VAL	Source profiles	SP-005	Read existing documentation paths through an explicit source mapping without moving files.	cli.output
+Specification dashboard	DSH	Specification browsing	SP-002	Inspect repository-native specifications, their health and their relationships.	web.specs
+Specification dashboard	DSH	Repository context	SP-006	Read repository rules and declared configuration alongside the specifications.	web.repository
+Specification dashboard	DSH	Planned capability states	SP-007	Show unimplemented capabilities as explicit planned states without controls or sample results.	web.agent_loop
+Agent plugin	AGT	Distribute Spectrum as an agent plugin	SP-004	Distribute deterministic tools through an agent-host plugin.	plugin.spectrum
+Agent plugin	AGT	Spec-grounded agent guidance	SP-008	Keep host-agent work aligned with repository specifications and human authority.	plugin.spectrum
+Agent loop	LOOP	Change proposals	SP-003	Propose, review and revalidate changes with explicit human authority.	web.agent_loop
+Agent loop	LOOP	Agent runs	SP-009	Run discovery and drafting against a pinned repository revision.	web.agent_loop
+Agent loop	LOOP	Pull request review	SP-010	Review pull requests against the specifications and rules they affect.	web.agent_loop
+Connections	INT	GitHub repository connection	SP-011	Read hosted GitHub repositories at a pinned commit through a GitHub App installation.	web.repository
+Connections	INT	Linear connection	SP-012	Link specification requirements to Linear issues.	web.integrations
+Connections	INT	Model provider connection	SP-013	Connect a verified model authentication path for server-side runs.	web.integrations

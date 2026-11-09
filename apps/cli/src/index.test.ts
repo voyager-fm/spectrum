@@ -49,3 +49,14 @@ test('CLI distinguishes structural failures and unsupported commands', async (t)
   assert.equal(cli(['unknown']).status, 2);
   assert.equal(cli(['check', '--profile']).status, 1);
 });
+
+test('CLI rejects unreadable and malformed profiles before checking', async (t) => {
+  const directory = await mkdtemp(join(tmpdir(), 'spectrum-cli-'));
+  t.after(() => rm(directory, { recursive: true, force: true }));
+  await writeFile(join(directory, 'malformed.json'), '{ not json');
+  for (const profile of [join(directory, 'missing.json'), join(directory, 'malformed.json')]) {
+    const result = cli(['check', directory, '--profile', profile]);
+    assert.equal(result.status, 1);
+    assert.equal(result.stdout, '');
+  }
+});

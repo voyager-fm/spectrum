@@ -1,8 +1,8 @@
 [contract]
 id = "spectrum.proposal"
-category = "SP"
+category = "LOOP"
 primary_object_key = "change_set"
-display_region = "web.repository"
+display_region = "web.agent_loop"
 
 [vocabulary]
 base_revision = "Repository revision against which the proposal was prepared."

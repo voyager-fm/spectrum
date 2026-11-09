@@ -1,6 +1,6 @@
 [contract]
 id = "spectrum.validation"
-category = "SP"
+category = "VAL"
 primary_object_key = "spec_bundle"
 display_region = "cli.output"
 
@@ -8,6 +8,7 @@ display_region = "cli.output"
 canonical_inventory = "A TSV table and its adjacent schema.json."
 interaction_spec = "One Markdown document whose frontmatter mirrors one FI interaction row."
 structural_finding = "A deterministic error or unresolved warning with a repository path."
+source_profile = "A schema_version 2 configuration supplied at read time instead of the repository's installed config.json."
 
 [policy]
 schema_version = 2
@@ -24,14 +25,23 @@ multi_reference_separator = "|"
 local_links_stay_inside_repository = true
 checked_boxes_are_execution_evidence = false
 structural_success_is_implementation_success = false
+commands = ["check", "list"]
+unknown_command_exit_status = 2
+structural_error_exit_status = 1
+profile_installs_configuration = false
+profile_moves_source_files = false
 
 [state_model.structural_check]
 states = ["not_run", "passed", "failed"]
 
 [ownership."SP-001-check_repository"]
-reads = ["repository", "spec_bundle", "agent_rule"]
+reads = ["repository", "configuration", "spec_bundle", "agent_rule"]
 writes = []
 
 [ownership."SP-001-list_specifications"]
 reads = ["spec_bundle", "interaction"]
+writes = []
+
+[ownership."SP-005-check_with_profile"]
+reads = ["repository", "source_profile", "spec_bundle", "agent_rule"]
 writes = []

@@ -2,7 +2,7 @@
 interaction_id: "SP-004-run_plugin_checks"
 interaction_type: "command"
 feature: "Distribute Spectrum as an agent plugin"
-category_key: "SP"
+category_key: "AGT"
 feature_id: "SP-004"
 status: "implementing"
 phase: "now"
@@ -21,15 +21,15 @@ Run the bundled deterministic CLI inside the supported host agent.
 
 ## Trigger / Entry Points
 
-The user runs the check or list command through the CLI or the Spectrum host skill.
+The host agent loads the Spectrum skill when the user mentions Spectrum or `.spectrum` specs, asks whether specs are valid, asks for a feature's acceptance criteria, or is about to change behavior a spec covers. The skill runs `node <skill base directory>/scripts/spectrum.mjs check|list [repository path] [--profile profile.json]`.
 
 ## Preconditions
 
-A local repository and a schema_version 2 configuration identify canonical documents and inventory schemas. External service authentication is not required for local reads.
+The plugin is installed and Node is available. A local repository and a schema_version 2 configuration identify canonical documents and inventory schemas. External service authentication is not required for local reads.
 
 ## Expected Outcome
 
-Return the requested repository data and structural findings from the shared deterministic engine.
+The skill returns the same JSON result and exit status as the workspace CLI. The host agent reads the result and the linked canonical documents before acting.
 
 ## State Changes
 
@@ -37,11 +37,11 @@ Canonical repository files stay unchanged. The response contains a derived model
 
 ## User-visible Feedback
 
-Show concrete document paths, IDs, findings and declared states. Describe unavailable adapters as planned.
+The host agent reports concrete paths, IDs, findings and declared states from the result and describes unavailable adapters as planned.
 
 ## Edge Cases / Failure Handling
 
-Malformed TSV, JSON schemas, YAML or TOML produce failures. Missing references and symlink escapes produce failures. TBD remains a visible unresolved warning. Missing data is never replaced with a successful sample.
+Malformed TSV, JSON schemas, YAML or TOML produce failures. Missing references and symlink escapes produce failures. TBD remains a visible unresolved warning. Missing data is never replaced with a successful sample. A repository without `.spectrum/config.json` is reported as not set up.
 
 ## Acceptance Criteria
 
@@ -57,14 +57,14 @@ Read-only local inspection is executable. Human review annotations do not grant 
 
 ## Observability / Analytics
 
-Local JSON findings and process exit status are available. Hosted telemetry, model jobs and PR review publication remain unimplemented.
+Local JSON findings and process exit status are available to the host agent. Hosted telemetry, model jobs and PR review publication remain unimplemented.
 
 ## Related Interactions
 
 - [Check repository](../SP-001/SP-001-check_repository.md)
 - [List specifications](../SP-001/SP-001-list_specifications.md)
-- [Browse specifications](../SP-002/SP-002-browse_specifications.md)
-- [Review proposal](../SP-003/SP-003-review_proposal.md)
+- [Install plugin](../SP-004/SP-004-install_plugin.md)
+- [Follow spec guardrails](../SP-008/SP-008-follow_spec_guardrails.md)
 
 ## Source
 

@@ -1,13 +1,13 @@
 ---
 interaction_id: "SP-002-browse_specifications"
 interaction_type: "display"
-feature: "Repository dashboard"
-category_key: "SP"
+feature: "Specification browsing"
+category_key: "DSH"
 feature_id: "SP-002"
 status: "implementing"
 phase: "now"
 summary: "Inspect specification relationships and distinguish declared status from executed evidence."
-related_region: "web.repository"
+related_region: "web.specs"
 menu: "-"
 shortcut: "-"
 document_status: "draft"
@@ -21,7 +21,7 @@ Inspect specification relationships and distinguish declared status from execute
 
 ## Trigger / Entry Points
 
-The user opens the repository overview, specification list or specification detail route.
+The user opens `/specs` from the dashboard navigation.
 
 ## Preconditions
 
@@ -29,7 +29,7 @@ A local repository and a schema_version 2 configuration identify canonical docum
 
 ## Expected Outcome
 
-Return the requested repository data and structural findings from the shared deterministic engine.
+A table lists every interaction specification with its ID, title, document status, acceptance-criteria count and link count. Each ID opens its detail page. Shared contracts and flows appear below the table with their paths.
 
 ## State Changes
 
@@ -37,11 +37,11 @@ Canonical repository files stay unchanged. The response contains a derived model
 
 ## User-visible Feedback
 
-Show concrete document paths, IDs, findings and declared states. Describe unavailable adapters as planned.
+Document status is labeled as a review annotation. IDs and paths use monospace text.
 
 ## Edge Cases / Failure Handling
 
-Malformed TSV, JSON schemas, YAML or TOML produce failures. Missing references and symlink escapes produce failures. TBD remains a visible unresolved warning. Missing data is never replaced with a successful sample.
+Malformed TSV, JSON schemas, YAML or TOML produce failures. Missing references and symlink escapes produce failures. TBD remains a visible unresolved warning. Missing data is never replaced with a successful sample. With no specifications, an empty notice points to `pnpm spec:check`.
 
 ## Acceptance Criteria
 
@@ -58,16 +58,16 @@ Read-only local inspection is executable. Human review annotations do not grant 
 
 ## Observability / Analytics
 
-Local JSON findings and process exit status are available. Hosted telemetry, model jobs and PR review publication remain unimplemented.
+Page load errors are shown in the page. Hosted telemetry remains unimplemented.
 
 ## Related Interactions
 
-- [Check repository](../SP-001/SP-001-check_repository.md)
 - [List specifications](../SP-001/SP-001-list_specifications.md)
-- [Review proposal](../SP-003/SP-003-review_proposal.md)
-- [Run plugin checks](../SP-004/SP-004-run_plugin_checks.md)
+- [View repository overview](../SP-002/SP-002-view_repository_overview.md)
+- [View specification detail](../SP-002/SP-002-view_specification_detail.md)
 
 ## Source
 
 - [Contract](../contracts/dashboard.toml)
 - [Flow](../flows/dashboard.md)
+- [Specs page contract](../../../../website/page_contracts/specs/contract.toml)

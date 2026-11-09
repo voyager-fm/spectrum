@@ -18,7 +18,7 @@ The canonical representation follows the document relationships used by Voyager 
 | `website/page_contracts/<page>/` | `contract.toml`, `layout.md`, `flow.md`, optional `spec.md` | Web experience and review |
 | `engineering/<platform>/{architecture,guides,standards,decisions}/` | Technical knowledge and decisions | Development context |
 
-`config.json` explicitly maps these sources. Paths are relative to the repository root. The [Voyager profile](../profiles/voyager.json) points directly at its existing `PRODUCT/`, `WEBSITE/` and `ENGINEERING/` owners. Customer vocabulary, optional columns, stable IDs and platform policy stay in the customer's files.
+`config.json` explicitly maps these sources. Paths are relative to the repository root. A profile passed with `--profile` uses the same shape and can point directly at existing owners such as Voyager's `PRODUCT/`, `WEBSITE/` and `ENGINEERING/` directories. Customer vocabulary, optional columns, stable IDs and platform policy stay in the customer's files.
 
 ## Schemas
 
@@ -57,4 +57,4 @@ Sources and Verification prose own engineering evidence. Spectrum does not requi
 
 ## Migration
 
-Version 1 feature JSON and the standalone JSON draft model are retired. Spectrum's `SP-001` through `SP-004` feature IDs and their original acceptance statements are preserved in FI and interaction Markdown. [The migration guide](../engineering/common/guides/voyager_migration.md) describes profiles, verification and recovery. No automatic customer-document migration or remote publication runs during validation.
+Version 1 feature JSON and the standalone JSON draft model are retired. Spectrum's `SP-001` through `SP-004` feature IDs and their original acceptance statements are preserved in FI and interaction Markdown. Spectrum's own feature IDs stay product-scoped (`SP-<nnn>`); its category keys (`VAL`, `DSH`, `AGT`, `LOOP`, `INT`) classify features without renumbering them. [The migration guide](../engineering/common/guides/voyager_migration.md) describes profiles, verification and recovery. No automatic customer-document migration or remote publication runs during validation.

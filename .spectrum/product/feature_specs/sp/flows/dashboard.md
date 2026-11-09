@@ -6,12 +6,24 @@
 
 ## Interaction Coverage
 
+- [View repository overview](../SP-002/SP-002-view_repository_overview.md)
 - [Browse specifications](../SP-002/SP-002-browse_specifications.md)
+- [View specification detail](../SP-002/SP-002-view_specification_detail.md)
+- [Read repository rules](../SP-006/SP-006-read_rules.md)
+- [Inspect integrations](../SP-006/SP-006-inspect_integrations.md)
+- [Show planned capabilities](../SP-007/SP-007-show_planned_capabilities.md)
 
 ## Happy Path
 
-Read the configured repository, build the shared document model, validate references and render the requested result. Keep canonical files unchanged.
+1. The user opens a dashboard route on the loopback-only local server.
+2. The server reads the configured repository (`SPECTRUM_REPOSITORY` or this monorepo), its Git revision and the shared model from `@spectrum/spec-engine`.
+3. Overview summarizes structural health; Specs lists interactions with shared contracts and flows; a spec detail shows one interaction's states, criteria, findings and linked documents.
+4. Rules shows rule files from the configured roots. Integrations shows declared flags beside a separate connection state.
+5. Proposals, Runs and PR reviews show planned states. No page writes to the repository.
 
 ## Failure Handling
 
-Report invalid configuration, malformed documents and unsafe or missing paths. Structural errors fail the check; unresolved TBD values remain visible warnings. The dashboard shows load failures and the CLI exits with a nonzero status on errors.
+- Load failures appear as page errors. The dashboard never substitutes sample data.
+- An unknown specification ID returns the not-found page.
+- Empty specification or rule sets show an empty notice that names where the data was read from.
+- Structural errors fail the check and appear as findings; unresolved `TBD` values remain visible warnings.

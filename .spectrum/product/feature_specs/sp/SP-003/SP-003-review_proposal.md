@@ -1,13 +1,13 @@
 ---
 interaction_id: "SP-003-review_proposal"
 interaction_type: "command"
-feature: "Review and improve Spectrum itself"
-category_key: "SP"
+feature: "Change proposals"
+category_key: "LOOP"
 feature_id: "SP-003"
 status: "planned"
 phase: "next"
 summary: "Review an exact proposal against its base revision before any approved application."
-related_region: "web.repository"
+related_region: "web.agent_loop"
 menu: "-"
 shortcut: "-"
 document_status: "draft"
@@ -60,11 +60,11 @@ Local JSON findings and process exit status are available. Hosted telemetry, mod
 ## Related Interactions
 
 - [Check repository](../SP-001/SP-001-check_repository.md)
-- [List specifications](../SP-001/SP-001-list_specifications.md)
-- [Browse specifications](../SP-002/SP-002-browse_specifications.md)
-- [Run plugin checks](../SP-004/SP-004-run_plugin_checks.md)
+- [Show planned capabilities](../SP-007/SP-007-show_planned_capabilities.md)
+- [Follow spec guardrails](../SP-008/SP-008-follow_spec_guardrails.md)
 
 ## Source
 
 - [Contract](../contracts/proposal.toml)
 - [Flow](../flows/proposal.md)
+- [ChangeSet contract](../../../../contracts/change-set.md)

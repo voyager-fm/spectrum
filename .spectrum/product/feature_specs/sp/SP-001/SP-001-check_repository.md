@@ -2,7 +2,7 @@
 interaction_id: "SP-001-check_repository"
 interaction_type: "command"
 feature: "Repository specification validation"
-category_key: "SP"
+category_key: "VAL"
 feature_id: "SP-001"
 status: "implementing"
 phase: "now"
@@ -21,7 +21,7 @@ Validate canonical inventories, documents and their references without writing.
 
 ## Trigger / Entry Points
 
-The user runs the check or list command through the CLI or the Spectrum host skill.
+The user runs `spectrum check [repository path]` (`pnpm spec:check` in this repository), or the Spectrum host skill runs the bundled CLI. The repository path defaults to the current directory.
 
 ## Preconditions
 
@@ -29,7 +29,7 @@ A local repository and a schema_version 2 configuration identify canonical docum
 
 ## Expected Outcome
 
-Return the requested repository data and structural findings from the shared deterministic engine.
+The CLI prints one JSON object with `ok`, `findings`, `specs`, `config` and `model`. `ok` is true when no finding has error severity.
 
 ## State Changes
 
@@ -37,11 +37,11 @@ Canonical repository files stay unchanged. The response contains a derived model
 
 ## User-visible Feedback
 
-Show concrete document paths, IDs, findings and declared states. Describe unavailable adapters as planned.
+Each finding names a code, severity, repository path and, when known, a line. The exit status is 0 without structural errors and 1 with structural errors or a missing configuration. Unresolved warnings remain visible in a passing result.
 
 ## Edge Cases / Failure Handling
 
-Malformed TSV, JSON schemas, YAML or TOML produce failures. Missing references and symlink escapes produce failures. TBD remains a visible unresolved warning. Missing data is never replaced with a successful sample.
+Malformed TSV, JSON schemas, YAML or TOML produce failures. Missing references and symlink escapes produce failures. TBD remains a visible unresolved warning. Missing data is never replaced with a successful sample. A legacy version 1 configuration reports an explicit `invalid-config` migration boundary.
 
 ## Acceptance Criteria
 
@@ -51,6 +51,7 @@ Malformed TSV, JSON schemas, YAML or TOML produce failures. Missing references a
 - [ ] **AC-4:** CLI reads schema_version 2 TSV inventories, TOML contracts and Markdown specifications through the configured repository-relative paths.
 - [ ] **AC-5:** Schema constraints, foreign keys, FI/frontmatter consistency, ownership IDs and flow coverage produce actionable findings.
 - [ ] **AC-6:** Markdown owns stable file-local AC IDs; checked boxes do not produce passed test evidence.
+- [ ] **AC-7:** An unknown command prints usage and exits with status 2 without reading the repository.
 
 ## Permissions / Dependencies
 
@@ -63,8 +64,8 @@ Local JSON findings and process exit status are available. Hosted telemetry, mod
 ## Related Interactions
 
 - [List specifications](../SP-001/SP-001-list_specifications.md)
-- [Browse specifications](../SP-002/SP-002-browse_specifications.md)
-- [Review proposal](../SP-003/SP-003-review_proposal.md)
+- [Check with a source profile](../SP-005/SP-005-check_with_profile.md)
+- [View repository overview](../SP-002/SP-002-view_repository_overview.md)
 - [Run plugin checks](../SP-004/SP-004-run_plugin_checks.md)
 
 ## Source

@@ -2,7 +2,7 @@
 interaction_id: "SP-001-list_specifications"
 interaction_type: "command"
 feature: "Repository specification validation"
-category_key: "SP"
+category_key: "VAL"
 feature_id: "SP-001"
 status: "implementing"
 phase: "now"
@@ -21,7 +21,7 @@ List interaction specifications with stable IDs and document-owned acceptance cr
 
 ## Trigger / Entry Points
 
-The user runs the check or list command through the CLI or the Spectrum host skill.
+The user runs `spectrum list [repository path]` (`pnpm spec:list` in this repository), or the Spectrum host skill runs the bundled CLI.
 
 ## Preconditions
 
@@ -29,7 +29,7 @@ A local repository and a schema_version 2 configuration identify canonical docum
 
 ## Expected Outcome
 
-Return the requested repository data and structural findings from the shared deterministic engine.
+The CLI prints the `specs` array of the same check as JSON. Each entry carries its interaction ID, feature ID, category key, title, document status, declared lifecycle, phase, path, acceptance criteria and resolved links.
 
 ## State Changes
 
@@ -37,11 +37,11 @@ Canonical repository files stay unchanged. The response contains a derived model
 
 ## User-visible Feedback
 
-Show concrete document paths, IDs, findings and declared states. Describe unavailable adapters as planned.
+Document status, declared lifecycle and phase appear as separate fields. Each acceptance criterion shows its ID, statement, checkbox state and a verification value that stays `not_recorded` without an evidence adapter.
 
 ## Edge Cases / Failure Handling
 
-Malformed TSV, JSON schemas, YAML or TOML produce failures. Missing references and symlink escapes produce failures. TBD remains a visible unresolved warning. Missing data is never replaced with a successful sample.
+Malformed TSV, JSON schemas, YAML or TOML produce failures. Missing references and symlink escapes produce failures. TBD remains a visible unresolved warning. Missing data is never replaced with a successful sample. Structural errors still print the parsed specifications.
 
 ## Acceptance Criteria
 
@@ -55,13 +55,12 @@ Read-only local inspection is executable. Human review annotations do not grant 
 
 ## Observability / Analytics
 
-Local JSON findings and process exit status are available. Hosted telemetry, model jobs and PR review publication remain unimplemented.
+Local JSON output and process exit status are available. Hosted telemetry remains unimplemented.
 
 ## Related Interactions
 
 - [Check repository](../SP-001/SP-001-check_repository.md)
 - [Browse specifications](../SP-002/SP-002-browse_specifications.md)
-- [Review proposal](../SP-003/SP-003-review_proposal.md)
 - [Run plugin checks](../SP-004/SP-004-run_plugin_checks.md)
 
 ## Source

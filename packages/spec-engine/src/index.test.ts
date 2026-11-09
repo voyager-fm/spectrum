@@ -11,7 +11,12 @@ test('self inventories and interaction specifications validate', async () => {
   assert.equal(r.ok, true);
   assert.deepEqual(
     [...new Set(r.specs.map((s) => s.featureId))],
-    ['SP-001', 'SP-002', 'SP-003', 'SP-004'],
+    ['SP-001', 'SP-002', 'SP-003', 'SP-004', 'SP-005', 'SP-006', 'SP-007', 'SP-008'],
+  );
+  const categories = r.model.inventories.find((table) => table.kind === 'categories');
+  assert.deepEqual(
+    categories?.rows.map((row) => row.values.category_key),
+    ['VAL', 'DSH', 'AGT', 'LOOP', 'INT'],
   );
   assert.ok(r.model.inventories.some((table) => table.kind === 'objects'));
   assert.ok(r.model.documents.some((doc) => doc.kind === 'engineering'));
