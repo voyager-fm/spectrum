@@ -4,6 +4,7 @@ Specification validation	VAL	Source profiles	VAL-002	Read existing documentation
 Specification dashboard	DSH	Specification browsing	DSH-001	Inspect repository-native specifications, their health and their relationships.	web.specs
 Specification dashboard	DSH	Repository context	DSH-002	Read repository rules and declared configuration alongside the specifications.	web.repository
 Specification dashboard	DSH	Planned capability states	DSH-003	Show unimplemented capabilities as explicit planned states without controls or sample results.	web.agent_loop
+Specification dashboard	DSH	Specification health	DSH-004	Chart a repository's specification states, acceptance criteria, structural findings and check history without treating declared state as evidence.	web.overview
 Agent plugin	AGT	Distribute Spectrum as an agent plugin	AGT-001	Distribute deterministic tools through an agent-host plugin.	plugin.spectrum
 Agent plugin	AGT	Spec-grounded agent guidance	AGT-002	Keep host-agent work aligned with repository specifications and human authority.	plugin.spectrum
 Agent loop	LOOP	Change proposals	LOOP-001	Propose, review and revalidate changes with explicit human authority.	web.agent_loop

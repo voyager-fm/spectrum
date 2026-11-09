@@ -40,3 +40,19 @@ writes = []
 [ownership."DSH-003-show_planned_capabilities"]
 reads = []
 writes = []
+
+[ownership."DSH-004-view_status_distribution"]
+reads = ["repository", "spec_bundle", "interaction"]
+writes = []
+
+[ownership."DSH-004-view_acceptance_coverage"]
+reads = ["spec_bundle", "interaction"]
+writes = []
+
+[ownership."DSH-004-group_findings"]
+reads = ["repository", "spec_bundle"]
+writes = []
+
+[ownership."DSH-004-view_check_trend"]
+reads = ["repository", "spec_bundle"]
+writes = []

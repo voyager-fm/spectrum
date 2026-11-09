@@ -29,7 +29,7 @@ The dashboard server runs locally and can read the configured repository. Extern
 
 ## Expected Outcome
 
-Summary cards show the structural check result and finding count, the number of interaction specifications and how many are marked approved, the number of rule files, and the configured mode and canonical source. Findings appear in a table with code, path and message. An Agent loop section links to Proposals, Runs and PR reviews as not implemented, and to Integrations with the GitHub App connection state and Linear as not implemented.
+Summary cards show the structural check result and finding count, the number of interaction specifications and how many are marked approved, the number of rule files, and the configured mode and canonical source. Below the cards, the Spec health, Acceptance criteria and grouped Findings sections chart the same result (see Specification health interactions). An Agent loop section links to Proposals, Runs and PR reviews as not implemented, and to Integrations with the GitHub App connection state and Linear as not implemented.
 
 ## State Changes
 
@@ -41,7 +41,7 @@ The check card says the check is deterministic and uses no model. The approved c
 
 ## Edge Cases / Failure Handling
 
-When the check cannot run, the check card shows "Could not run" and the load error appears above the cards. Missing configuration shows the mode as unknown. Without findings, the findings table is omitted rather than filled with sample rows.
+When the check cannot run, the check card shows "Could not run" and the load error appears above the cards. Missing configuration shows the mode as unknown. Without findings, the Findings section states that there are none and that this does not show the code implements the specifications; it never shows sample rows.
 
 ## Acceptance Criteria
 
@@ -63,6 +63,8 @@ Page load errors are shown in the page. Hosted telemetry remains unimplemented.
 - [Check repository](../../val/VAL-001/VAL-001-check_repository.md)
 - [Browse specifications](DSH-001-browse_specifications.md)
 - [Show planned capabilities](../DSH-003/DSH-003-show_planned_capabilities.md)
+- [View status distribution](../DSH-004/DSH-004-view_status_distribution.md)
+- [Group findings](../DSH-004/DSH-004-group_findings.md)
 
 ## Source
 

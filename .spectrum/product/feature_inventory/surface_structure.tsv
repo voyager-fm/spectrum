@@ -1,7 +1,7 @@
 surface_key	parent_region_id	region_id	region_label	level	slot_type	structure_key	description	interaction_refs	status
 cli	-	output	Command output	1	root	cli.output	JSON results and a nonzero exit status for structural errors.	VAL-001-check_repository|VAL-001-list_specifications|VAL-002-check_with_profile|SET-001-install_cli_package|SET-002-initialize_repository|SET-003-install_repository_skills	implementing
 web	-	repository	Repository workspace	1	root	web.repository	Specification, rule and declared integration views.	INT-001-list_github_repositories|INT-001-check_github_revision|SET-004-view_setup_checklist|INT-004-browse_remote_specifications|INT-004-view_remote_specification|INT-004-switch_repository	implementing
-web	repository	overview	Overview	2	section	web.overview	Structural check health and repository counts.	DSH-001-view_repository_overview	implementing
+web	repository	overview	Overview	2	section	web.overview	Structural check health, repository counts and specification health charts.	DSH-001-view_repository_overview|DSH-004-view_status_distribution|DSH-004-view_acceptance_coverage|DSH-004-group_findings|DSH-004-view_check_trend	implementing
 web	repository	specs	Specifications	2	section	web.specs	Interaction list with shared contracts and flows.	DSH-001-browse_specifications	implementing
 web	repository	spec_detail	Specification detail	2	section	web.spec_detail	One interaction with its states, criteria, findings and links.	DSH-001-view_specification_detail	implementing
 web	repository	rules	Rules	2	section	web.rules	Rule files from the configured rule sources.	DSH-002-read_rules|LOOP-001-propose_rule_change	implementing
