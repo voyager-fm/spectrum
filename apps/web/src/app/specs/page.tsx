@@ -31,8 +31,8 @@ export default async function SpecsPage() {
         title="Specs"
         description={
           <>
-            Feature specs from <Mono>.spectrum/features</Mono> and the shared contracts and flows
-            they link to.
+            Interaction specs from the configured FI and Markdown sources, with their contracts and
+            flows.
           </>
         }
       />
@@ -40,7 +40,7 @@ export default async function SpecsPage() {
 
       {specs.length === 0 ? (
         <EmptyNotice>
-          No feature specs found. Run <Mono>pnpm spec:check</Mono> for details.
+          No interaction specs found. Run <Mono>pnpm spec:check</Mono> for details.
         </EmptyNotice>
       ) : (
         <div className="rounded-xl border">
@@ -67,9 +67,7 @@ export default async function SpecsPage() {
                   </TableCell>
                   <TableCell className="whitespace-normal">{s.title}</TableCell>
                   <TableCell>
-                    <StatusBadge tone={s.status === 'approved' ? 'ok' : 'neutral'}>
-                      {s.status}
-                    </StatusBadge>
+                    <StatusBadge tone="neutral">{s.status}</StatusBadge>
                   </TableCell>
                   <TableCell className="text-right tabular-nums">{s.acceptance.length}</TableCell>
                   <TableCell className="text-right tabular-nums">{s.links.length}</TableCell>
@@ -89,7 +87,9 @@ export default async function SpecsPage() {
               <Card size="sm" key={d.path}>
                 <CardHeader>
                   <CardTitle>{d.title}</CardTitle>
-                  <CardDescription className="font-mono text-xs">{d.path}</CardDescription>
+                  <CardDescription className="break-all font-mono text-xs">
+                    {d.path}
+                  </CardDescription>
                 </CardHeader>
               </Card>
             ))}
@@ -97,11 +97,12 @@ export default async function SpecsPage() {
         )}
       </Section>
 
-      <Section title="Relationship graph">
+      <Section title="Relationships">
         <p className="text-sm text-muted-foreground">
-          Objects, surfaces, interactions and their contract/flow/spec relationships come from the
-          richer document model (<Mono>.spectrum/schemas/document-model.schema.json</Mono>). The
-          spec engine does not read that model yet, so no graph is shown.
+          {data.check?.model.inventories.length ?? '—'} configured inventories and{' '}
+          {data.check?.model.relationships.length ?? '—'} resolved relationships connect objects,
+          regions, features, interactions and their documents. These are structural links; semantic
+          policy review and implementation verification require separate evidence.
         </p>
       </Section>
     </>

@@ -1,0 +1,47 @@
+{
+  "$schema": "../../../schemas/inventory.schema.json",
+  "schema_version": "1.0",
+  "name": "ROUTES",
+  "primary_key": ["page_id"],
+  "null_values": ["-"],
+  "columns": [
+    {
+      "name": "page_id",
+      "type": "string",
+      "required": true
+    },
+    {
+      "name": "page_name",
+      "type": "string",
+      "required": true
+    },
+    {
+      "name": "path",
+      "type": "string",
+      "required": true
+    },
+    {
+      "name": "type",
+      "type": "string",
+      "required": true,
+      "enum": ["page", "route_parent", "api", "text"]
+    },
+    {
+      "name": "nav_exposure",
+      "type": "string",
+      "required": true,
+      "enum": ["top_nav", "top_nav/footer", "footer", "hidden", "modal"]
+    },
+    {
+      "name": "primary_role",
+      "type": "string",
+      "required": true
+    },
+    {
+      "name": "implementation_status",
+      "type": "string",
+      "required": true,
+      "enum": ["implemented", "branch_partial", "planned", "cms_driven", "modal_surface"]
+    }
+  ]
+}

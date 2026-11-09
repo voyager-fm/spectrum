@@ -1,9 +1,73 @@
 {
-  "schemaVersion": 1,
+  "$schema": "./schemas/config.schema.json",
+  "schema_version": 2,
   "name": "Spectrum",
-  "specRoot": "features",
   "mode": "proposal-only",
-  "canonicalSource": "git-files",
+  "canonical_source": "git-files",
+  "overview": ".spectrum/overview.md",
+  "inventories": [
+    {
+      "kind": "objects",
+      "data": ".spectrum/product/information_architecture/objects/data.tsv",
+      "schema": ".spectrum/product/information_architecture/objects/schema.json"
+    },
+    {
+      "kind": "surfaces",
+      "data": ".spectrum/product/information_architecture/surfaces/data.tsv",
+      "schema": ".spectrum/product/information_architecture/surfaces/schema.json"
+    },
+    {
+      "kind": "regions",
+      "data": ".spectrum/product/information_architecture/surface_structure/data.tsv",
+      "schema": ".spectrum/product/information_architecture/surface_structure/schema.json"
+    },
+    {
+      "kind": "categories",
+      "data": ".spectrum/product/feature_inventory/feature_categories/data.tsv",
+      "schema": ".spectrum/product/feature_inventory/feature_categories/schema.json"
+    },
+    {
+      "kind": "features",
+      "data": ".spectrum/product/feature_inventory/features/data.tsv",
+      "schema": ".spectrum/product/feature_inventory/features/schema.json"
+    },
+    {
+      "kind": "interactions",
+      "data": ".spectrum/product/feature_inventory/interactions/data.tsv",
+      "schema": ".spectrum/product/feature_inventory/interactions/schema.json"
+    },
+    {
+      "kind": "routes",
+      "data": ".spectrum/website/route_map/routes/data.tsv",
+      "schema": ".spectrum/website/route_map/routes/schema.json"
+    }
+  ],
+  "documents": [
+    {
+      "kind": "feature_bundle",
+      "root": ".spectrum/product/feature_specs"
+    },
+    {
+      "kind": "page_bundle",
+      "root": ".spectrum/website/page_contracts"
+    },
+    {
+      "kind": "contracts",
+      "root": ".spectrum/contracts"
+    },
+    {
+      "kind": "flows",
+      "root": ".spectrum/flows"
+    },
+    {
+      "kind": "engineering",
+      "root": ".spectrum/engineering"
+    },
+    {
+      "kind": "rules",
+      "root": ".spectrum/rules"
+    }
+  ],
   "integrations": {
     "github": {
       "enabled": false
@@ -14,6 +78,6 @@
   },
   "agents": {
     "enabled": false,
-    "maxRepairAttempts": 2
+    "max_repair_attempts": 2
   }
 }

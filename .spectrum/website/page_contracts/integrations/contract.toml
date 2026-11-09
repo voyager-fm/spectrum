@@ -1,0 +1,16 @@
+[contract]
+id = "website.integrations"
+page_id = "INTEGRATIONS"
+path = "/settings"
+implementation_status = "implemented"
+
+[responsibility]
+primary = "Inspect declared configuration independently of live connectivity."
+
+[policy]
+read_only = true
+capability = "ready"
+declared_status_is_execution_evidence = false
+
+[policy_refs]
+specification = ["../../../product/feature_specs/sp/contracts/dashboard.toml"]

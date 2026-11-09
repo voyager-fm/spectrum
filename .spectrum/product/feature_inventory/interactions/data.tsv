@@ -1,0 +1,6 @@
+interaction_title	interaction_id	interaction_type	feature	category_key	feature_id	status	phase	summary	related_region	menu	shortcut
+Check repository	SP-001-check_repository	command	Repository specification validation	SP	SP-001	implementing	now	Validate canonical inventories, documents and their references without writing.	cli.output	-	-
+List specifications	SP-001-list_specifications	command	Repository specification validation	SP	SP-001	implementing	now	List interaction specifications with stable IDs and document-owned acceptance criteria.	cli.output	-	-
+Browse specifications	SP-002-browse_specifications	display	Repository dashboard	SP	SP-002	implementing	now	Inspect specification relationships and distinguish declared status from executed evidence.	web.repository	-	-
+Review proposal	SP-003-review_proposal	command	Review and improve Spectrum itself	SP	SP-003	planned	next	Review an exact proposal against its base revision before any approved application.	web.repository	-	-
+Run plugin checks	SP-004-run_plugin_checks	command	Distribute Spectrum as an agent plugin	SP	SP-004	implementing	now	Run the bundled deterministic CLI inside the supported host agent.	plugin.spectrum	-	-

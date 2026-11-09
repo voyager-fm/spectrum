@@ -1,9 +1,9 @@
 import assert from 'node:assert/strict';
-import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
+import { cp, mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import test from 'node:test';
-import { loadDashboard, readDocuments } from './dashboard.ts';
+import { loadDashboard } from './dashboard.ts';
 
 const repoRoot = resolve(import.meta.dirname, '../../../..');
 
@@ -11,13 +11,17 @@ test('dashboard snapshot reads the repository own specs, rules and config', asyn
   const data = await loadDashboard(repoRoot);
   assert.deepEqual(data.errors, []);
   assert.equal(data.check?.ok, true);
-  assert.ok(data.check?.specs.some((s) => s.id === 'SP-001'));
+  assert.ok(data.check?.specs.some((s) => s.id === 'SP-001-check_repository'));
+  assert.ok(data.contracts.some((d) => d.path.endsWith('/contracts/validation.toml')));
+  assert.ok(data.flows.some((d) => d.path.endsWith('/flows/validation.md')));
+  assert.ok(data.documents.some((d) => d.path.endsWith('/page_contracts/specs/contract.toml')));
   assert.ok(
     data.rules.some((r) => r.path === '.spectrum/rules/agents.md' && r.title === 'Agent rules'),
   );
   assert.equal(data.overview?.title, 'Spectrum');
   assert.equal(data.config?.mode, 'proposal-only');
   assert.equal(data.config?.github, false);
+  assert.equal(data.config?.canonicalSource, 'git-files');
 });
 
 test('missing spectrum data is reported as errors, not replaced with samples', async () => {
@@ -36,22 +40,40 @@ test('missing spectrum data is reported as errors, not replaced with samples', a
   }
 });
 
-test('documents are sorted, filtered to md/toml and titled by first heading', async () => {
+test('dashboard reads configured document paths through the shared engine', async () => {
   const dir = await mkdtemp(join(tmpdir(), 'spectrum-web-'));
   try {
-    await mkdir(join(dir, '.spectrum/rules'), { recursive: true });
-    await writeFile(join(dir, '.spectrum/rules/b.md'), 'intro\n# Beta rules\n');
-    await writeFile(join(dir, '.spectrum/rules/a.toml'), 'key = 1\n');
-    await writeFile(join(dir, '.spectrum/rules/ignored.json'), '{}');
-    const docs = await readDocuments(dir, 'rules');
+    await cp(join(repoRoot, '.spectrum'), join(dir, '.spectrum'), { recursive: true });
+    await mkdir(join(dir, 'existing/rules'), { recursive: true });
+    await writeFile(join(dir, 'existing/rules/b.md'), 'intro\n# Beta rules\n');
+    await writeFile(join(dir, 'existing/rules/a.toml'), 'key = 1\n');
+    await writeFile(join(dir, 'existing/rules/ignored.json'), '{}');
+    const configPath = join(dir, '.spectrum/config.json');
+    const config = JSON.parse(await readFile(configPath, 'utf8'));
+    config.documents.find((source: { kind: string }) => source.kind === 'rules').root =
+      'existing/rules';
+    await writeFile(configPath, JSON.stringify(config));
+    const data = await loadDashboard(dir);
+    assert.equal(data.check?.ok, true);
     assert.deepEqual(
-      docs.map((d) => [d.path, d.title]),
+      data.rules.map((d) => [d.path, d.title]),
       [
-        ['.spectrum/rules/a.toml', 'a.toml'],
-        ['.spectrum/rules/b.md', 'Beta rules'],
+        ['existing/rules/a.toml', 'a.toml'],
+        ['existing/rules/b.md', 'Beta rules'],
       ],
     );
   } finally {
     await rm(dir, { recursive: true, force: true });
   }
+});
+
+test('a missing configured source remains a load failure rather than an empty success', async (t) => {
+  const dir = await mkdtemp(join(tmpdir(), 'spectrum-web-'));
+  t.after(() => rm(dir, { recursive: true, force: true }));
+  await cp(join(repoRoot, '.spectrum'), join(dir, '.spectrum'), { recursive: true });
+  await rm(join(dir, '.spectrum/rules'), { recursive: true });
+  const data = await loadDashboard(dir);
+  assert.equal(data.check?.ok, false);
+  assert.deepEqual(data.rules, []);
+  assert.ok(data.errors.some((error) => error.startsWith('.spectrum/rules:')));
 });

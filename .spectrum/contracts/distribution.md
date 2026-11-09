@@ -3,7 +3,6 @@
 Spectrum ships as an agent plugin: a bundle of skills that runs inside the user's coding agent (Claude Code first; other Agent Skills hosts later). The host agent's model does the judgment. A bundled deterministic CLI does everything that must be exact. Spectrum does not need its own model credentials on this path.
 
 ## Repository layout
-
 - `apps/` holds deliverables only. `apps/plugin` is the agent plugin, `apps/web` the dashboard, `apps/cli` the deterministic command line (an unpublished workspace package for now). `apps/worker` is a placeholder until a hosted GitHub review path exists.
 - `packages/` holds shared libraries consumed as workspace packages (`@spectrum/<name>`) through package `exports`, never through relative paths into another package.
   - `core`: shared types and contracts.
@@ -11,10 +10,9 @@ Spectrum ships as an agent plugin: a bundle of skills that runs inside the user'
   - `changeset`: proposal approval and staleness rules.
   - `integrations`: GitHub/Linear adapter contracts.
 - `.claude-plugin/marketplace.json` at the repository root lists `apps/plugin`, so `claude plugin marketplace add <owner>/<repo>` installs it.
-- Skills for _developing_ Spectrum stay in `.apm/library/`. Product skills live only in `apps/plugin/skills/`. Neither copies the other.
+- Skills for *developing* Spectrum stay in `.apm/library/`. Product skills live only in `apps/plugin/skills/`. Neither copies the other.
 
 ## Plugin rules
-
 1. `apps/plugin/.claude-plugin/plugin.json` declares a kebab-case `name`, `version`, `description` and `author`.
 2. Each skill is `apps/plugin/skills/<name>/SKILL.md` and follows the Agent Skills specification:
    - YAML frontmatter with `name` and `description`, one `key: value` per line.
@@ -27,5 +25,4 @@ Spectrum ships as an agent plugin: a bundle of skills that runs inside the user'
 6. Host support is stated per host and only after verification. Claude Code is the first target. No other host manifest ships until its format and behavior are verified.
 
 ## Verification
-
 `pnpm check` validates every skill and the manifest and checks bundle freshness. `claude plugin validate apps/plugin` is the authoritative Claude Code manifest check when the `claude` binary is available.

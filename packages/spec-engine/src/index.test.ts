@@ -1,16 +1,22 @@
 import assert from 'node:assert/strict';
 import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { join, resolve } from 'node:path';
 import { test } from 'node:test';
 import { checkRepository } from './index.ts';
 
-test('self specs validate', async () => {
-  const r = await checkRepository(process.cwd());
+test('self inventories and interaction specifications validate', async () => {
+  const r = await checkRepository(resolve(import.meta.dirname, '../../..'));
+  assert.deepEqual(r.findings, []);
   assert.equal(r.ok, true);
-  assert.equal(r.specs.length, 4);
+  assert.deepEqual(
+    [...new Set(r.specs.map((s) => s.featureId))],
+    ['SP-001', 'SP-002', 'SP-003', 'SP-004'],
+  );
+  assert.ok(r.model.inventories.some((table) => table.kind === 'objects'));
+  assert.ok(r.model.documents.some((doc) => doc.kind === 'engineering'));
 });
-test('invalid references and duplicate IDs fail', async () => {
+test('legacy feature-only configuration reports an explicit migration boundary', async () => {
   const dir = await mkdtemp(join(tmpdir(), 'spectrum-test-'));
   try {
     await mkdir(join(dir, '.spectrum/features'), { recursive: true });
@@ -31,8 +37,9 @@ test('invalid references and duplicate IDs fail', async () => {
       );
     const r = await checkRepository(dir);
     assert.equal(r.ok, false);
-    for (const code of ['duplicate-id', 'broken-link', 'unsafe-link'])
-      assert.ok(r.findings.some((f) => f.code === code));
+    assert.ok(
+      r.findings.some((f) => f.code === 'invalid-config' && /schema_version/.test(f.message)),
+    );
   } finally {
     await rm(dir, { recursive: true, force: true });
   }

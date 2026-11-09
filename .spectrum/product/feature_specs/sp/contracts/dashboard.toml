@@ -1,0 +1,18 @@
+[contract]
+id = "spectrum.dashboard"
+category = "SP"
+primary_object_key = "spec_bundle"
+display_region = "web.repository"
+
+[policy]
+read_only = true
+shared_engine = "@spectrum/spec-engine"
+configuration_is_connection_evidence = false
+review_status_is_implementation_evidence = false
+checkboxes_are_execution_evidence = false
+load_failures_use_sample_data = false
+unimplemented_actions = "Show a planned state."
+
+[ownership."SP-002-browse_specifications"]
+reads = ["repository", "spec_bundle", "agent_rule"]
+writes = []

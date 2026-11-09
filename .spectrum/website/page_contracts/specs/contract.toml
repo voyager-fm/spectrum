@@ -1,0 +1,16 @@
+[contract]
+id = "website.specs"
+page_id = "SPECS"
+path = "/specs"
+implementation_status = "implemented"
+
+[responsibility]
+primary = "Browse interactions and their canonical document relationships."
+
+[policy]
+read_only = true
+capability = "ready"
+declared_status_is_execution_evidence = false
+
+[policy_refs]
+specification = ["../../../product/feature_specs/sp/contracts/dashboard.toml"]

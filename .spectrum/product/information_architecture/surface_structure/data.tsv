@@ -1,0 +1,4 @@
+surface_key	parent_region_id	region_id	region_label	level	slot_type	structure_key	description	interaction_refs	status
+cli	-	output	Command output	1	root	cli.output	JSON results and a nonzero exit status for structural errors.	SP-001-check_repository|SP-001-list_specifications	implementing
+web	-	repository	Repository workspace	1	root	web.repository	Specification, rule and declared integration views.	SP-002-browse_specifications|SP-003-review_proposal	implementing
+plugin	-	spectrum	Spectrum skill	1	root	plugin.spectrum	The host skill invokes the same CLI contract.	SP-004-run_plugin_checks	implementing

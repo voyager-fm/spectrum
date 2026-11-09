@@ -1,0 +1,128 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Spectrum repository source mapping, version 2",
+  "type": "object",
+  "required": ["schema_version", "name", "mode", "canonical_source", "inventories", "documents"],
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "minLength": 1
+    },
+    "schema_version": {
+      "const": 2
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "mode": {
+      "const": "proposal-only"
+    },
+    "canonical_source": {
+      "const": "git-files"
+    },
+    "overview": {
+      "type": "string",
+      "minLength": 1
+    },
+    "inventories": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["kind", "data", "schema"],
+        "properties": {
+          "kind": {
+            "enum": [
+              "objects",
+              "surfaces",
+              "regions",
+              "menus",
+              "categories",
+              "features",
+              "interactions",
+              "routes",
+              "other"
+            ]
+          },
+          "data": {
+            "type": "string",
+            "minLength": 1
+          },
+          "schema": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "documents": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["kind", "root"],
+        "properties": {
+          "kind": {
+            "enum": [
+              "feature_bundle",
+              "page_bundle",
+              "contracts",
+              "flows",
+              "engineering",
+              "rules",
+              "reference"
+            ]
+          },
+          "root": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "integrations": {
+      "type": "object",
+      "properties": {
+        "github": {
+          "type": "object",
+          "required": ["enabled"],
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            }
+          },
+          "additionalProperties": false
+        },
+        "linear": {
+          "type": "object",
+          "required": ["enabled"],
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "agents": {
+      "type": "object",
+      "required": ["enabled"],
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "max_repair_attempts": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

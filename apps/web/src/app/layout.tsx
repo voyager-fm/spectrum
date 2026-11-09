@@ -52,7 +52,9 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
             </div>
             <Nav />
           </aside>
-          <main className="mx-auto w-full max-w-5xl px-4 py-8 md:px-10 md:py-10">{children}</main>
+          <main className="mx-auto min-w-0 w-full max-w-5xl px-4 py-8 md:px-10 md:py-10">
+            {children}
+          </main>
         </div>
       </body>
     </html>

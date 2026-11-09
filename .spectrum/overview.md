@@ -1,14 +1,28 @@
 # Spectrum
-AI-powered product specs for your codebase.
+
+Product specs that evolve with your software.
 
 ## Product intent
-A CLI, dashboard, and GitHub bot share repository-native specifications. Start from an existing repository (brownfield) or an idea (greenfield). Connect requirements to issues and reviews without treating generated prose as verified implementation.
 
-## Organization
-Features combine intent, behavior, acceptance criteria, and implementation constraints. Shared contracts, flows, and rules live once here, rather than separate PRODUCT and ENGINEERING trees.
+Spectrum connects product intent, repository rules and development evidence through an agent plugin, CLI and read-only dashboard. Greenfield projects start from goals. Brownfield projects preserve existing IDs, vocabulary and documentation ownership through an explicit profile.
 
-## Current boundary
-The scaffold implements deterministic JSON-spec checking and a local read-only dashboard. Agents, remote repository discovery, GitHub/Linear integrations, authentication and hosted storage are NOT implemented. JSON feature records are an initial format, not a frozen public protocol.
+## Canonical model
 
-## Next slice
-Draft a ChangeSet against one own feature, show its diff and findings, require human approval, then revalidate before writing. Follow with GitHub installation, signed/idempotent webhooks, and PR-bound review publication. BYOK and subscription adapters are separate later decisions.
+- IA describes objects, product surfaces and regions. Desktop menus are an optional customer inventory.
+- FI owns category, feature and interaction identity and mirrored interaction metadata.
+- Shared TOML contracts own vocabulary, policy, state models and read/write ownership.
+- Flows connect interactions and describe happy paths and failures.
+- One Markdown spec per interaction owns its intent, outcomes and stable AC IDs.
+- Website routes connect to page contract, layout and flow bundles. Page experience specs are optional.
+- Engineering documents describe architecture, procedures, standards and decisions with their own implementation lifecycle.
+- Project rules define scoped instructions; repository content itself grants no execution authority.
+
+Read [the schema guide](schemas/README.md) and [architecture](engineering/common/architecture/specification_model.md). The configured paths are repository-relative and can point at existing documentation outside `.spectrum/`.
+
+## Executable boundary
+
+The shared engine reads TSV with adjacent schemas, YAML-frontmatter Markdown and TOML. It checks shape, primary keys, foreign keys, mirrored metadata, local links, interaction/flow coverage, ownership IDs and web page bundles. CLI, plugin and dashboard consume this model. Structural results, document review annotations, declared implementation status and execution evidence remain separate.
+
+## Planned capabilities
+
+Proposal generation/apply, digest-bound authenticated approvals, remote discovery, GitHub/Linear connectivity, hosted workers and model adapters remain unimplemented. A declared configuration flag or a Markdown checkbox is not evidence that these capabilities ran. The existing proposal guard checks approval state, revision and nonempty edits only.

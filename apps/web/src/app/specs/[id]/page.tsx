@@ -32,10 +32,7 @@ export default async function SpecPage({ params }: Props) {
   const spec = data.check?.specs.find((s) => s.id === id);
   if (!spec) notFound();
   const findings = data.check?.findings.filter((f) => f.path === spec.path) ?? [];
-  const all = [data.overview, ...data.rules, ...data.contracts, ...data.flows].filter(
-    (d) => d !== null,
-  );
-  const documents = new Map(all.map((d) => [d.path, d]));
+  const documents = new Map(data.documents.map((d) => [d.path, d]));
 
   return (
     <>
@@ -49,7 +46,7 @@ export default async function SpecPage({ params }: Props) {
         title={spec.title}
         description={
           <>
-            <Mono>{spec.id}</Mono> · <Mono>{spec.path}</Mono>
+            <Mono>{spec.id}</Mono> · <Mono className="break-all">{spec.path}</Mono>
           </>
         }
       />
@@ -58,20 +55,23 @@ export default async function SpecPage({ params }: Props) {
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
         <StatCard
           title="Document status"
-          value={
-            <StatusBadge tone={spec.status === 'approved' ? 'ok' : 'neutral'}>
-              {spec.status}
-            </StatusBadge>
-          }
+          value={<StatusBadge tone="neutral">{spec.status}</StatusBadge>}
         />
-        <StatCard title="Implementation" value={<StatusBadge>Not tracked</StatusBadge>}>
-          This spec format has no implementation status.
+        <StatCard
+          title="Declared lifecycle"
+          value={<StatusBadge>{spec.implementationStatus}</StatusBadge>}
+        >
+          Phase: {spec.phase}. This inventory value is not executed test evidence.
         </StatCard>
         <StatCard
           title="Structural check"
           value={
-            <StatusBadge tone={findings.length ? 'bad' : 'ok'}>
-              {findings.length ? `${findings.length} findings` : 'No findings'}
+            <StatusBadge tone={findings.length ? 'bad' : data.check?.ok ? 'ok' : 'neutral'}>
+              {findings.length
+                ? `${findings.length} findings`
+                : data.check?.ok
+                  ? 'No findings'
+                  : 'Repository needs review'}
             </StatusBadge>
           }
         />
@@ -82,18 +82,20 @@ export default async function SpecPage({ params }: Props) {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-10">#</TableHead>
+                <TableHead className="w-10">ID</TableHead>
                 <TableHead>Criterion</TableHead>
                 <TableHead className="w-28">Verification</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {spec.acceptance.map((statement, i) => (
-                <TableRow key={statement}>
-                  <TableCell className="tabular-nums text-muted-foreground">{i + 1}</TableCell>
-                  <TableCell className="whitespace-normal">{statement}</TableCell>
+              {spec.acceptance.map((criterion) => (
+                <TableRow key={`${criterion.id ?? 'unassigned'}:${criterion.statement}`}>
+                  <TableCell className="tabular-nums text-muted-foreground">
+                    {criterion.id ?? 'Unassigned'}
+                  </TableCell>
+                  <TableCell className="whitespace-normal">{criterion.statement}</TableCell>
                   <TableCell>
-                    <StatusBadge tone="planned">Not run</StatusBadge>
+                    <StatusBadge tone="planned">Not recorded</StatusBadge>
                   </TableCell>
                 </TableRow>
               ))}
@@ -105,7 +107,7 @@ export default async function SpecPage({ params }: Props) {
       <Section title="Linked documents">
         <div className="flex flex-col gap-2">
           {spec.links.map((link) => {
-            const doc = documents.get(`.spectrum/${link}`);
+            const doc = documents.get(link);
             return (
               <details key={link} className="group rounded-xl border bg-card">
                 <summary className="flex cursor-pointer list-none items-center gap-2 px-4 py-3 text-sm [&::-webkit-details-marker]:hidden">
@@ -113,8 +115,10 @@ export default async function SpecPage({ params }: Props) {
                     className="size-4 text-muted-foreground transition-transform group-open:rotate-90"
                     aria-hidden
                   />
-                  <span className="font-medium">{doc?.title ?? link}</span>
-                  <span className="font-mono text-xs text-muted-foreground">.spectrum/{link}</span>
+                  <span className="min-w-0 break-words font-medium">{doc?.title ?? link}</span>
+                  <span className="min-w-0 break-all font-mono text-xs text-muted-foreground">
+                    {link}
+                  </span>
                 </summary>
                 <div className="px-4 pb-4">
                   {doc ? (

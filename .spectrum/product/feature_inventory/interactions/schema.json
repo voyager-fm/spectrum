@@ -1,0 +1,88 @@
+{
+  "$schema": "../../../schemas/inventory.schema.json",
+  "schema_version": "1.0",
+  "name": "INTERACTIONS",
+  "primary_key": ["interaction_id"],
+  "null_values": ["-"],
+  "columns": [
+    {
+      "name": "interaction_title",
+      "type": "string",
+      "required": true
+    },
+    {
+      "name": "interaction_id",
+      "type": "string",
+      "required": true
+    },
+    {
+      "name": "interaction_type",
+      "type": "string",
+      "required": false,
+      "enum": ["command", "input", "display", "background"]
+    },
+    {
+      "name": "feature",
+      "type": "string",
+      "required": false,
+      "ref": {
+        "table": "FEATURES",
+        "column": "feature_title"
+      }
+    },
+    {
+      "name": "category_key",
+      "type": "string",
+      "required": false,
+      "ref": {
+        "table": "FEATURE_CATEGORIES",
+        "column": "category_key"
+      }
+    },
+    {
+      "name": "feature_id",
+      "type": "string",
+      "required": false,
+      "ref": {
+        "table": "FEATURES",
+        "column": "feature_id"
+      }
+    },
+    {
+      "name": "status",
+      "type": "string",
+      "required": false,
+      "enum": ["idea", "drafted", "planned", "implementing", "shipped", "deprecated"]
+    },
+    {
+      "name": "phase",
+      "type": "string",
+      "required": false,
+      "enum": ["-", "now", "next", "later"]
+    },
+    {
+      "name": "summary",
+      "type": "string",
+      "required": false
+    },
+    {
+      "name": "related_region",
+      "type": "string",
+      "required": false,
+      "ref": {
+        "table": "SURFACE_STRUCTURE",
+        "column": "structure_key"
+      }
+    },
+    {
+      "name": "menu",
+      "type": "string",
+      "required": false
+    },
+    {
+      "name": "shortcut",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

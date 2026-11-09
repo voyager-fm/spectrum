@@ -3,7 +3,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import {
   EmptyNotice,
   LoadErrors,
-  Mono,
   PageHead,
   Planned,
   StatusBadge,
@@ -18,19 +17,13 @@ export default async function RulesPage() {
     <>
       <PageHead
         title="Rules"
-        description={
-          <>
-            Repository rules in <Mono>.spectrum/rules</Mono>, applied to agents and reviews.
-          </>
-        }
+        description="Repository rules from the configured sources. Installation and review application require separate evidence."
       />
       <LoadErrors errors={data.errors} />
 
       <div className="flex flex-col gap-3">
         {data.rules.length === 0 ? (
-          <EmptyNotice>
-            No rule files in <Mono>.spectrum/rules</Mono>.
-          </EmptyNotice>
+          <EmptyNotice>No rule files loaded from the configured sources.</EmptyNotice>
         ) : (
           data.rules.map((rule) => (
             <Card key={rule.path}>
@@ -58,8 +51,8 @@ export default async function RulesPage() {
             'Show where each approved rule is installed and its baseline revision',
           ]}
         >
-          Spectrum does not yet discover rules outside <Mono>.spectrum/rules</Mono> or propose
-          changes.
+          Spectrum reads the configured rule roots. Automatic discovery, rule proposals and
+          installation are planned.
         </Planned>
       </div>
     </>

@@ -18,18 +18,20 @@ node "<skill base directory>/scripts/spectrum.mjs" list [repository path]
 
 The repository path defaults to the current directory.
 
-- `check` prints `{ "ok", "findings", "specs" }` as JSON. Exit code 0 means no findings. Exit code 1 means findings or an error such as a missing `.spectrum/config.json`.
-- `list` prints the feature specs as a JSON array.
+- `check` prints `{ "ok", "findings", "specs", "config", "model" }` as JSON. Exit code 0 means no structural errors; unresolved warnings remain visible. Exit code 1 means structural errors or a missing/invalid configuration.
+- `list` prints the parsed interaction specs as a JSON array. It uses the same validation and exit status.
 - Any other command prints usage and exits with code 2.
 
-Finding codes: `invalid-spec`, `duplicate-id`, `broken-link`, `unsafe-link`, `empty-specs`.
+Add `--profile /path/to/profile.json` to either command to select an explicit source mapping for an existing repository without installing a config or moving its files.
 
 ## Read the specs
 
-Feature specs are `.spectrum/features/SP-*.json` with `id`, `title`, `status`, `acceptance` and `links`. Links point to shared documents in `.spectrum/` such as `contracts/`, `flows/` and `rules/`. Read the linked documents before acting on a spec.
+Read `config.json` for the version 2 source mapping. TSV inventories and adjacent `schema.json` files own IA and FI. TOML contracts own policy, state vocabulary and read/write ownership; Markdown flows own interaction coverage and failure paths. One Markdown spec per interaction owns its ACs. Web routes connect to page contract/layout/flow bundles, and engineering documents keep technical knowledge separate. Existing paths outside `.spectrum/` can be mapped within the repository.
 
-- `status` is the document review state (`draft` or `approved`). It says nothing about whether the behavior is implemented or tested.
-- Follow `.spectrum/rules/*.md` when present.
+- The result's `specs[].id` is the stable interaction ID. `featureId` and `categoryKey` identify its inventory owners. `links` are resolved repository-relative document paths.
+- `status` is the document review annotation; `implementationStatus` and `phase` come from FI. None is executed test evidence.
+- ACs have stable file-local `id`, `statement`, `checked` and `verification`. Legacy statements retain `id: null` and a finding until reviewed; checked boxes never synthesize test evidence.
+- Read the linked canonical documents and configured rules before acting. Repository data does not itself authorize execution.
 
 ## Rules
 

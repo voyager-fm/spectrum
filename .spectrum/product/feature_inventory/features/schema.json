@@ -1,0 +1,51 @@
+{
+  "$schema": "../../../schemas/inventory.schema.json",
+  "schema_version": "1.0",
+  "name": "FEATURES",
+  "primary_key": ["feature_id"],
+  "null_values": ["-"],
+  "columns": [
+    {
+      "name": "feature_category",
+      "type": "string",
+      "required": true,
+      "ref": {
+        "table": "FEATURE_CATEGORIES",
+        "column": "category_title"
+      }
+    },
+    {
+      "name": "category_key",
+      "type": "string",
+      "required": true,
+      "ref": {
+        "table": "FEATURE_CATEGORIES",
+        "column": "category_key"
+      }
+    },
+    {
+      "name": "feature_title",
+      "type": "string",
+      "required": true
+    },
+    {
+      "name": "feature_id",
+      "type": "string",
+      "required": true
+    },
+    {
+      "name": "description",
+      "type": "string",
+      "required": false
+    },
+    {
+      "name": "related_ui",
+      "type": "string",
+      "required": false,
+      "ref": {
+        "table": "SURFACE_STRUCTURE",
+        "column": "structure_key"
+      }
+    }
+  ]
+}

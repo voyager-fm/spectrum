@@ -1,40 +1,60 @@
-# Spectrum document schema draft 0.1
+# Repository document model, version 2
 
-This draft generalizes Voyager's category → feature → interaction inventory and object/surface → contract → flow → interaction spec relationships. It does not require a top-level PRODUCT/ENGINEERING split. Existing files and applications were left unchanged when this draft was added.
+The canonical representation follows the document relationships used by Voyager app and web: TSV inventories with adjacent schemas, TOML policies, Markdown flows and interaction specs, web page bundles, and engineering knowledge. There is one editable owner for each fact.
 
-## Files
-- document-model.schema.json: JSON Schema Draft 2020-12 definitions, shapes, required fields, and state enums.
-- ../examples/review/model.json: one minimal feature bundle and its relationships.
-- contracts/*.toml, flows/*.md, and specs/*.md in the example: sample document bodies. Paths are relative to the parent directory of model.json.
+## Sources and ownership
 
-## Layers and canonical sources
-- object: product objects and state vocabulary.
-- surface: touchpoints such as CLI, web, API, and background processing. Desktop menus and shortcuts are optional.
-- category → feature → interaction: linked through stable IDs, with one spec per interaction.
-- contract: shared states, policies, and read/write ownership. TOML is the canonical body.
-- flow: paths and failure branches between interactions. Markdown is the canonical body.
-- spec: detailed behavior and acceptance criteria. In this draft, model.json is the canonical source for ACs; Markdown references them. UI rendering is planned but not implemented.
-- external_links: references to GitHub/Linear issues and pull requests only. These do not authorize automatic synchronization or posting.
+| Source | Owns | Derived consumers |
+| --- | --- | --- |
+| `information_architecture/*/data.tsv` | Objects, surfaces, regions and optional menus | FI references, contracts and specs |
+| `feature_inventory/feature_categories/data.tsv` | Category identity and title | Feature classification |
+| `feature_inventory/features/data.tsv` | Feature identity and category | Interaction grouping |
+| `feature_inventory/interactions/data.tsv` | Interaction identity, lifecycle, phase and summary | Spec frontmatter mirror |
+| Adjacent `schema.json` | Columns, types, required values, enums, primary keys and foreign keys | Deterministic table validation |
+| `feature_specs/<category>/contracts/*.toml` | Shared policy, vocabulary, state models, reads/writes | Flows and interaction specs |
+| `feature_specs/<category>/flows/*.md` | Interaction coverage, happy paths and failure handling | Interaction sources and review |
+| `feature_specs/<category>/<feature_id>/*.md` | One interaction's detailed behavior and ACs | CLI, dashboard, host-agent context |
+| `website/route_map/routes/{data.tsv,schema.json}` | Web route identity and declared implementation status | Page contract matching |
+| `website/page_contracts/<page>/` | `contract.toml`, `layout.md`, `flow.md`, optional `spec.md` | Web experience and review |
+| `engineering/<platform>/{architecture,guides,standards,decisions}/` | Technical knowledge and decisions | Development context |
 
-## Separate status dimensions
-Keep phase (now/next/later/undecided), implementation (unverified/planned/in_progress/implemented/released), review (draft/in_review/approved/changes_requested), and AC verification (not_run/passed/failed) separate. Document approval alone does not change implementation to implemented or verification to passed. Approved documents require an actor, timestamp, and content digest. This record does not by itself establish authenticated identity or execution permission.
+`config.json` explicitly maps these sources. Paths are relative to the repository root. The [Voyager profile](../profiles/voyager.json) points directly at its existing `PRODUCT/`, `WEBSITE/` and `ENGINEERING/` owners. Customer vocabulary, optional columns, stable IDs and platform policy stay in the customer's files.
 
-## Validation beyond the schema
-JSON Schema alone does not establish the following:
-1. Unique IDs, valid foreign keys, and consistent feature/category and bidirectional interaction/spec relationships.
-2. Consistent contract/flow/spec references and interaction coverage.
-3. Existing relative paths and repository-boundary checks, including symlinks.
-4. Required Markdown sections, matching frontmatter IDs, and matching TOML contract IDs.
-5. AC IDs unique within each spec, with evidence for passed/failed verification.
-6. Matching approval content digests, trusted actors, and revalidated base revisions.
-7. Consistent object-state vocabulary and contract/flow/spec meaning. Distinguish deterministic checks from human review.
+## Schemas
 
-## Markdown shell
-Intent; Trigger / Entry Points; Preconditions; Expected Outcome; State Changes; User-visible Feedback; Edge Cases / Failure Handling; Acceptance Criteria; Permissions / Dependencies; Observability / Analytics; Related Interactions; Source.
+- [config.schema.json](config.schema.json): versioned source mapping, mode and declared flags.
+- [inventory.schema.json](inventory.schema.json): the adjacent TSV schema vocabulary, including scalar and composite `ref` metadata.
+- [interaction.schema.json](interaction.schema.json): YAML frontmatter mirror and optional document review annotation.
+- [engineering.schema.json](engineering.schema.json): descriptive document and implementation lifecycle.
 
-## Explicit assumptions and open decisions
-- JSON inventory is a provisional serialization choice. To use TSV with a schema as Voyager does, preserve this relationship model and define a separate adapter. Do not create independently editable JSON and TSV canonical sources.
-- TBD in prose means undecided; implementation unverified means not verified. Do not use TBD as a stable ID.
-- The approval digest's file bundle and normalization rules, and schema migration rules, require further design.
-- Detailed TOML contract fields remain illustrative. This JSON Schema does not validate TOML.
-- The current app reads only the existing .spectrum/features/SP-*.json files. It neither reads nor validates this new model. A passing existing spec:check does not validate the new model.
+These JSON Schemas describe JSON objects and frontmatter mappings. The shared engine parses the actual TSV, Markdown and TOML and performs reference and coverage checks. It does not infer semantic agreement from file presence or run customer tests. It does not execute arbitrary JSON Schema extensions from customer documents.
+
+## Table conventions
+
+Use a header and a fixed column count with no blank rows. `-` means intentionally absent. `TBD` means undecided and produces a warning; primary keys require decided values. `<<AI>>` marks draft human-readable text and grants no approval. IDs are opaque, stable customer keys; there is no Spectrum-specific `SP-` ID requirement.
+
+`ref.table` resolves a configured table name. `ref.column` targets one column and accepts `|`-separated references. Composite references use `columns` for the local tuple and `references` for the target tuple. The triggering column's absent value skips an optional parent reference. No menu or entitlement inventory is mandatory.
+
+## Interaction document contract
+
+FI owns `interaction_id`, `interaction_type`, `feature`, `category_key`, `feature_id`, `status`, `phase`, `summary`, `related_region`, `menu` and `shortcut` when those columns exist. Spec frontmatter mirrors those values exactly. Markdown owns the acceptance statements; use `- [ ] **AC-1:** ...`. IDs are positive, file-local and stable across reorder; gaps are preserved. Evidence keys are `<interaction_id>#AC-<n>`.
+
+Legacy acceptance statements without IDs are retained in the derived model with `id: null` and an `invalid-ac` finding. The importer never invents stable IDs, discards the statements or marks them verified. Assigning new IDs is a reviewable migration of the canonical Markdown.
+
+Keep these sections in order: Intent; Trigger / Entry Points; Preconditions; Expected Outcome; State Changes; User-visible Feedback; Edge Cases / Failure Handling; Acceptance Criteria; Permissions / Dependencies; Observability / Analytics; Related Interactions; Source. Optional Boundary Notes may add an explicit boundary. Fenced examples cannot satisfy sections, links or ACs. Source links identify parsed TOML contracts and flows; each linked flow lists the spec in Interaction Coverage.
+
+Standard relative Markdown links and repository-root Wikilinks are supported. Wikilinks may omit `.md`. Local paths, including symlinks, stay inside the repository. Link targets are checked for existence; heading anchors and prose meaning require further review.
+
+## Independent states
+
+- FI `status`: idea, drafted, planned, implementing, shipped, deprecated. This preserves Voyager's declared interaction lifecycle; it is not a fresh execution result.
+- FI `phase`: `-` (stable), now, next, later. Inline `[now]`, `[next]`, `[later]` and `[TBD]` remain product planning annotations.
+- Optional `document_status`: draft, in_review, approved, changes_requested. Missing review metadata is untracked. This annotation grants no authenticated execution permission.
+- Engineering `implementation_state`: current, target, mixed, historical. Lifecycle `status` is independent.
+- AC verification: not_recorded until an implemented evidence adapter supplies an actual execution record. A checked Markdown box remains an author annotation.
+
+Sources and Verification prose own engineering evidence. Spectrum does not require the retired Voyager `source_refs` machine contract. A runtime approval for exact edits still needs trusted identity, digest binding, revision/hash revalidation and an implemented apply adapter.
+
+## Migration
+
+Version 1 feature JSON and the standalone JSON draft model are retired. Spectrum's `SP-001` through `SP-004` feature IDs and their original acceptance statements are preserved in FI and interaction Markdown. [The migration guide](../engineering/common/guides/voyager_migration.md) describes profiles, verification and recovery. No automatic customer-document migration or remote publication runs during validation.

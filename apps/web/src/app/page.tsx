@@ -54,8 +54,8 @@ export default async function OverviewPage() {
             ? `${check.findings.length} finding${check.findings.length === 1 ? '' : 's'} · deterministic, no model`
             : 'See the error above'}
         </StatCard>
-        <StatCard title="Feature specs" value={check?.specs.length ?? '—'}>
-          {approved} approved · {(check?.specs.length ?? 0) - approved} draft
+        <StatCard title="Interaction specs" value={check?.specs.length ?? '—'}>
+          {approved} marked approved · document review only
         </StatCard>
         <StatCard title="Rules" value={data.rules.length}>
           files in <Mono>.spectrum/rules</Mono>

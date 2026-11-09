@@ -1,0 +1,37 @@
+[contract]
+id = "spectrum.validation"
+category = "SP"
+primary_object_key = "spec_bundle"
+display_region = "cli.output"
+
+[vocabulary]
+canonical_inventory = "A TSV table and its adjacent schema.json."
+interaction_spec = "One Markdown document whose frontmatter mirrors one FI interaction row."
+structural_finding = "A deterministic error or unresolved warning with a repository path."
+
+[policy]
+schema_version = 2
+canonical_files = ["data.tsv", "schema.json", "contract.toml", "flow.md", "interaction.md"]
+repository_reads_only = true
+stable_ids_are_preserved = true
+inventory_owns_mirrored_metadata = true
+markdown_owns_acceptance_criteria = true
+null_value = "-"
+undecided_value = "TBD"
+undecided_values_are_warnings = true
+primary_keys_must_be_decided = true
+multi_reference_separator = "|"
+local_links_stay_inside_repository = true
+checked_boxes_are_execution_evidence = false
+structural_success_is_implementation_success = false
+
+[state_model.structural_check]
+states = ["not_run", "passed", "failed"]
+
+[ownership."SP-001-check_repository"]
+reads = ["repository", "spec_bundle", "agent_rule"]
+writes = []
+
+[ownership."SP-001-list_specifications"]
+reads = ["spec_bundle", "interaction"]
+writes = []

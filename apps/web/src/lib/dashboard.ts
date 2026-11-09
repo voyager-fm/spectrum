@@ -1,6 +1,4 @@
 import { execFile } from 'node:child_process';
-import type { Dirent } from 'node:fs';
-import { readdir, readFile } from 'node:fs/promises';
 import { basename, resolve } from 'node:path';
 import { promisify } from 'node:util';
 import type { CheckResult } from '@spectrum/core';
@@ -39,6 +37,7 @@ export interface DashboardSnapshot {
   rules: SpecDocument[];
   contracts: SpecDocument[];
   flows: SpecDocument[];
+  documents: SpecDocument[];
 }
 
 /** Repository whose .spectrum directory the dashboard reads. Defaults to this monorepo. */
@@ -68,45 +67,6 @@ export async function readRepositoryState(root: string): Promise<RepositoryState
   };
 }
 
-function titleOf(path: string, body: string): string {
-  const heading = /^#\s+(.+)$/m.exec(body);
-  return heading ? heading[1].trim() : basename(path);
-}
-
-export async function readDocument(root: string, path: string): Promise<SpecDocument> {
-  const body = await readFile(resolve(root, path), 'utf8');
-  return { path, title: titleOf(path, body), body };
-}
-
-export async function readDocuments(root: string, dir: string): Promise<SpecDocument[]> {
-  let entries: Dirent[];
-  try {
-    entries = await readdir(resolve(root, '.spectrum', dir), {
-      withFileTypes: true,
-    });
-  } catch (e) {
-    if ((e as NodeJS.ErrnoException).code === 'ENOENT') return [];
-    throw e;
-  }
-  const docs: SpecDocument[] = [];
-  for (const entry of entries.sort((a, b) => a.name.localeCompare(b.name))) {
-    if (!entry.isFile() || !/\.(md|toml)$/.test(entry.name)) continue;
-    docs.push(await readDocument(root, `.spectrum/${dir}/${entry.name}`));
-  }
-  return docs;
-}
-
-export async function readConfig(root: string): Promise<ConfigSummary> {
-  const raw = JSON.parse(await readFile(resolve(root, '.spectrum/config.json'), 'utf8'));
-  return {
-    mode: String(raw.mode ?? 'unknown'),
-    canonicalSource: String(raw.canonicalSource ?? 'unknown'),
-    github: raw.integrations?.github?.enabled === true,
-    linear: raw.integrations?.linear?.enabled === true,
-    agents: raw.agents?.enabled === true,
-  };
-}
-
 async function attempt<T>(
   label: string,
   errors: string[],
@@ -123,23 +83,48 @@ async function attempt<T>(
 
 export async function loadDashboard(root: string = repositoryRoot()): Promise<DashboardSnapshot> {
   const errors: string[] = [];
-  const [repository, config, check, overview, rules, contracts, flows] = await Promise.all([
+  const [repository, result] = await Promise.all([
     readRepositoryState(root),
-    attempt('config', errors, () => readConfig(root), null),
     attempt('spec check', errors, () => checkRepository(root), null),
-    attempt('overview', errors, () => readDocument(root, '.spectrum/overview.md'), null),
-    attempt('rules', errors, () => readDocuments(root, 'rules'), []),
-    attempt('contracts', errors, () => readDocuments(root, 'contracts'), []),
-    attempt('flows', errors, () => readDocuments(root, 'flows'), []),
   ]);
+  const raw = result?.config;
+  if (!raw) {
+    errors.push('config: No valid repository source mapping.');
+    if (result) errors.push(...result.findings.map((f) => `spec check: ${f.message}`));
+  }
+  if (raw && result) {
+    const loadFailures = new Set([
+      'missing-file',
+      'invalid-document',
+      'invalid-contract',
+      'invalid-inventory',
+    ]);
+    errors.push(
+      ...result.findings
+        .filter((f) => loadFailures.has(f.code))
+        .map((f) => `${f.path}: ${f.message}`),
+    );
+  }
+  const config: ConfigSummary | null = raw
+    ? {
+        mode: raw.mode,
+        canonicalSource: raw.canonical_source,
+        github: raw.integrations?.github?.enabled === true,
+        linear: raw.integrations?.linear?.enabled === true,
+        agents: raw.agents?.enabled === true,
+      }
+    : null;
+  const check = raw ? result : null;
+  const documents = check?.model.documents ?? [];
   return {
     repository,
     config,
     check,
     errors,
-    overview,
-    rules,
-    contracts,
-    flows,
+    documents,
+    overview: documents.find((doc) => doc.kind === 'overview') ?? null,
+    rules: documents.filter((doc) => doc.kind === 'rule'),
+    contracts: documents.filter((doc) => doc.kind === 'contract' || doc.kind === 'page_contract'),
+    flows: documents.filter((doc) => doc.kind === 'flow'),
   };
 }

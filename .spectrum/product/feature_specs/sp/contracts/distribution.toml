@@ -1,0 +1,19 @@
+[contract]
+id = "spectrum.distribution"
+category = "SP"
+primary_object_key = "agent_rule"
+display_region = "plugin.spectrum"
+
+[policy]
+reasoning_owner = "User host agent"
+deterministic_owner = "Bundled CLI consuming shared workspace packages"
+product_skills = "apps/plugin/skills"
+development_skills = ".apm/library"
+bundled_commands = ["check", "list"]
+bundle_freshness_required = true
+service_model_credentials_required = false
+host_support_requires_host_specific_evidence = true
+
+[ownership."SP-004-run_plugin_checks"]
+reads = ["repository", "spec_bundle", "agent_rule"]
+writes = []

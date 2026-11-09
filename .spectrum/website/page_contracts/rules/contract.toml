@@ -1,0 +1,16 @@
+[contract]
+id = "website.rules"
+page_id = "RULES"
+path = "/rules"
+implementation_status = "implemented"
+
+[responsibility]
+primary = "Read repository rules from the configured sources."
+
+[policy]
+read_only = true
+capability = "ready"
+declared_status_is_execution_evidence = false
+
+[policy_refs]
+specification = ["../../../product/feature_specs/sp/contracts/dashboard.toml"]

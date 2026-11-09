@@ -1,0 +1,16 @@
+[contract]
+id = "website.spec_detail"
+page_id = "SPEC_DETAIL"
+path = "/specs/[id]"
+implementation_status = "implemented"
+
+[responsibility]
+primary = "Read one interaction, its acceptance criteria and linked sources."
+
+[policy]
+read_only = true
+capability = "ready"
+declared_status_is_execution_evidence = false
+
+[policy_refs]
+specification = ["../../../product/feature_specs/sp/contracts/dashboard.toml"]

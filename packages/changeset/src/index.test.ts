@@ -8,13 +8,7 @@ test('approval and stale revision guards', () => {
     id: 'c1',
     baseRevision: 'abc',
     summary: 'test',
-    edits: [
-      {
-        path: '.spectrum/overview.md',
-        beforeHash: 'hash',
-        proposedText: 'new',
-      },
-    ],
+    edits: [{ path: '.spectrum/overview.md', beforeHash: 'hash', proposedText: 'new' }],
     status: 'proposed',
   };
   assert.throws(() => assertPublishable(c, 'abc'), /approval/);

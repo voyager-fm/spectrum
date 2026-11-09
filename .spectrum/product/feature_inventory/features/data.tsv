@@ -1,0 +1,5 @@
+feature_category	category_key	feature_title	feature_id	description	related_ui
+Specification workspace	SP	Repository specification validation	SP-001	Read and validate a rich repository document model.	cli.output
+Specification workspace	SP	Repository dashboard	SP-002	Inspect repository-native documents through a read-only dashboard.	web.repository
+Specification workspace	SP	Review and improve Spectrum itself	SP-003	Propose, review and revalidate changes with explicit human authority.	web.repository
+Specification workspace	SP	Distribute Spectrum as an agent plugin	SP-004	Distribute deterministic tools through an agent-host plugin.	plugin.spectrum

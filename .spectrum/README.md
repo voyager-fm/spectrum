@@ -1,0 +1,7 @@
+# Repository specifications
+
+[Overview](overview.md) explains Spectrum's intent and executable boundary. [The schema guide](schemas/README.md) defines document ownership and validation. [Architecture](engineering/common/architecture/specification_model.md) connects the canonical files to the shared engine and its consumers.
+
+Product objects and behavior live in `product/`. Web route and page contracts live in `website/`. Engineering knowledge lives in `engineering/`; scoped agent instructions live in `rules/`. The source mapping in `config.json` lets existing repositories preserve their own paths.
+
+Run `pnpm spec:check` to validate the configured repository model and `pnpm spec:list` to list interaction specifications. These commands read only. Planning, document approval, declared implementation and executed test evidence have separate meanings.

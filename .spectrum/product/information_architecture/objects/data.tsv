@@ -1,0 +1,7 @@
+category	key	label	summary
+Domain	repository	Repository	A revisioned source repository with project-owned documentation and rules.
+Domain	spec_bundle	Specification bundle	Related FI, IA, contract, flow and interaction documents.
+Domain	interaction	Interaction	One stable product behavior with a detailed Markdown specification.
+Operation	change_set	Change set	Exact proposed edits against a repository revision and original file hashes.
+State	review_result	Review result	Findings bound to the reviewed repository revision.
+Rule	agent_rule	Agent rule	A project instruction with an explicit scope and application boundary.
