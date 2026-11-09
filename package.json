@@ -11,7 +11,7 @@
     "cli": "node apps/cli/src/index.ts",
     "spec:check": "node apps/cli/src/index.ts check",
     "spec:list": "node apps/cli/src/index.ts list",
-    "test": "node --test tests/*.test.ts",
+    "test": "node --test \"{apps,packages}/*/src/**/*.test.ts\"",
     "typecheck": "tsc --noEmit",
     "check": "pnpm typecheck && pnpm test && pnpm spec:check",
     "agents:setup": "apm install --frozen && apm audit --ci",

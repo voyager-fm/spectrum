@@ -21,7 +21,7 @@ Open http://127.0.0.1:3000. The dashboard reads this repository's own .spectrum 
 - packages/agent-runtime: agent interface and partial proposal approval guard
 - packages/integrations: GitHub/Linear adapter contracts only
 - .spectrum: Spectrum's own feature specs, shared contracts, flows and rules
-- tests: deterministic regression tests
+- `*.test.ts` next to each package source: deterministic regression tests
 
 ## Implemented vs planned
 Working: local spec listing/checking, validation failures and a local dashboard.
