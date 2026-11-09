@@ -269,7 +269,7 @@ async function replace(root: string, path: string, before: string, after: string
   await put(root, path, body.replace(before, after));
 }
 
-test('Voyager-shaped TSV, TOML, Markdown and page bundles preserve IDs and evidence boundaries', async (t) => {
+test('Brownfield TSV, TOML, Markdown and page bundles preserve IDs and evidence boundaries', async (t) => {
   const result = await checkRepository(await fixture(t));
   assert.deepEqual(result.findings, []);
   assert.equal(result.ok, true);

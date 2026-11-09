@@ -8,7 +8,7 @@ implementation_state: mixed
 
 ## Overview
 
-Spectrum represents the documentation model used by Voyager app and web while preserving customer-owned vocabulary and paths. `config.json` selects canonical TSV, TOML and Markdown sources. The engine produces a derived repository model; CLI, plugin and dashboard consume that model.
+Spectrum represents a repository's product, website and engineering documentation while preserving customer-owned vocabulary and paths. `config.json` selects canonical TSV, TOML and Markdown sources. The engine produces a derived repository model; CLI, plugin and dashboard consume that model.
 
 ## Canonical traceability
 
@@ -58,16 +58,9 @@ Semantic policy review, automatic spec generation, authenticated digest-bound ap
 
 ## Verification
 
-Behavior tests use temporary repositories with Voyager-shaped inventories, contracts, flows, frontmatter and web page bundles. They exercise malformed sources, stale references, metadata disagreement, missing coverage, stable AC IDs and unsafe paths. `pnpm check` is the local convergence gate; the plugin bundle must be regenerated when the shared CLI changes. Actual command outcomes belong to the task's execution record.
+Behavior tests use temporary repositories with brownfield inventories, contracts, flows, frontmatter and web page bundles. They exercise malformed sources, stale references, metadata disagreement, missing coverage, stable AC IDs and unsafe paths. `pnpm check` is the local convergence gate; the plugin bundle must be regenerated when the shared CLI changes. Actual command outcomes belong to the task's execution record.
 
 ## Sources
-
-The following canonical files were read from Voyager documentation revision `8c844a446d8fb8e8fbd8c4554b31d6e13ead83a1`:
-
-- [FI interaction schema](https://github.com/voyager-fm/voyager-documentation/blob/8c844a446d8fb8e8fbd8c4554b31d6e13ead83a1/PRODUCT/03_FEATURE_INVENTORY/INTERACTIONS/schema.json)
-- [IA region schema](https://github.com/voyager-fm/voyager-documentation/blob/8c844a446d8fb8e8fbd8c4554b31d6e13ead83a1/PRODUCT/02_INFORMATION_ARCHITECTURE/WINDOW_STRUCTURE/schema.json)
-- [Website route schema](https://github.com/voyager-fm/voyager-documentation/blob/8c844a446d8fb8e8fbd8c4554b31d6e13ead83a1/WEBSITE/01_ROUTE_MAP/ROUTES/schema.json)
-- [Engineering knowledge and evidence ownership](https://github.com/voyager-fm/voyager-documentation/blob/8c844a446d8fb8e8fbd8c4554b31d6e13ead83a1/ENGINEERING/common/standards/documentation.md)
 
 Runtime owners are `packages/core/src/index.ts`, `packages/spec-engine/src/`, `apps/cli/src/index.ts` and `apps/web/src/lib/dashboard.ts` in this repository. These paths identify implementation; tests and check receipts establish executed evidence separately.
 

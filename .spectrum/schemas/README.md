@@ -1,6 +1,6 @@
 # Repository document model, version 2
 
-The canonical representation follows the document relationships used by Voyager app and web: TSV inventories with adjacent schemas, TOML policies, Markdown flows and interaction specs, web page bundles, and engineering knowledge. There is one editable owner for each fact.
+The canonical representation connects TSV inventories with adjacent schemas, TOML policies, Markdown flows and interaction specs, web page bundles, and engineering knowledge. There is one editable owner for each fact.
 
 ## Sources and ownership
 
@@ -19,7 +19,7 @@ The canonical representation follows the document relationships used by Voyager 
 | `website/page_contracts/<page>/` | `contract.toml`, `layout.md`, `flow.md`, optional `spec.md` | Web experience and review |
 | `engineering/<platform>/{architecture,guides,standards,decisions}/` | Technical knowledge and decisions | Development context |
 
-`config.json` explicitly maps these sources. Paths are relative to the repository root. A profile passed with `--profile` uses the same shape and can point directly at existing owners such as Voyager's `PRODUCT/`, `WEBSITE/` and `ENGINEERING/` directories. Customer vocabulary, optional columns, stable IDs and platform policy stay in the customer's files.
+`config.json` explicitly maps these sources. Paths are relative to the repository root. A profile passed with `--profile` uses the same shape and can point directly at a repository's existing documentation directories. Customer vocabulary, optional columns, stable IDs and platform policy stay in the customer's files.
 
 ## Schemas
 
@@ -43,7 +43,7 @@ The engine owns the base schemas of the three FI tables. Each base fixes the tab
 
 An adjacent extension declares `extends` and lists every TSV column in header order. A base column appears by name, optionally with a `description`; its type, requiredness, enum and reference stay engine-owned. Added columns, such as `description`, `related_ui`, `related_region`, `menu` or `entitlement_key`, carry a full column definition. An extension cannot set `name`, `primary_key` or `null_values`, cannot redefine or omit a base column, and must extend the base for its configured inventory kind. The engine merges the extension onto the base before validating rows.
 
-A schema without `extends` remains a complete standalone contract, so existing brownfield tables such as Voyager's keep validating unchanged. The read-only table query API and `compat/python` read the adjacent file as written; they do not merge extensions.
+A schema without `extends` remains a complete standalone contract, so existing brownfield tables keep validating unchanged. The read-only table query API and `compat/python` read the adjacent file as written; they do not merge extensions.
 
 ## Table conventions
 
@@ -63,14 +63,14 @@ Standard relative Markdown links and repository-root Wikilinks are supported. Wi
 
 ## Independent states
 
-- FI `status`: idea, drafted, planned, implementing, shipped, deprecated. This preserves Voyager's declared interaction lifecycle; it is not a fresh execution result.
+- FI `status`: idea, drafted, planned, implementing, shipped, deprecated. This is a declared interaction lifecycle, not a fresh execution result.
 - FI `phase`: `-` (stable), now, next, later. Inline `[now]`, `[next]`, `[later]` and `[TBD]` remain product planning annotations.
 - Optional `document_status`: draft, in_review, approved, changes_requested. Missing review metadata is untracked. This annotation grants no authenticated execution permission.
 - Engineering `implementation_state`: current, target, mixed, historical. Lifecycle `status` is independent.
 - AC verification: not_recorded until an implemented evidence adapter supplies an actual execution record. A checked Markdown box remains an author annotation.
 
-Sources and Verification prose own engineering evidence. Spectrum does not require the retired Voyager `source_refs` machine contract. A runtime approval for exact edits still needs trusted identity, digest binding, revision/hash revalidation and an implemented apply adapter.
+Sources and Verification prose own engineering evidence. A runtime approval for exact edits still needs trusted identity, digest binding, revision/hash revalidation and an implemented apply adapter.
 
 ## Migration
 
-Version 1 feature JSON and the standalone JSON draft model are retired. Spectrum's `SP-001` through `SP-004` feature IDs and their original acceptance statements are preserved in FI and interaction Markdown. Spectrum's own feature IDs stay product-scoped (`SP-<nnn>`); its category keys (`VAL`, `DSH`, `AGT`, `LOOP`, `INT`) classify features without renumbering them. [The migration guide](../engineering/common/guides/voyager_migration.md) describes profiles, verification and recovery. No automatic customer-document migration or remote publication runs during validation.
+Version 1 feature JSON and the standalone JSON draft model are retired. Spectrum's `SP-001` through `SP-004` feature IDs and their original acceptance statements are preserved in FI and interaction Markdown. Spectrum's own feature IDs stay product-scoped (`SP-<nnn>`); its category keys (`VAL`, `DSH`, `AGT`, `LOOP`, `INT`) classify features without renumbering them. No automatic customer-document migration or remote publication runs during validation.

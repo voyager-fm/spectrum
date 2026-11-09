@@ -21,7 +21,7 @@ Check or list a repository through an explicit profile mapping instead of its in
 
 ## Trigger / Entry Points
 
-The user adds `--profile <profile.json>` to `check` or `list`, for example `pnpm cli check /path/to/voyager-documentation --profile /path/to/profile.json`.
+The user adds `--profile <profile.json>` to `check` or `list`, for example `pnpm cli check /path/to/repository --profile /path/to/profile.json`.
 
 ## Preconditions
 
@@ -67,4 +67,3 @@ Local JSON findings and process exit status are available. Profile adoption hist
 
 - [Contract](../contracts/validation.toml)
 - [Flow](../flows/validation.md)
-- [Voyager migration guide](../../../../engineering/common/guides/voyager_migration.md)
