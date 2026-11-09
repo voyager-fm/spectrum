@@ -14,9 +14,11 @@
     "test": "node --test \"{apps,packages}/*/src/**/*.test.ts\" && pnpm test:documents",
     "test:documents": "node scripts/test-document-snapshot.ts && node scripts/test-document-parsing.ts",
     "typecheck": "tsc --noEmit && pnpm --filter @spectrum/web typecheck",
-    "check": "pnpm typecheck && pnpm test && pnpm spec:check",
+    "check": "pnpm typecheck && pnpm test && pnpm spec:check && pnpm plugin:check",
     "agents:setup": "apm install --frozen && apm audit --ci",
-    "agents:sync": "apm install && apm audit --ci"
+    "agents:sync": "apm install && apm audit --ci",
+    "plugin:build": "pnpm --filter @spectrum/plugin build",
+    "plugin:check": "pnpm --filter @spectrum/plugin check"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",

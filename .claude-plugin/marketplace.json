@@ -1,0 +1,14 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "spectrum",
+  "description": "Spectrum agent plugin.",
+  "owner": { "name": "Voyager" },
+  "plugins": [
+    {
+      "name": "spectrum",
+      "description": "Repository-native product and technical specs for your coding agent.",
+      "source": "./apps/plugin",
+      "category": "development"
+    }
+  ]
+}

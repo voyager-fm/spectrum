@@ -1,0 +1,8 @@
+{
+  "name": "spectrum",
+  "displayName": "Spectrum",
+  "version": "0.1.0",
+  "description": "Repository-native product and technical specs for your coding agent. Checks .spectrum specs with a deterministic CLI; your agent does the reasoning.",
+  "author": { "name": "Voyager" },
+  "keywords": ["specs", "product", "acceptance-criteria"]
+}

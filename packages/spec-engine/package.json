@@ -8,6 +8,10 @@
     "js-yaml": "4.1.1",
     "markdown-it": "14.3.0",
     "markdown-it-anchor": "10.0.0",
-    "markdown-it-front-matter": "0.2.4"
+    "markdown-it-front-matter": "0.2.4",
+    "@spectrum/core": "workspace:*"
+  },
+  "exports": {
+    ".": "./src/index.ts"
   }
 }

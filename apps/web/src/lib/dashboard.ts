@@ -2,8 +2,8 @@ import { execFile } from 'node:child_process';
 import { readFile, readdir } from 'node:fs/promises';
 import { basename, resolve } from 'node:path';
 import { promisify } from 'node:util';
-import type { CheckResult } from '../../../../packages/core/src/index.ts';
-import { checkRepository } from '../../../../packages/spec-engine/src/index.ts';
+import type { CheckResult } from '@spectrum/core';
+import { checkRepository } from '@spectrum/spec-engine';
 
 const run = promisify(execFile);
 
@@ -43,7 +43,10 @@ export interface DashboardSnapshot {
 /** Repository whose .spectrum directory the dashboard reads. Defaults to this monorepo. */
 export function repositoryRoot(): string {
   // Read at request time from any local repository; never bundle or trace it.
-  return resolve(/*turbopackIgnore: true*/ process.env.SPECTRUM_REPOSITORY ?? resolve(process.cwd(), '../..'));
+  return resolve(
+    /*turbopackIgnore: true*/ process.env.SPECTRUM_REPOSITORY ??
+      resolve(process.cwd(), '../..'),
+  );
 }
 
 async function git(root: string, args: string[]): Promise<string | null> {
@@ -55,10 +58,16 @@ async function git(root: string, args: string[]): Promise<string | null> {
   }
 }
 
-export async function readRepositoryState(root: string): Promise<RepositoryState> {
+export async function readRepositoryState(
+  root: string,
+): Promise<RepositoryState> {
   const revision = (await git(root, ['rev-parse', 'HEAD']))?.trim() || null;
   const status = revision ? await git(root, ['status', '--porcelain']) : null;
-  return { name: basename(root), revision, dirty: status === null ? null : status.trim().length > 0 };
+  return {
+    name: basename(root),
+    revision,
+    dirty: status === null ? null : status.trim().length > 0,
+  };
 }
 
 function titleOf(path: string, body: string): string {
@@ -66,15 +75,23 @@ function titleOf(path: string, body: string): string {
   return heading ? heading[1].trim() : basename(path);
 }
 
-export async function readDocument(root: string, path: string): Promise<SpecDocument> {
+export async function readDocument(
+  root: string,
+  path: string,
+): Promise<SpecDocument> {
   const body = await readFile(resolve(root, path), 'utf8');
   return { path, title: titleOf(path, body), body };
 }
 
-export async function readDocuments(root: string, dir: string): Promise<SpecDocument[]> {
+export async function readDocuments(
+  root: string,
+  dir: string,
+): Promise<SpecDocument[]> {
   let entries;
   try {
-    entries = await readdir(resolve(root, '.spectrum', dir), { withFileTypes: true });
+    entries = await readdir(resolve(root, '.spectrum', dir), {
+      withFileTypes: true,
+    });
   } catch (e) {
     if ((e as NodeJS.ErrnoException).code === 'ENOENT') return [];
     throw e;
@@ -88,7 +105,9 @@ export async function readDocuments(root: string, dir: string): Promise<SpecDocu
 }
 
 export async function readConfig(root: string): Promise<ConfigSummary> {
-  const raw = JSON.parse(await readFile(resolve(root, '.spectrum/config.json'), 'utf8'));
+  const raw = JSON.parse(
+    await readFile(resolve(root, '.spectrum/config.json'), 'utf8'),
+  );
   return {
     mode: String(raw.mode ?? 'unknown'),
     canonicalSource: String(raw.canonicalSource ?? 'unknown'),
@@ -98,7 +117,12 @@ export async function readConfig(root: string): Promise<ConfigSummary> {
   };
 }
 
-async function attempt<T>(label: string, errors: string[], load: () => Promise<T>, fallback: T): Promise<T> {
+async function attempt<T>(
+  label: string,
+  errors: string[],
+  load: () => Promise<T>,
+  fallback: T,
+): Promise<T> {
   try {
     return await load();
   } catch (e) {
@@ -107,16 +131,33 @@ async function attempt<T>(label: string, errors: string[], load: () => Promise<T
   }
 }
 
-export async function loadDashboard(root: string = repositoryRoot()): Promise<DashboardSnapshot> {
+export async function loadDashboard(
+  root: string = repositoryRoot(),
+): Promise<DashboardSnapshot> {
   const errors: string[] = [];
-  const [repository, config, check, overview, rules, contracts, flows] = await Promise.all([
-    readRepositoryState(root),
-    attempt('config', errors, () => readConfig(root), null),
-    attempt('spec check', errors, () => checkRepository(root), null),
-    attempt('overview', errors, () => readDocument(root, '.spectrum/overview.md'), null),
-    attempt('rules', errors, () => readDocuments(root, 'rules'), []),
-    attempt('contracts', errors, () => readDocuments(root, 'contracts'), []),
-    attempt('flows', errors, () => readDocuments(root, 'flows'), []),
-  ]);
-  return { repository, config, check, errors, overview, rules, contracts, flows };
+  const [repository, config, check, overview, rules, contracts, flows] =
+    await Promise.all([
+      readRepositoryState(root),
+      attempt('config', errors, () => readConfig(root), null),
+      attempt('spec check', errors, () => checkRepository(root), null),
+      attempt(
+        'overview',
+        errors,
+        () => readDocument(root, '.spectrum/overview.md'),
+        null,
+      ),
+      attempt('rules', errors, () => readDocuments(root, 'rules'), []),
+      attempt('contracts', errors, () => readDocuments(root, 'contracts'), []),
+      attempt('flows', errors, () => readDocuments(root, 'flows'), []),
+    ]);
+  return {
+    repository,
+    config,
+    check,
+    errors,
+    overview,
+    rules,
+    contracts,
+    flows,
+  };
 }

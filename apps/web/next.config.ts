@@ -1,7 +1,7 @@
 import { resolve } from 'node:path';
 import type { NextConfig } from 'next';
 
-// The dashboard imports shared engine sources from ../../packages, so the
+// The dashboard imports shared workspace packages from ../../packages, so the
 // monorepo root is the build root. `next` always runs with apps/web as cwd.
 const monorepoRoot = resolve(process.cwd(), '../..');
 

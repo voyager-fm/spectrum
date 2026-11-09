@@ -1,0 +1,12 @@
+{
+  "id": "SP-004",
+  "title": "Distribute Spectrum as an agent plugin",
+  "status": "draft",
+  "acceptance": [
+    "The plugin installs from this repository's marketplace with no model credentials.",
+    "Every product skill passes Agent Skills naming, description, size and reference checks.",
+    "Skills run the checked-in CLI bundle, and the build fails when that bundle is stale.",
+    "Skills describe only commands the bundled CLI implements."
+  ],
+  "links": ["overview.md", "rules/agents.md", "contracts/distribution.md"]
+}
