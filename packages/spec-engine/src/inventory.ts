@@ -2,13 +2,51 @@ import type {
   Finding,
   Inventory,
   InventoryColumn,
+  InventoryKind,
   InventorySchema,
   InventorySource,
   Relationship,
 } from '@spectrum/core';
+import {
+  type BaseInventorySchemaId,
+  baseInventoryKinds,
+  baseInventorySchema,
+} from './base-schemas.ts';
 import { strings, text } from './config.ts';
 import { readRepositoryText } from './files.ts';
 import { record } from './markdown.ts';
+
+function parseColumn(value: unknown): InventoryColumn {
+  if (
+    !record(value) ||
+    !text(value.name) ||
+    !['string', 'number', 'boolean'].includes(String(value.type)) ||
+    typeof value.required !== 'boolean'
+  )
+    throw new Error('Each column requires name, type and required.');
+  if (
+    value.enum !== undefined &&
+    (!Array.isArray(value.enum) ||
+      !value.enum.every((v) => ['string', 'number', 'boolean'].includes(typeof v)))
+  )
+    throw new Error(`Invalid enum for ${value.name}.`);
+  if (value.ref !== undefined) {
+    const ref = value.ref;
+    if (
+      !record(ref) ||
+      !text(ref.table) ||
+      !(
+        text(ref.column) ||
+        (strings(ref.columns) &&
+          strings(ref.references) &&
+          ref.columns.length > 0 &&
+          ref.columns.length === ref.references.length)
+      )
+    )
+      throw new Error(`Invalid reference for ${value.name}.`);
+  }
+  return value as unknown as InventoryColumn;
+}
 
 export function parseInventorySchema(raw: unknown): InventorySchema {
   if (
@@ -21,37 +59,7 @@ export function parseInventorySchema(raw: unknown): InventorySchema {
     !raw.columns.length
   )
     throw new Error('Inventory schema requires schema_version, name, primary_key and columns.');
-  const columns: InventoryColumn[] = raw.columns.map((value: unknown) => {
-    if (
-      !record(value) ||
-      !text(value.name) ||
-      !['string', 'number', 'boolean'].includes(String(value.type)) ||
-      typeof value.required !== 'boolean'
-    )
-      throw new Error('Each column requires name, type and required.');
-    if (
-      value.enum !== undefined &&
-      (!Array.isArray(value.enum) ||
-        !value.enum.every((v) => ['string', 'number', 'boolean'].includes(typeof v)))
-    )
-      throw new Error(`Invalid enum for ${value.name}.`);
-    if (value.ref !== undefined) {
-      const ref = value.ref;
-      if (
-        !record(ref) ||
-        !text(ref.table) ||
-        !(
-          text(ref.column) ||
-          (strings(ref.columns) &&
-            strings(ref.references) &&
-            ref.columns.length > 0 &&
-            ref.columns.length === ref.references.length)
-        )
-      )
-        throw new Error(`Invalid reference for ${value.name}.`);
-    }
-    return value as unknown as InventoryColumn;
-  });
+  const columns = raw.columns.map(parseColumn);
   const names = columns.map((c) => c.name);
   if (
     new Set(names).size !== names.length ||
@@ -72,6 +80,67 @@ export function parseInventorySchema(raw: unknown): InventorySchema {
   };
 }
 
+/**
+ * Merge a repository schema extension onto its engine-owned base. The extension lists every
+ * TSV column in header order: base columns by name (optionally with a description), added
+ * columns with their full definition. Table identity, keys and base column rules stay
+ * engine-owned.
+ */
+export function extendInventorySchema(raw: unknown, kind?: InventoryKind): InventorySchema {
+  if (!record(raw) || !text(raw.extends))
+    throw new Error('Inventory schema extension requires extends.');
+  const base = baseInventorySchema(raw.extends);
+  if (!base)
+    throw new Error(
+      `Unknown base schema ${raw.extends}; expected one of ${Object.keys(baseInventoryKinds).join(', ')}.`,
+    );
+  const baseKind = baseInventoryKinds[raw.extends as BaseInventorySchemaId];
+  if (kind !== undefined && kind !== baseKind)
+    throw new Error(`${raw.extends} extends the ${baseKind} inventory, not ${kind}.`);
+  for (const owned of ['name', 'primary_key', 'null_values'])
+    if (raw[owned] !== undefined)
+      throw new Error(`${owned} is owned by the base schema ${raw.extends}.`);
+  if (!text(raw.schema_version) || !Array.isArray(raw.columns) || !raw.columns.length)
+    throw new Error('Inventory schema extension requires schema_version and columns.');
+  const columns = raw.columns.map((value: unknown) => {
+    const baseColumn = record(value)
+      ? base.columns.find((column) => column.name === value.name)
+      : undefined;
+    if (!record(value) || !baseColumn) return parseColumn(value);
+    const overrides = Object.keys(value).filter((key) => !['name', 'description'].includes(key));
+    if (overrides.length)
+      throw new Error(
+        `${baseColumn.name} is defined by ${raw.extends}; list it by name (and optional description) only.`,
+      );
+    if (value.description !== undefined && typeof value.description !== 'string')
+      throw new Error(`Invalid description for ${baseColumn.name}.`);
+    return { ...baseColumn, ...(value.description ? { description: value.description } : {}) };
+  });
+  const missing = base.columns.filter(
+    (column) => !columns.some((candidate) => candidate.name === column.name),
+  );
+  if (missing.length)
+    throw new Error(
+      `${raw.extends} requires base columns: ${missing.map((column) => column.name).join(', ')}.`,
+    );
+  return parseInventorySchema({
+    ...raw,
+    schema_version: raw.schema_version,
+    extends: raw.extends,
+    name: base.name,
+    primary_key: base.primary_key,
+    null_values: base.null_values,
+    columns,
+  });
+}
+
+/** Resolve an adjacent schema: an extension of an engine-owned base, or a standalone table. */
+export function resolveInventorySchema(raw: unknown, kind?: InventoryKind): InventorySchema {
+  return record(raw) && raw.extends !== undefined
+    ? extendInventorySchema(raw, kind)
+    : parseInventorySchema(raw);
+}
+
 export function absent(value: string | undefined, schema?: InventorySchema): boolean {
   return value === undefined || value === '' || (schema?.null_values ?? ['-']).includes(value);
 }
@@ -87,7 +156,10 @@ export async function readInventory(
   source: InventorySource,
   findings: Finding[],
 ): Promise<Inventory> {
-  const schema = parseInventorySchema(JSON.parse(await readRepositoryText(root, source.schema)));
+  const schema = resolveInventorySchema(
+    JSON.parse(await readRepositoryText(root, source.schema)),
+    source.kind,
+  );
   const body = await readRepositoryText(root, source.data);
   const lines = body.replace(/^\uFEFF/, '').split(/\r?\n/);
   if (lines.at(-1) === '') lines.pop();

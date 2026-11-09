@@ -25,6 +25,17 @@ import {
   record,
 } from './markdown.ts';
 
+export {
+  type BaseInventorySchemaId,
+  baseInventoryKinds,
+  baseInventorySchema,
+  baseInventorySchemas,
+} from './base-schemas.ts';
+export {
+  extendInventorySchema,
+  parseInventorySchema,
+  resolveInventorySchema,
+} from './inventory.ts';
 export type {
   SearchInput,
   TableBinding,
@@ -118,7 +129,14 @@ export async function checkRepository(
         add('duplicate-table', source.schema, `Table ${table.schema.name} is configured twice.`);
       else model.inventories.push(table);
     } catch (error) {
-      fileError(error, source.data, 'invalid-inventory');
+      if (error instanceof RepositoryFileError || !(error instanceof Error))
+        fileError(error, source.data, 'invalid-inventory');
+      else
+        add(
+          'invalid-inventory',
+          source.schema,
+          error instanceof SyntaxError ? 'Inventory schema must be valid JSON.' : error.message,
+        );
     }
   }
   checkReferences(model.inventories, findings, model.relationships);

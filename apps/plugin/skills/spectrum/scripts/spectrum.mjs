@@ -9759,22 +9759,110 @@ async function readConfiguration(root, configPath = ".spectrum/config.json") {
   return parseConfiguration(JSON.parse(await readRepositoryText(root, configPath)));
 }
 
+// ../../packages/spec-engine/src/base-schemas.ts
+var baseInventorySchemas = {
+  "spectrum:feature_categories": {
+    schema_version: "1.0",
+    name: "FEATURE_CATEGORIES",
+    primary_key: ["category_key"],
+    null_values: ["-"],
+    columns: [
+      { name: "category_title", type: "string", required: true },
+      { name: "category_key", type: "string", required: true }
+    ]
+  },
+  "spectrum:features": {
+    schema_version: "1.0",
+    name: "FEATURES",
+    primary_key: ["feature_id"],
+    null_values: ["-"],
+    columns: [
+      {
+        name: "feature_category",
+        type: "string",
+        required: true,
+        ref: { table: "FEATURE_CATEGORIES", column: "category_title" }
+      },
+      {
+        name: "category_key",
+        type: "string",
+        required: true,
+        ref: { table: "FEATURE_CATEGORIES", column: "category_key" }
+      },
+      { name: "feature_title", type: "string", required: true },
+      { name: "feature_id", type: "string", required: true }
+    ]
+  },
+  "spectrum:interactions": {
+    schema_version: "1.0",
+    name: "INTERACTIONS",
+    primary_key: ["interaction_id"],
+    null_values: ["-"],
+    columns: [
+      { name: "interaction_title", type: "string", required: true },
+      { name: "interaction_id", type: "string", required: true },
+      {
+        name: "interaction_type",
+        type: "string",
+        required: false,
+        enum: ["command", "input", "display", "background"]
+      },
+      {
+        name: "feature",
+        type: "string",
+        required: false,
+        ref: { table: "FEATURES", column: "feature_title" }
+      },
+      {
+        name: "category_key",
+        type: "string",
+        required: false,
+        ref: { table: "FEATURE_CATEGORIES", column: "category_key" }
+      },
+      {
+        name: "feature_id",
+        type: "string",
+        required: false,
+        ref: { table: "FEATURES", column: "feature_id" }
+      },
+      {
+        name: "status",
+        type: "string",
+        required: false,
+        enum: ["idea", "drafted", "planned", "implementing", "shipped", "deprecated"]
+      },
+      { name: "phase", type: "string", required: false, enum: ["-", "now", "next", "later"] },
+      { name: "summary", type: "string", required: false }
+    ]
+  }
+};
+var baseInventoryKinds = {
+  "spectrum:feature_categories": "categories",
+  "spectrum:features": "features",
+  "spectrum:interactions": "interactions"
+};
+function baseInventorySchema(id) {
+  if (!Object.hasOwn(baseInventorySchemas, id)) return void 0;
+  return structuredClone(baseInventorySchemas[id]);
+}
+
 // ../../packages/spec-engine/src/inventory.ts
+function parseColumn(value) {
+  if (!record(value) || !text(value.name) || !["string", "number", "boolean"].includes(String(value.type)) || typeof value.required !== "boolean")
+    throw new Error("Each column requires name, type and required.");
+  if (value.enum !== void 0 && (!Array.isArray(value.enum) || !value.enum.every((v) => ["string", "number", "boolean"].includes(typeof v))))
+    throw new Error(`Invalid enum for ${value.name}.`);
+  if (value.ref !== void 0) {
+    const ref = value.ref;
+    if (!record(ref) || !text(ref.table) || !(text(ref.column) || strings(ref.columns) && strings(ref.references) && ref.columns.length > 0 && ref.columns.length === ref.references.length))
+      throw new Error(`Invalid reference for ${value.name}.`);
+  }
+  return value;
+}
 function parseInventorySchema(raw) {
   if (!record(raw) || !text(raw.schema_version) || !text(raw.name) || !strings(raw.primary_key) || !raw.primary_key.length || !Array.isArray(raw.columns) || !raw.columns.length)
     throw new Error("Inventory schema requires schema_version, name, primary_key and columns.");
-  const columns = raw.columns.map((value) => {
-    if (!record(value) || !text(value.name) || !["string", "number", "boolean"].includes(String(value.type)) || typeof value.required !== "boolean")
-      throw new Error("Each column requires name, type and required.");
-    if (value.enum !== void 0 && (!Array.isArray(value.enum) || !value.enum.every((v) => ["string", "number", "boolean"].includes(typeof v))))
-      throw new Error(`Invalid enum for ${value.name}.`);
-    if (value.ref !== void 0) {
-      const ref = value.ref;
-      if (!record(ref) || !text(ref.table) || !(text(ref.column) || strings(ref.columns) && strings(ref.references) && ref.columns.length > 0 && ref.columns.length === ref.references.length))
-        throw new Error(`Invalid reference for ${value.name}.`);
-    }
-    return value;
-  });
+  const columns = raw.columns.map(parseColumn);
   const names = columns.map((c2) => c2.name);
   if (new Set(names).size !== names.length || new Set(raw.primary_key).size !== raw.primary_key.length || raw.primary_key.some((key) => !names.includes(key)))
     throw new Error(
@@ -9790,6 +9878,54 @@ function parseInventorySchema(raw) {
     columns
   };
 }
+function extendInventorySchema(raw, kind) {
+  if (!record(raw) || !text(raw.extends))
+    throw new Error("Inventory schema extension requires extends.");
+  const base = baseInventorySchema(raw.extends);
+  if (!base)
+    throw new Error(
+      `Unknown base schema ${raw.extends}; expected one of ${Object.keys(baseInventoryKinds).join(", ")}.`
+    );
+  const baseKind = baseInventoryKinds[raw.extends];
+  if (kind !== void 0 && kind !== baseKind)
+    throw new Error(`${raw.extends} extends the ${baseKind} inventory, not ${kind}.`);
+  for (const owned of ["name", "primary_key", "null_values"])
+    if (raw[owned] !== void 0)
+      throw new Error(`${owned} is owned by the base schema ${raw.extends}.`);
+  if (!text(raw.schema_version) || !Array.isArray(raw.columns) || !raw.columns.length)
+    throw new Error("Inventory schema extension requires schema_version and columns.");
+  const columns = raw.columns.map((value) => {
+    const baseColumn = record(value) ? base.columns.find((column) => column.name === value.name) : void 0;
+    if (!record(value) || !baseColumn) return parseColumn(value);
+    const overrides = Object.keys(value).filter((key) => !["name", "description"].includes(key));
+    if (overrides.length)
+      throw new Error(
+        `${baseColumn.name} is defined by ${raw.extends}; list it by name (and optional description) only.`
+      );
+    if (value.description !== void 0 && typeof value.description !== "string")
+      throw new Error(`Invalid description for ${baseColumn.name}.`);
+    return { ...baseColumn, ...value.description ? { description: value.description } : {} };
+  });
+  const missing = base.columns.filter(
+    (column) => !columns.some((candidate) => candidate.name === column.name)
+  );
+  if (missing.length)
+    throw new Error(
+      `${raw.extends} requires base columns: ${missing.map((column) => column.name).join(", ")}.`
+    );
+  return parseInventorySchema({
+    ...raw,
+    schema_version: raw.schema_version,
+    extends: raw.extends,
+    name: base.name,
+    primary_key: base.primary_key,
+    null_values: base.null_values,
+    columns
+  });
+}
+function resolveInventorySchema(raw, kind) {
+  return record(raw) && raw.extends !== void 0 ? extendInventorySchema(raw, kind) : parseInventorySchema(raw);
+}
 function absent(value, schema) {
   return value === void 0 || value === "" || (schema?.null_values ?? ["-"]).includes(value);
 }
@@ -9800,7 +9936,10 @@ function rowKey(table, values) {
   return `${table.schema.name}:${JSON.stringify(table.schema.primary_key.map((key) => values[key]))}`;
 }
 async function readInventory(root, source, findings) {
-  const schema = parseInventorySchema(JSON.parse(await readRepositoryText(root, source.schema)));
+  const schema = resolveInventorySchema(
+    JSON.parse(await readRepositoryText(root, source.schema)),
+    source.kind
+  );
   const body = await readRepositoryText(root, source.data);
   const lines = body.replace(/^\uFEFF/, "").split(/\r?\n/);
   if (lines.at(-1) === "") lines.pop();
@@ -9965,7 +10104,14 @@ async function checkRepository(root, options = {}) {
         add("duplicate-table", source.schema, `Table ${table.schema.name} is configured twice.`);
       else model.inventories.push(table);
     } catch (error) {
-      fileError(error, source.data, "invalid-inventory");
+      if (error instanceof RepositoryFileError || !(error instanceof Error))
+        fileError(error, source.data, "invalid-inventory");
+      else
+        add(
+          "invalid-inventory",
+          source.schema,
+          error instanceof SyntaxError ? "Inventory schema must be valid JSON." : error.message
+        );
     }
   }
   checkReferences(model.inventories, findings, model.relationships);

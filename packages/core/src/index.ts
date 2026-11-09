@@ -75,6 +75,8 @@ export interface InventoryColumn {
 }
 export interface InventorySchema {
   schema_version: string;
+  /** Engine-owned base schema this table extends, for example spectrum:features. */
+  extends?: string;
   name: string;
   primary_key: string[];
   null_values?: string[];
