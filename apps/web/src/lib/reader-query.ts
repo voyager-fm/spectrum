@@ -21,7 +21,7 @@ export interface InteractionRow {
 }
 
 export interface SearchEntry {
-  kind: 'interaction' | 'document';
+  kind: 'interaction' | 'category' | 'feature' | 'document';
   id: string | null;
   title: string;
   path: string | null;

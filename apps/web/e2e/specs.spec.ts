@@ -55,7 +55,8 @@ test('linked contracts and flows open inside the reader', async ({ page }) => {
     .getByRole('group', { name: 'Document kind' })
     .getByRole('button', { name: /^Contracts/ })
     .click();
-  const contract = page.getByRole('table').nth(1).getByRole('link').first();
+  // The documents table is the last table on the index.
+  const contract = page.getByRole('table').last().getByRole('link').first();
   const name = (await contract.textContent())?.trim() ?? '';
   await contract.click();
   await expect(page).toHaveURL(/\/specs\/documents\/.+\.toml$/);
@@ -82,7 +83,35 @@ test('the command palette finds a spec by acceptance criterion text', async ({ p
   await expect(page.getByRole('heading', { level: 2, name: 'Acceptance criteria' })).toBeVisible();
 });
 
+test('categories and features open with their descriptions and interactions', async ({ page }) => {
+  await page.goto('/specs');
+  const catalog = page.getByRole('table').nth(1);
+  const category = catalog.getByRole('link').first();
+  const categoryName = (await category.textContent())?.trim() ?? '';
+  await category.click();
+
+  await expect(page).toHaveURL(/\/specs\/categories\/[A-Z]+$/);
+  await expect(page.getByRole('heading', { level: 2, name: 'Features' })).toBeVisible();
+  const tree = page.getByRole('navigation', { name: 'Specifications' });
+  await expect(tree.locator('[aria-current="page"]')).toContainText(categoryName);
+
+  const feature = page.getByRole('table').first().getByRole('link').first();
+  const featureTitle = (await feature.textContent())?.trim() ?? '';
+  await feature.click();
+  await expect(page).toHaveURL(/\/specs\/features\/[A-Z]+-\d{3}$/);
+  await expect(
+    page.getByRole('heading', { level: 1, name: featureTitle, exact: true }),
+  ).toBeVisible();
+  await expect(page.getByText('Related UI', { exact: true })).toBeVisible();
+  await expect(tree.locator('[aria-current="page"]')).toContainText(featureTitle);
+  // The breadcrumb leads back to the category.
+  await page.getByRole('navigation', { name: 'Breadcrumb' }).getByRole('link').click();
+  await expect(page).toHaveURL(/\/specs\/categories\/[A-Z]+$/);
+});
+
 test('an unknown spec or document is not found', async ({ page }) => {
   expect((await page.goto('/specs/NOPE-000-missing'))?.status()).toBe(404);
   expect((await page.goto('/specs/documents/.spectrum/missing.md'))?.status()).toBe(404);
+  expect((await page.goto('/specs/categories/NOPE'))?.status()).toBe(404);
+  expect((await page.goto('/specs/features/NOPE-000'))?.status()).toBe(404);
 });

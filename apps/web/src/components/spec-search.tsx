@@ -1,6 +1,6 @@
 'use client';
 
-import { FileText, Search, SquareDashed } from 'lucide-react';
+import { Boxes, FileText, Folder, Search, SquareDashed } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useId, useMemo, useRef, useState } from 'react';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
@@ -13,6 +13,13 @@ function typing(target: EventTarget | null) {
     (target.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName))
   );
 }
+
+const ICON: Record<SearchEntry['kind'], typeof FileText> = {
+  interaction: FileText,
+  category: Folder,
+  feature: Boxes,
+  document: SquareDashed,
+};
 
 /**
  * Command palette over spec IDs, titles, summaries, acceptance criteria and document paths.
@@ -110,7 +117,7 @@ export function SpecSearch({ entries }: { entries: SearchEntry[] }) {
               className="max-h-96 overflow-y-auto p-1.5"
             >
               {results.map((entry, i) => {
-                const Icon = entry.kind === 'interaction' ? FileText : SquareDashed;
+                const Icon = ICON[entry.kind];
                 return (
                   // biome-ignore lint/a11y/useKeyWithClickEvents: the combobox input handles keys.
                   <div

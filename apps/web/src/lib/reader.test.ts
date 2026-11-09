@@ -4,9 +4,12 @@ import type { CheckResult, Inventory, RepositoryDocument, Spec } from '@spectrum
 import { markdownView } from '@spectrum/spec-engine/markdown';
 import {
   adjacentSpecs,
+  catalog,
+  categoryHref,
   documentHref,
   EMPTY_FILTER,
   facet,
+  featureHref,
   filterRows,
   interactionRows,
   linkContext,
@@ -93,12 +96,42 @@ function fixture(): CheckResult {
     model: {
       inventories: [
         table('categories', [
-          { order: '2', category_key: 'DSH', category_title: 'Dashboard' },
-          { order: '1', category_key: 'VAL', category_title: 'Validation' },
+          {
+            order: '2',
+            category_key: 'DSH',
+            category_title: 'Dashboard',
+            description: 'Web views.',
+          },
+          {
+            order: '1',
+            category_key: 'VAL',
+            category_title: 'Validation',
+            description: 'Checks.',
+          },
+          { order: '3', category_key: 'LOOP', category_title: 'Loop', description: '-' },
         ]),
         table('features', [
-          { feature_id: 'VAL-001', feature_title: 'Validation feature' },
-          { feature_id: 'DSH-001', feature_title: 'Browsing feature' },
+          {
+            feature_id: 'VAL-001',
+            feature_title: 'Validation feature',
+            category_key: 'VAL',
+            description: 'Validate a repository.',
+            related_ui: 'cli.output',
+          },
+          {
+            feature_id: 'DSH-001',
+            feature_title: 'Browsing feature',
+            category_key: 'DSH',
+            description: 'Browse specs.',
+            related_ui: 'web.specs',
+          },
+          {
+            feature_id: 'DSH-002',
+            feature_title: 'Empty feature',
+            category_key: 'DSH',
+            description: 'Nothing yet.',
+            related_ui: '-',
+          },
         ]),
         table('interactions', [
           interaction('DSH-001-browse', 'DSH', 'DSH-001', 'implementing'),
@@ -153,14 +186,18 @@ test('a spec missing from the inventory is still listed', () => {
 
 test('readerTree groups interactions under categories and features, documents by kind', () => {
   const result = fixture();
-  const tree = readerTree(interactionRows(result), result.model.documents, LOCAL);
+  const rows = interactionRows(result);
+  const tree = readerTree(catalog(result, rows), result.model.documents, LOCAL);
   assert.deepEqual(
     tree.categories.map((c) => [c.key, c.features.map((f) => f.interactions.map((i) => i.id))]),
     [
       ['VAL', [['VAL-001-check']]],
-      ['DSH', [['DSH-001-browse', 'DSH-001-idea']]],
+      ['DSH', [['DSH-001-browse', 'DSH-001-idea'], []]],
+      ['LOOP', []],
     ],
   );
+  assert.equal(tree.categories[0]?.href, '/specs/categories/VAL');
+  assert.equal(tree.categories[1]?.features[1]?.href, '/specs/features/DSH-002');
   assert.equal(tree.categories[1]?.features[0]?.interactions[1]?.hasSpec, false);
   assert.deepEqual(tree.groups, [
     {
@@ -182,10 +219,47 @@ test('surface bundle documents are listed with pages', () => {
     doc('surface_contract', '.spectrum/surfaces/web/specs/contract.toml', 'Specs contract'),
     doc('surface_spec', '.spectrum/surfaces/web/specs/spec.md', 'Specs surface'),
   ];
-  const tree = readerTree(interactionRows(result), docs, LOCAL);
+  const rows = interactionRows(result);
+  const tree = readerTree(catalog(result, rows), docs, LOCAL);
   assert.deepEqual(
     tree.groups.map((g) => [g.label, g.documents.map((d) => d.title)]),
     [['Pages', ['Specs contract', 'Specs surface']]],
+  );
+});
+
+test('catalog keeps declared categories and features with their descriptions', () => {
+  const result = fixture();
+  const categories = catalog(result, interactionRows(result));
+  assert.deepEqual(
+    categories.map((c) => [c.key, c.description, c.features.map((f) => f.id)]),
+    [
+      ['VAL', 'Checks.', ['VAL-001']],
+      ['DSH', 'Web views.', ['DSH-001', 'DSH-002']],
+      ['LOOP', '', []],
+    ],
+  );
+  const browsing = categories[1]?.features[0];
+  assert.equal(browsing?.description, 'Browse specs.');
+  assert.equal(browsing?.relatedUi, 'web.specs');
+  assert.deepEqual(
+    browsing?.interactions.map((r) => r.id),
+    ['DSH-001-browse', 'DSH-001-idea'],
+  );
+  assert.equal(categories[1]?.features[1]?.relatedUi, '');
+  assert.equal(categories[1]?.interactions.length, 2);
+});
+
+test('catalog adds categories and features that interactions reference but do not declare', () => {
+  const result = fixture();
+  result.specs.push(spec('OPS-009-orphan', 'OPS-009', 'OPS'));
+  const categories = catalog(result, interactionRows(result));
+  const ops = categories.at(-1);
+  assert.equal(ops?.key, 'OPS');
+  assert.equal(ops?.declared, false);
+  assert.equal(ops?.features[0]?.declared, false);
+  assert.deepEqual(
+    ops?.features[0]?.interactions.map((r) => r.id),
+    ['OPS-009-orphan'],
   );
 });
 
@@ -229,6 +303,8 @@ test('resolveLink maps written links to reader pages, sources or nothing', () =>
 test('hrefs encode IDs and keep each path segment', () => {
   const routes = { base: '/repositories/o/r/specs', query: '?pr=4' };
   assert.equal(specHref(routes, 'A B'), '/repositories/o/r/specs/A%20B?pr=4');
+  assert.equal(categoryHref(routes, 'VAL'), '/repositories/o/r/specs/categories/VAL?pr=4');
+  assert.equal(featureHref(routes, 'VAL 001'), '/repositories/o/r/specs/features/VAL%20001?pr=4');
   assert.equal(
     documentHref(routes, '.spectrum/a b/c.md'),
     '/repositories/o/r/specs/documents/.spectrum/a%20b/c.md?pr=4',
@@ -276,7 +352,8 @@ test('filterRows combines facets, document presence, findings and text', () => {
 
 test('search matches acceptance criteria and ranks ID matches first', () => {
   const result = fixture();
-  const entries = searchEntries(interactionRows(result), result, LOCAL);
+  const rows = interactionRows(result);
+  const entries = searchEntries(rows, result, LOCAL, catalog(result, rows));
   assert.deepEqual(
     searchMatches(entries, 'criterion 2').map((e) => e.id),
     ['VAL-001-check'],
@@ -284,6 +361,12 @@ test('search matches acceptance criteria and ranks ID matches first', () => {
   assert.equal(searchMatches(entries, 'dsh-001-idea')[0]?.id, 'DSH-001-idea');
   assert.equal(searchMatches(entries, 'browse flow')[0]?.kind, 'document');
   assert.deepEqual(searchMatches(entries, 'nothing matches this'), []);
+  // Categories and features are found by their descriptions.
+  assert.deepEqual(
+    searchMatches(entries, 'validate a repository').map((e) => [e.kind, e.href]),
+    [['feature', '/specs/features/VAL-001']],
+  );
+  assert.equal(searchMatches(entries, 'web views')[0]?.kind, 'category');
 });
 
 test('outline lists second-level headings with their anchors', () => {

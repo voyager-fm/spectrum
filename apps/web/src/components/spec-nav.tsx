@@ -29,38 +29,85 @@ export function LifecycleDot({ lifecycle, className }: { lifecycle: string; clas
   );
 }
 
+const FOCUS = 'outline-none focus-visible:ring-3 focus-visible:ring-ring/50';
+
+/**
+ * A collapsible tree group. With `href` the label is a link to the group's own page and only the
+ * chevron toggles; without it the whole row toggles.
+ */
 function Group({
   label,
+  name,
   meta,
+  href,
+  active = false,
   initiallyOpen,
   children,
 }: {
   label: ReactNode;
+  /** Plain-text name for the toggle's accessible label. */
+  name: string;
   meta?: ReactNode;
+  href?: string;
+  active?: boolean;
   initiallyOpen: boolean;
   children: ReactNode;
 }) {
   const [open, setOpen] = useState(initiallyOpen);
+  const chevron = (
+    <ChevronRight
+      className={cn(
+        'size-3.5 shrink-0 text-muted-foreground transition-transform',
+        open && 'rotate-90',
+      )}
+      aria-hidden
+    />
+  );
+  const count = meta ? (
+    <span className="font-mono text-[11px] text-muted-foreground tabular-nums">{meta}</span>
+  ) : null;
   return (
     <li>
-      <button
-        type="button"
-        aria-expanded={open}
-        onClick={() => setOpen((o) => !o)}
-        className="flex w-full items-center gap-1.5 rounded-md px-1.5 py-1 text-left text-sm font-medium outline-none hover:bg-muted focus-visible:ring-3 focus-visible:ring-ring/50"
-      >
-        <ChevronRight
+      {href ? (
+        <div
           className={cn(
-            'size-3.5 shrink-0 text-muted-foreground transition-transform',
-            open && 'rotate-90',
+            'flex items-center rounded-md text-sm font-medium hover:bg-muted',
+            active && 'bg-muted',
           )}
-          aria-hidden
-        />
-        <span className="min-w-0 flex-1 truncate">{label}</span>
-        {meta ? (
-          <span className="font-mono text-[11px] text-muted-foreground tabular-nums">{meta}</span>
-        ) : null}
-      </button>
+        >
+          <button
+            type="button"
+            aria-expanded={open}
+            aria-label={`${open ? 'Collapse' : 'Expand'} ${name}`}
+            onClick={() => setOpen((o) => !o)}
+            className={cn('grid size-6 shrink-0 place-items-center rounded-md', FOCUS)}
+          >
+            {chevron}
+          </button>
+          <Link
+            href={href}
+            aria-current={active ? 'page' : undefined}
+            className={cn('flex min-w-0 flex-1 items-center gap-1.5 rounded-md py-1 pr-1.5', FOCUS)}
+          >
+            <span className="min-w-0 flex-1 truncate">{label}</span>
+            {count}
+          </Link>
+        </div>
+      ) : (
+        <button
+          type="button"
+          aria-expanded={open}
+          onClick={() => setOpen((o) => !o)}
+          className={cn(
+            'flex w-full items-center gap-1.5 rounded-md px-1.5 py-1 text-left text-sm font-medium hover:bg-muted',
+            FOCUS,
+          )}
+        >
+          {chevron}
+          <span className="min-w-0 flex-1 truncate">{label}</span>
+          {count}
+        </button>
+      )}
       {open ? <ul className="mt-0.5 mb-1.5 flex flex-col">{children}</ul> : null}
     </li>
   );
@@ -164,9 +211,13 @@ export function SpecNav({
       <ul className={cn('flex flex-col', !expanded && 'max-lg:hidden')}>
         {tree.categories.map((category) => {
           const items = category.features.flatMap((f) => f.interactions);
+          const categoryActive = isActive(category.href);
           return (
             <Group
               key={category.key}
+              name={category.title}
+              href={category.href}
+              active={categoryActive}
               label={
                 <>
                   <span className="mr-1.5 font-mono text-[11px] text-muted-foreground">
@@ -176,13 +227,27 @@ export function SpecNav({
                 </>
               }
               meta={items.length}
-              initiallyOpen={items.some((i) => isActive(i.href))}
+              initiallyOpen={
+                categoryActive ||
+                category.features.some((f) => isActive(f.href)) ||
+                items.some((i) => isActive(i.href))
+              }
             >
               {category.features.map((feature) => (
                 <li key={feature.id} className="mt-1 first:mt-0">
-                  <div className="truncate py-0.5 pr-1.5 pl-6 text-[11px] text-muted-foreground">
+                  <Link
+                    href={feature.href}
+                    aria-current={isActive(feature.href) ? 'page' : undefined}
+                    className={cn(
+                      'block truncate rounded-md py-0.5 pr-1.5 pl-6 text-[11px] hover:bg-muted hover:text-foreground',
+                      FOCUS,
+                      isActive(feature.href)
+                        ? 'bg-muted font-medium text-foreground'
+                        : 'text-muted-foreground',
+                    )}
+                  >
                     <span className="font-mono">{feature.id}</span> · {feature.title}
-                  </div>
+                  </Link>
                   <ul className="flex flex-col">
                     {feature.interactions.map((item) => (
                       <InteractionLeaf key={item.id} item={item} active={isActive(item.href)} />
@@ -200,6 +265,7 @@ export function SpecNav({
           {tree.groups.map((group) => (
             <Group
               key={group.label}
+              name={group.label}
               label={group.label}
               meta={group.documents.length}
               initiallyOpen={group.documents.some((d) => isActive(d.href))}
