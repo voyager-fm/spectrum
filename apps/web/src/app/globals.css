@@ -154,3 +154,17 @@
     @apply overflow-x-auto rounded-md bg-muted p-4 font-mono text-xs leading-relaxed whitespace-pre-wrap;
   }
 }
+
+/*
+ * Syntax highlighting (lib/highlight.ts) stays on the ink tokens and the one brand accent:
+ * keywords and literals take the accent, strings an accent-tinted ink, and punctuation and
+ * comments the muted ink.
+ */
+:root {
+  --code-key: var(--foreground);
+  --code-keyword: var(--brand);
+  --code-constant: var(--brand);
+  --code-string: color-mix(in oklch, var(--brand) 55%, var(--foreground));
+  --code-punctuation: var(--muted-foreground);
+  --code-comment: var(--muted-foreground);
+}

@@ -3,7 +3,9 @@ import { ExternalLink } from 'lucide-react';
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 import { cn } from '@/lib/utils';
+import { highlightLines } from '../lib/highlight.ts';
 import type { ResolvedLink } from '../lib/reader.ts';
+import { MermaidDiagram } from './mermaid.tsx';
 
 type Resolve = (href: string) => ResolvedLink;
 
@@ -109,6 +111,12 @@ function Block({ block, resolve }: { block: MarkdownBlock; resolve: Resolve }): 
       );
     }
     case 'code':
+      if (block.lang.trim().toLowerCase() === 'mermaid')
+        return (
+          <MermaidDiagram source={block.text}>
+            <CodeBlock text={block.text} label="mermaid" />
+          </MermaidDiagram>
+        );
       return <CodeBlock text={block.text} label={block.lang || undefined} />;
     case 'blockquote':
       return (
@@ -162,8 +170,12 @@ function Block({ block, resolve }: { block: MarkdownBlock; resolve: Resolve }): 
   }
 }
 
-export function CodeBlock({ text, label }: { text: string; label?: string }) {
-  const lines = text.replace(/\n$/, '').split('\n');
+/**
+ * Numbered source with syntax highlighting for the language `label` names (a fence language or a
+ * file extension). Lines keep `#L<n>` anchors; unknown languages render as plain text.
+ */
+export async function CodeBlock({ text, label }: { text: string; label?: string }) {
+  const lines = await highlightLines(text, label);
   return (
     <div className="overflow-hidden rounded-xl border bg-muted/40">
       {label ? (
@@ -171,11 +183,28 @@ export function CodeBlock({ text, label }: { text: string; label?: string }) {
       ) : null}
       <pre className="py-2 font-mono text-xs leading-5">
         <code className="grid">
-          {lines.map((line, i) => (
+          {lines.map((tokens, i) => (
             // biome-ignore lint/suspicious/noArrayIndexKey: lines are positional.
             <span key={i} id={`L${i + 1}`} className="grid grid-cols-[3rem_1fr] scroll-mt-6">
               <span className="select-none pr-3 text-right text-muted-foreground/60">{i + 1}</span>
-              <span className="min-w-0 pr-4 break-words whitespace-pre-wrap">{line || ' '}</span>
+              <span className="min-w-0 pr-4 break-words whitespace-pre-wrap">
+                {tokens.length
+                  ? tokens.map((token, j) =>
+                      token.color || token.bold || token.italic ? (
+                        <span
+                          // biome-ignore lint/suspicious/noArrayIndexKey: tokens are positional.
+                          key={j}
+                          style={{ color: token.color }}
+                          className={cn(token.bold && 'font-semibold', token.italic && 'italic')}
+                        >
+                          {token.text}
+                        </span>
+                      ) : (
+                        token.text
+                      ),
+                    )
+                  : ' '}
+              </span>
             </span>
           ))}
         </code>
