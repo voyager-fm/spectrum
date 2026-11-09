@@ -36,7 +36,7 @@ For the pinned commit, the page lists these steps with a state for each:
 3. `@voyager-fm/spectrum` is declared in `package.json`.
 4. An agent integration exists: the repository skills, with their installed version, or the plugin enabled in `.claude/settings.json`.
 
-Each missing step shows the command that completes it. Detection uses `inspectRepositorySetup` from `@spectrum/spec-engine/setup`, so it matches what the CLI writes.
+Each missing step shows the command that completes it. The agent step has one tab per coding agent (Claude Code, Codex, OpenCode), like a package-manager switcher: each tab shows that agent's install state, the files it reads and its own commands (`skills install --agent claude` or the plugin for Claude Code, `skills install --agent codex` for Codex and OpenCode, which share `.agents/skills`). The chosen tab is remembered in the browser; otherwise the first installed agent is shown. Detection uses `inspectRepositorySetup` from `@spectrum/spec-engine/setup`, so it matches what the CLI writes.
 
 ## State Changes
 
@@ -55,6 +55,7 @@ A skill file without the Spectrum marker is shown as not installed by Spectrum, 
 - [ ] **AC-1:** The checklist reports each setup step's state for the pinned commit, using the shared setup inspector.
 - [ ] **AC-2:** Every missing step shows the command that completes it, and no step offers a remote write.
 - [ ] **AC-3:** Unmanaged skill files and invalid configuration are distinguished from completed steps.
+- [ ] **AC-4:** Each coding agent tab shows only that agent's state, files and install commands, and an agent that is installed shows no install command.
 
 ## Permissions / Dependencies
 
