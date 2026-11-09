@@ -1,0 +1,14 @@
+[contract]
+id = "surface.web.spec_feature"
+region = "web.spec_feature"
+
+[responsibility]
+primary = "Read one feature, its category, related UI and interactions."
+
+[policy]
+read_only = true
+capability = "ready"
+declared_status_is_execution_evidence = false
+
+[policy_refs]
+specification = ["../../../specs/dsh/contracts/dashboard.toml"]

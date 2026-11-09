@@ -6,7 +6,7 @@ Open `/specs` for the configured local repository.
 
 ## Ready
 
-Browse interactions and their canonical document relationships. Filters narrow the interaction table and are kept in the URL, so a filtered view can be shared or reloaded. Interactions declared only in the inventory are listed without a document link. ⌘K or `/` opens search over interactions and documents.
+Browse interactions and their canonical document relationships. Filters narrow the interaction table and are kept in the URL, so a filtered view can be shared or reloaded. Interactions declared only in the inventory are listed without a document link. The categories and features table shows each description, interaction count and lifecycle mix, and opens category and feature pages. ⌘K or `/` opens search over interactions, categories, features and documents.
 
 ## Empty and failure states
 

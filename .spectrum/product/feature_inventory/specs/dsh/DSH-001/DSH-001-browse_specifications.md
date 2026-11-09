@@ -29,7 +29,7 @@ A local repository and a schema_version 2 configuration identify canonical docum
 
 ## Expected Outcome
 
-The page opens the specification reader. A tree beside the content groups interactions by category and feature and lists documents under Overview, Flows, Contracts, Pages, Engineering, Rules and Reference. The content shows counts for interactions, interactions with a document, interactions declared implementing and interactions with findings. A table lists every inventory interaction grouped by category with its title, ID, feature, declared lifecycle, phase, type, acceptance-criteria count and structural findings; the table can be filtered (see [Filter specifications](DSH-001-filter_specifications.md)). Each title with a document opens its detail page. A documents table lists contracts, flows, pages, engineering, rule, reference and overview documents one kind at a time with their paths and how many documents link to each; each title opens the document in the reader.
+The page opens the specification reader. A tree beside the content groups interactions by category and feature and lists documents under Overview, Flows, Contracts, Pages, Engineering, Rules and Reference. The content shows counts for categories, features, interactions, interactions with a document, interactions declared implementing and interactions with findings. Category and feature names in the tree open their pages. A table lists every inventory interaction grouped by category with its title, ID, feature, declared lifecycle, phase, type, acceptance-criteria count and structural findings; the table can be filtered (see [Filter specifications](DSH-001-filter_specifications.md)). Each title with a document opens its detail page. A categories and features table lists every declared feature under its category with the category's and feature's descriptions, the feature's interaction count, its lifecycle mix and its related UI region; category and feature names open their pages (see [View feature category](DSH-001-view_feature_category.md) and [View feature](DSH-001-view_feature.md)). A documents table lists contracts, flows, pages, engineering, rule, reference and overview documents one kind at a time with their paths and how many documents link to each; each title opens the document in the reader.
 
 ## State Changes
 
@@ -53,6 +53,7 @@ Malformed TSV, JSON schemas, YAML or TOML produce failures. Missing references a
 - [ ] **AC-6:** Configured web routes resolve through their region to surface contract, layout and flow documents.
 - [ ] **AC-7:** The table lists every inventory interaction, including those without a document, in category order, and only interactions with a document link to a detail page.
 - [ ] **AC-8:** The tree and the documents table open every loaded canonical document in the reader.
+- [ ] **AC-9:** Every declared category and feature is listed with its inventory description, including those without interactions.
 
 ## Permissions / Dependencies
 
@@ -70,6 +71,8 @@ Page load errors are shown in the page. Hosted telemetry remains unimplemented.
 - [Filter specifications](DSH-001-filter_specifications.md)
 - [Search specifications](DSH-001-search_specifications.md)
 - [View specification document](DSH-001-view_specification_document.md)
+- [View feature category](DSH-001-view_feature_category.md)
+- [View feature](DSH-001-view_feature.md)
 
 ## Source
 
