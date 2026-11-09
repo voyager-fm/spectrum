@@ -1,21 +1,21 @@
 # Repository document model, version 2
 
-The canonical representation connects TSV inventories with adjacent schemas, TOML policies, Markdown flows and interaction specs, web page bundles, and engineering knowledge. There is one editable owner for each fact.
+The canonical representation connects TSV inventories declared in domain schema catalogs, TOML policies, Markdown flows and interaction specs, web page bundles, and engineering knowledge. There is one editable owner for each fact.
 
 ## Sources and ownership
 
 | Source | Owns | Derived consumers |
 | --- | --- | --- |
-| `information_architecture/*/data.tsv` | Objects, surfaces, regions and optional menus | FI references, contracts and specs |
-| `feature_inventory/feature_categories/data.tsv` | Category identity and title | Feature classification |
-| `feature_inventory/features/data.tsv` | Feature identity and category | Interaction grouping |
-| `feature_inventory/interactions/data.tsv` | Interaction identity, lifecycle, phase and summary | Spec frontmatter mirror |
+| `feature_inventory/{objects,surfaces,surface_structure}.tsv` | Objects, surfaces, regions and optional menus | FI references, contracts and specs |
+| `feature_inventory/feature_categories.tsv` | Category identity and title | Feature classification |
+| `feature_inventory/features.tsv` | Feature identity and category | Interaction grouping |
+| `feature_inventory/interactions.tsv` | Interaction identity, lifecycle, phase and summary | Spec frontmatter mirror |
 | Engine base schemas (`@spectrum/spec-engine`) | FI table names, primary keys and the category, feature and interaction columns the engine checks | Repository schema extensions |
-| Adjacent `schema.json` | Added columns and their order, or a complete standalone table contract | Deterministic table validation |
-| `feature_specs/<category>/contracts/*.toml` | Shared policy, vocabulary, state models, reads/writes | Flows and interaction specs |
-| `feature_specs/<category>/flows/*.md` | Interaction coverage, happy paths and failure handling | Interaction sources and review |
-| `feature_specs/<category>/<feature_id>/*.md` | One interaction's detailed behavior and ACs | CLI, dashboard, host-agent context |
-| `product/website/route_map/routes/{data.tsv,schema.json}` | Web route identity and declared implementation status | Page contract matching |
+| Domain `schema.json` catalog | Each table's TSV file, kind, column order and added columns | Deterministic table validation |
+| `feature_inventory/specs/<category>/contracts/*.toml` | Shared policy, vocabulary, state models, reads/writes | Flows and interaction specs |
+| `feature_inventory/specs/<category>/flows/*.md` | Interaction coverage, happy paths and failure handling | Interaction sources and review |
+| `feature_inventory/specs/<category>/<feature_id>/*.md` | One interaction's detailed behavior and ACs | CLI, dashboard, host-agent context |
+| `product/website/route_map/{schema.json,routes.tsv}` | Web route identity and declared implementation status | Page contract matching |
 | `product/website/page_contracts/<page>/` | `contract.toml`, `layout.md`, `flow.md`, optional `spec.md` | Web experience and review |
 | `engineering/<platform>/{architecture,guides,standards,decisions}/` | Technical knowledge and decisions | Development context |
 
@@ -79,7 +79,7 @@ Version 1 feature JSON and the standalone JSON draft model are retired. Spectrum
 
 ## Planned implementation links
 
-The planned [implementation-link contract](../product/feature_specs/trc/contracts/implementation_links.toml) defines an optional `### Implementation` subsection within an interaction's `## Source`. Ordinary Markdown links there declare implementation files and optional `#L<n>` or `#L<start>-L<end>` locations. They supplement, rather than replace, Source contract and flow links. Inline-code paths and prose are not declarations. Existing specs without implementation links remain valid. Resolution states, code navigation and the Connected code section are planned; neither a declared link nor file existence establishes executed AC evidence.
+The planned [implementation-link contract](../product/feature_inventory/specs/trc/contracts/implementation_links.toml) defines an optional `### Implementation` subsection within an interaction's `## Source`. Ordinary Markdown links there declare implementation files and optional `#L<n>` or `#L<start>-L<end>` locations. They supplement, rather than replace, Source contract and flow links. Inline-code paths and prose are not declarations. Existing specs without implementation links remain valid. Resolution states, code navigation and the Connected code section are planned; neither a declared link nor file existence establishes executed AC evidence.
 
 For example, a specification at `.spectrum/specs/APP-001.md` could declare the following target. This is a planned declaration format, not a generated file or a claim that the example implementation exists:
 

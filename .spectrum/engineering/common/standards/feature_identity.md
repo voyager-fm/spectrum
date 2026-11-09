@@ -10,7 +10,7 @@ Spectrum's own feature IDs use `<category_key>-<three digit category-local seque
 
 This convention belongs to Spectrum's product inventory. Customer IDs remain opaque and do not need these prefixes. The engine must not impose Spectrum's categories or numbering on client repositories.
 
-Feature bundles live at `feature_specs/<lowercase category_key>/<feature_id>/`. Category contracts and flows live in that category's contracts/ and flows/ directories. References across categories stay explicit repository-local links.
+Feature bundles live at `product/feature_inventory/specs/<lowercase category_key>/<feature_id>/`. Category contracts and flows live in that category's contracts/ and flows/ directories. References across categories stay explicit repository-local links.
 
 ## Authorized migration
 
@@ -43,6 +43,6 @@ FI owns category/feature identity. Interaction metadata, IA references, contract
 
 ## Sources
 
-- [Feature inventory](../../../product/feature_inventory/features/data.tsv)
-- [Interaction inventory](../../../product/feature_inventory/interactions/data.tsv)
+- [Feature inventory](../../../product/feature_inventory/features.tsv)
+- [Interaction inventory](../../../product/feature_inventory/interactions.tsv)
 - [Schema guide](../../../schemas/README.md)

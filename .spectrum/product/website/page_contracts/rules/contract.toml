@@ -13,4 +13,4 @@ capability = "ready"
 declared_status_is_execution_evidence = false
 
 [policy_refs]
-specification = ["../../../feature_specs/dsh/contracts/dashboard.toml"]
+specification = ["../../../feature_inventory/specs/dsh/contracts/dashboard.toml"]

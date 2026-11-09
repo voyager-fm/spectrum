@@ -20,4 +20,4 @@ A successful empty load identifies its source. Failed loads show an error and un
 
 - [Page contract](contract.toml)
 - [Layout](layout.md)
-- [Implementation-link contract](../../../feature_specs/trc/contracts/implementation_links.toml)
+- [Implementation-link contract](../../../feature_inventory/specs/trc/contracts/implementation_links.toml)

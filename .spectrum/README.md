@@ -8,4 +8,4 @@ Product objects and behavior live in `product/`. Web route and page contracts ar
 
 Run `pnpm spec:check` to validate the configured repository model and `pnpm spec:list` to list interaction specifications. These commands read only. Planning, document approval, declared implementation and executed test evidence have separate meanings.
 
-Spectrum feature identity uses category-local IDs and bundles; see [the namespace standard and migration crosswalk](engineering/common/standards/feature_identity.md). The planned [implementation-link feature](product/feature_specs/trc/TRC-001/TRC-001-inspect_linked_implementation.md) defines Connected code in specification detail; this specification does not claim the resolver or UI is implemented.
+Spectrum feature identity uses category-local IDs and bundles; see [the namespace standard and migration crosswalk](engineering/common/standards/feature_identity.md). The planned [implementation-link feature](product/feature_inventory/specs/trc/TRC-001/TRC-001-inspect_linked_implementation.md) defines Connected code in specification detail; this specification does not claim the resolver or UI is implemented.

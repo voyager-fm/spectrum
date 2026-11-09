@@ -12,4 +12,4 @@ Repository navigation, page heading and load errors precede the page content. Ta
 
 - [Page contract](contract.toml)
 - [Flow](flow.md)
-- [Implementation-link contract](../../../feature_specs/trc/contracts/implementation_links.toml)
+- [Implementation-link contract](../../../feature_inventory/specs/trc/contracts/implementation_links.toml)

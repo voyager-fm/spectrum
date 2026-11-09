@@ -15,4 +15,4 @@ implementation_links_capability = "planned"
 implementation_links_region = "web.spec_implementation"
 
 [policy_refs]
-specification = ["../../../feature_specs/dsh/contracts/dashboard.toml", "../../../feature_specs/trc/contracts/implementation_links.toml"]
+specification = ["../../../feature_inventory/specs/dsh/contracts/dashboard.toml", "../../../feature_inventory/specs/trc/contracts/implementation_links.toml"]
