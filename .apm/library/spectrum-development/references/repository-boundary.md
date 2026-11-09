@@ -22,7 +22,7 @@ Client files refer to the format through `$schema` URLs (`https://raw.githubuser
 
 ## Rules
 
-1. **Never install format definitions into a client.** Templates, `init` and setup render only client content: configuration, overview, rules, inventories, specs, contracts, flows, page bundles and project engineering notes. Schema files, base schemas, layout or scaffolding contracts and template documentation are not rendered as client files.
+1. **Never install format definitions into a client.** Templates, `init` and setup render only client content: configuration, overview, rules, inventories, specs, contracts, flows, surface bundles and project engineering notes. Schema files, base schemas, layout or scaffolding contracts and template documentation are not rendered as client files.
 2. **`.spectrum/` is a client, not a fixture of the engine.** It contains only what a customer repository would contain. It does not mirror engine definitions. No test may assert that `.spectrum/` equals a shipped definition.
 3. **Test format behavior in temporary repositories.** Engine and template tests build their fixtures in temporary directories. The self-check test only proves that Spectrum's own specifications are valid client content; it is not the format's source of truth.
 4. **Keep templates client-neutral.** Template content contains no Spectrum product IDs (for example `VAL-001`), categories or vocabulary. It contains no paths into `packages/` or `apps/`, and no claims about Spectrum's own implementation.

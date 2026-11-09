@@ -13,7 +13,7 @@ Use [the configured source map](../../../../.spectrum/config.json) to locate the
 | Spectrum's own engine architecture | The specification-model architecture in the configured engineering root |
 | Objects, surfaces, regions and stable feature/interaction IDs | Configured IA and FI inventories under `.spectrum/product/` |
 | Behavior and acceptance criteria | The affected feature bundle's contracts, flows and interaction Markdown specs |
-| Web routes and page behavior | Configured route inventory and page bundles under `.spectrum/product/website/` |
+| Screens, web routes and page behavior | Surface bundles under `.spectrum/product/feature_inventory/surfaces/<surface>/<region>/` and the ROUTES table in the feature_inventory catalog |
 | Which product a change belongs to (local tool or hosted application) | The product-layers architecture in the configured engineering root; rules in [implementation](implementation.md#product-layers) |
 | Runtime and package boundaries | [Distribution contract](../../../../.spectrum/contracts/distribution.md) and the application-runtime architecture in the configured engineering root |
 | Engineering decisions and scoped instructions | Applicable `.spectrum/engineering/`, `.spectrum/rules/` and local `AGENTS.md` |

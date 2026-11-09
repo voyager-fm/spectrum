@@ -22,20 +22,20 @@ dependencies:
   - .claude/skills/spectrum-development/references/verification.md
   deployed_file_hashes:
     .agents/skills/spectrum-development/SKILL.md: sha256:07fe001161b602c19ad04d35af368b7faa786d80be6ee1af68690482c430fca0
-    .agents/skills/spectrum-development/references/authority-map.md: sha256:8daeacff19e5c2d6da9ae423557f75f5e670c03b645b81072666743267901874
+    .agents/skills/spectrum-development/references/authority-map.md: sha256:44ed8585e2ec7c5371670ad6b32b1907c4e7d32d6e4b6fb6d6e20e48ba2a7da3
     .agents/skills/spectrum-development/references/external-integrations.md: sha256:2abdc15795051e3f2b15293702e44280d8bbd7e05186d67c178cae0bcceeb5ff
     .agents/skills/spectrum-development/references/implementation.md: sha256:ed04151b26d0b4ee9a1f2f1d9f1161dbe3d65df4b85d5abe32554b2fe778a8e4
-    .agents/skills/spectrum-development/references/repository-boundary.md: sha256:15f71b50c4b413d8235295582d264211f090a3eb385fd1ab0ff33facd8d7f79d
+    .agents/skills/spectrum-development/references/repository-boundary.md: sha256:d8044f5ff915a4a36bfe218a016dc2228e0dc755b801b98637cd5b9e0b3f7ba7
     .agents/skills/spectrum-development/references/verification.md: sha256:073a76b3c11c8c2fb99db71c59fba8615d08b4e11a10ce24ead69b45cf124404
     .claude/skills/spectrum-development/SKILL.md: sha256:07fe001161b602c19ad04d35af368b7faa786d80be6ee1af68690482c430fca0
-    .claude/skills/spectrum-development/references/authority-map.md: sha256:8daeacff19e5c2d6da9ae423557f75f5e670c03b645b81072666743267901874
+    .claude/skills/spectrum-development/references/authority-map.md: sha256:44ed8585e2ec7c5371670ad6b32b1907c4e7d32d6e4b6fb6d6e20e48ba2a7da3
     .claude/skills/spectrum-development/references/external-integrations.md: sha256:2abdc15795051e3f2b15293702e44280d8bbd7e05186d67c178cae0bcceeb5ff
     .claude/skills/spectrum-development/references/implementation.md: sha256:ed04151b26d0b4ee9a1f2f1d9f1161dbe3d65df4b85d5abe32554b2fe778a8e4
-    .claude/skills/spectrum-development/references/repository-boundary.md: sha256:15f71b50c4b413d8235295582d264211f090a3eb385fd1ab0ff33facd8d7f79d
+    .claude/skills/spectrum-development/references/repository-boundary.md: sha256:d8044f5ff915a4a36bfe218a016dc2228e0dc755b801b98637cd5b9e0b3f7ba7
     .claude/skills/spectrum-development/references/verification.md: sha256:073a76b3c11c8c2fb99db71c59fba8615d08b4e11a10ce24ead69b45cf124404
   source: local
   local_path: ./.apm/library/spectrum-development
-  content_hash: sha256:d4aefdf224c79db0030b664c945780696ef5a850703b518f58b7fa34deef8e50
+  content_hash: sha256:f6d8d4500faa4c2f303a3fad0d25ed6b080ad28f8b038124d15c3460ba4af0f5
 - repo_url: _local/spectrum-test-authoring
   name: spectrum-test-authoring
   version: unknown
@@ -121,7 +121,7 @@ deployments:
   owners:
   - ./.apm/library/spectrum-development
   active_owner: ./.apm/library/spectrum-development
-  content_hash: sha256:8daeacff19e5c2d6da9ae423557f75f5e670c03b645b81072666743267901874
+  content_hash: sha256:44ed8585e2ec7c5371670ad6b32b1907c4e7d32d6e4b6fb6d6e20e48ba2a7da3
 - kind: project-relative
   target: claude
   value: .claude/skills/spectrum-development/references/external-integrations.md
@@ -148,7 +148,7 @@ deployments:
   owners:
   - ./.apm/library/spectrum-development
   active_owner: ./.apm/library/spectrum-development
-  content_hash: sha256:15f71b50c4b413d8235295582d264211f090a3eb385fd1ab0ff33facd8d7f79d
+  content_hash: sha256:d8044f5ff915a4a36bfe218a016dc2228e0dc755b801b98637cd5b9e0b3f7ba7
 - kind: project-relative
   target: claude
   value: .claude/skills/spectrum-development/references/verification.md
@@ -283,7 +283,7 @@ deployments:
   owners:
   - ./.apm/library/spectrum-development
   active_owner: ./.apm/library/spectrum-development
-  content_hash: sha256:8daeacff19e5c2d6da9ae423557f75f5e670c03b645b81072666743267901874
+  content_hash: sha256:44ed8585e2ec7c5371670ad6b32b1907c4e7d32d6e4b6fb6d6e20e48ba2a7da3
 - kind: project-relative
   target: codex
   value: .agents/skills/spectrum-development/references/external-integrations.md
@@ -310,7 +310,7 @@ deployments:
   owners:
   - ./.apm/library/spectrum-development
   active_owner: ./.apm/library/spectrum-development
-  content_hash: sha256:15f71b50c4b413d8235295582d264211f090a3eb385fd1ab0ff33facd8d7f79d
+  content_hash: sha256:d8044f5ff915a4a36bfe218a016dc2228e0dc755b801b98637cd5b9e0b3f7ba7
 - kind: project-relative
   target: codex
   value: .agents/skills/spectrum-development/references/verification.md
