@@ -1,6 +1,10 @@
 import { readdir, readFile, realpath } from 'node:fs/promises';
 import { isAbsolute, relative, resolve } from 'node:path';
 import type { CheckResult, Finding, Spec } from '@spectrum/core';
+export { createTableQuery } from './tables/query.ts';
+export type {
+  TableBinding, TableQueryOptions, TableContract, SearchInput,
+} from './tables/query.ts';
 export async function checkRepository(root: string): Promise<CheckResult> {
   const base = await realpath(root);
   const findings: Finding[] = [];
