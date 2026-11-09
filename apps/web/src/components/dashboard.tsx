@@ -35,16 +35,18 @@ export function StatusBadge({ tone = 'neutral', children }: { tone?: Tone; child
 }
 
 export function Section({
+  id,
   title,
   description,
   children,
 }: {
+  id?: string;
   title: string;
   description?: ReactNode;
   children: ReactNode;
 }) {
   return (
-    <section className="mt-10 flex flex-col gap-3">
+    <section id={id} className="mt-10 flex scroll-mt-6 flex-col gap-3">
       <div>
         <h2 className="text-sm font-medium">{title}</h2>
         {description ? <p className="text-sm text-muted-foreground">{description}</p> : null}

@@ -1,15 +1,9 @@
+import type { CheckResult } from '@spectrum/core';
 import { ArrowUpRight } from 'lucide-react';
 import Link from 'next/link';
 import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import {
+  EmptyNotice,
   LoadErrors,
   Mono,
   PageHead,
@@ -17,8 +11,23 @@ import {
   StatCard,
   StatusBadge,
 } from '../components/dashboard.tsx';
+import {
+  AcceptancePanel,
+  CheckTrendPanel,
+  FindingsPanel,
+  StatusDistributionPanel,
+} from '../components/overview.tsx';
 import { loadDashboard } from '../lib/dashboard.ts';
 import { githubAppStatus } from '../lib/github.ts';
+import {
+  acceptanceCoverage,
+  categoryBreakdown,
+  categoryOrder,
+  type FindingView,
+  groupFindings,
+  parseFindingView,
+  statusDistribution,
+} from '../lib/overview.ts';
 
 const loop = [
   { href: '/proposals', title: 'Proposals', detail: 'Spec change sets awaiting review' },
@@ -26,7 +35,13 @@ const loop = [
   { href: '/reviews', title: 'PR reviews', detail: 'Pull requests checked against specs' },
 ];
 
-export default async function OverviewPage() {
+type Props = {
+  searchParams: Promise<{ group?: string | string[]; severity?: string | string[] }>;
+};
+
+const specHref = (spec: { id: string }) => `/specs/${encodeURIComponent(spec.id)}`;
+
+export default async function OverviewPage({ searchParams }: Props) {
   const [data, github] = await Promise.all([loadDashboard(), githubAppStatus()]);
   const { check, config } = data;
   const approved = check?.specs.filter((s) => s.status === 'approved').length ?? 0;
@@ -69,35 +84,7 @@ export default async function OverviewPage() {
         </StatCard>
       </div>
 
-      {check && check.findings.length > 0 ? (
-        <Section title="Findings">
-          <div className="rounded-xl border">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Code</TableHead>
-                  <TableHead>Path</TableHead>
-                  <TableHead>Message</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {check.findings.map((f, i) => (
-                  // biome-ignore lint/suspicious/noArrayIndexKey: Findings have no IDs and can repeat; this read-only list is server-rendered.
-                  <TableRow key={`${f.path}-${f.code}-${i}`}>
-                    <TableCell>
-                      <StatusBadge tone="bad">{f.code}</StatusBadge>
-                    </TableCell>
-                    <TableCell>
-                      <Mono>{f.path}</Mono>
-                    </TableCell>
-                    <TableCell className="whitespace-normal">{f.message}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-        </Section>
-      ) : null}
+      {check ? <OverviewHealth check={check} view={parseFindingView(await searchParams)} /> : null}
 
       <Section title="Agent loop" description="Planned capabilities. Nothing here runs yet.">
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -140,6 +127,61 @@ export default async function OverviewPage() {
           </Link>
         </div>
       </Section>
+    </>
+  );
+}
+
+function OverviewHealth({ check, view }: { check: CheckResult; view: FindingView }) {
+  if (check.specs.length === 0) {
+    return (
+      <>
+        <Section title="Spec health">
+          <EmptyNotice>
+            No interaction specs were read from the configured feature bundles. Run{' '}
+            <Mono>pnpm spec:check</Mono> for details.
+          </EmptyNotice>
+        </Section>
+        <FindingsPanel
+          grouped={groupFindings(check.findings, check.specs, view)}
+          view={view}
+          pagePath="/"
+          targetQuery=""
+          specHref={specHref}
+        />
+      </>
+    );
+  }
+  return (
+    <>
+      <StatusDistributionPanel
+        distribution={statusDistribution(check.specs)}
+        categories={categoryBreakdown(check.specs, check.findings, categoryOrder(check.model))}
+      />
+      <AcceptancePanel
+        coverage={acceptanceCoverage(check.specs)}
+        specCount={check.specs.length}
+        hrefFor={specHref}
+      />
+      <FindingsPanel
+        grouped={groupFindings(check.findings, check.specs, view)}
+        view={view}
+        pagePath="/"
+        targetQuery=""
+        specHref={specHref}
+        emptyNote={
+          check.findings.length ? null : (
+            <EmptyNotice>
+              No structural findings. This does not show that the code implements the specs.
+            </EmptyNotice>
+          )
+        }
+      />
+      <CheckTrendPanel
+        rows={null}
+        currentSha={undefined}
+        hrefFor={() => '/'}
+        unavailable="This repository is read from the working tree on every request, so no check history is stored. Connected repositories keep one check per commit when accounts are enabled."
+      />
     </>
   );
 }

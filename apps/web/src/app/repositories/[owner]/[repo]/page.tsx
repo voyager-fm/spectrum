@@ -19,6 +19,12 @@ import {
   StatusBadge,
 } from '../../../../components/dashboard.tsx';
 import {
+  AcceptancePanel,
+  CheckTrendPanel,
+  FindingsPanel,
+  StatusDistributionPanel,
+} from '../../../../components/overview.tsx';
+import {
   RepositoryFrame,
   repositoryPath,
   targetQuery,
@@ -33,10 +39,25 @@ import {
   type RepositoryView,
 } from '../../../../lib/github.ts';
 import { onboardingSteps } from '../../../../lib/onboarding.ts';
+import {
+  acceptanceCoverage,
+  categoryBreakdown,
+  categoryOrder,
+  checkTrend,
+  type FindingView,
+  groupFindings,
+  parseFindingView,
+  statusDistribution,
+} from '../../../../lib/overview.ts';
 
 type Props = {
   params: Promise<{ owner: string; repo: string }>;
-  searchParams: Promise<{ ref?: string | string[]; pr?: string | string[] }>;
+  searchParams: Promise<{
+    ref?: string | string[];
+    pr?: string | string[];
+    group?: string | string[];
+    severity?: string | string[];
+  }>;
 };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -61,7 +82,9 @@ export default async function RepositoryPage({ params, searchParams }: Props) {
   const { owner: rawOwner, repo: rawRepo } = await params;
   const owner = decodeURIComponent(rawOwner);
   const repo = decodeURIComponent(rawRepo);
-  const target = parseTarget(await searchParams);
+  const query = await searchParams;
+  const target = parseTarget(query);
+  const findingView = parseFindingView(query);
   const view = await loadRepositoryCheck(owner, repo, target);
   const base = repositoryPath(owner, repo);
 
@@ -73,7 +96,9 @@ export default async function RepositoryPage({ params, searchParams }: Props) {
       tab="overview"
       query={targetQuery(target)}
     >
-      {view.status === 'ready' ? <Ready view={view} base={base} target={target} /> : null}
+      {view.status === 'ready' ? (
+        <Ready view={view} base={base} target={target} findingView={findingView} />
+      ) : null}
     </RepositoryFrame>
   );
 }
@@ -82,10 +107,12 @@ function Ready({
   view,
   base,
   target,
+  findingView,
 }: {
   view: Extract<RepositoryView, { status: 'ready' }>;
   base: string;
   target: ReturnType<typeof parseTarget>;
+  findingView: FindingView;
 }) {
   const { repository, branches, pullRequests, check } = view;
   const source = (path: string) => `${repository.htmlUrl}/blob/${check?.sha}/${path}`;
@@ -100,7 +127,12 @@ function Ready({
               <SetupChecklist onboarding={onboarding} sha={check.sha} sourceUrl={source} />
             </div>
           )}
-          <CheckSummary check={check} htmlUrl={repository.htmlUrl} base={base} />
+          <CheckSummary
+            check={check}
+            htmlUrl={repository.htmlUrl}
+            base={base}
+            findingView={findingView}
+          />
           {onboarding.complete ? (
             <Section title="Setup">
               <SetupChecklist onboarding={onboarding} sha={check.sha} sourceUrl={source} />
@@ -111,6 +143,13 @@ function Ready({
         <EmptyNotice>Not assessed. No check result exists for this revision.</EmptyNotice>
       )}
 
+      {check ? (
+        <CheckTrendPanel
+          rows={view.history ? checkTrend(view.history) : null}
+          currentSha={check.sha}
+          hrefFor={(sha) => `${base}?ref=${sha}`}
+        />
+      ) : null}
       {view.history ? <History rows={view.history} base={base} current={check?.sha} /> : null}
 
       <Section
@@ -247,12 +286,16 @@ function CheckSummary({
   check,
   htmlUrl,
   base,
+  findingView,
 }: {
   check: RemoteCheck;
   htmlUrl: string;
   base: string;
+  findingView: FindingView;
 }) {
   const { result } = check;
+  const query = targetQuery(check.target);
+  const specHref = (spec: { id: string }) => `${base}/specs/${encodeURIComponent(spec.id)}${query}`;
   const errors = result.findings.filter((f) => f.severity === 'error').length;
   const warnings = result.findings.length - errors;
   const noConfig =
@@ -311,61 +354,45 @@ function CheckSummary({
         </StatCard>
       </div>
 
-      <Section title="Findings">
-        {noConfig ? (
-          <EmptyNotice>
-            This commit has no readable <Mono>.spectrum/config.json</Mono>, so there are no specs to
-            check. Follow the setup steps above to add one.
-          </EmptyNotice>
-        ) : null}
-        {result.findings.length ? (
-          <div className="rounded-xl border">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-24">Severity</TableHead>
-                  <TableHead>Code</TableHead>
-                  <TableHead>Path</TableHead>
-                  <TableHead>Message</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {result.findings.map((f) => (
-                  <TableRow key={`${f.code}:${f.path}:${f.line ?? ''}:${f.message}`}>
-                    <TableCell>
-                      <StatusBadge tone={f.severity === 'error' ? 'bad' : 'neutral'}>
-                        {f.severity}
-                      </StatusBadge>
-                    </TableCell>
-                    <TableCell>
-                      <Mono>{f.code}</Mono>
-                    </TableCell>
-                    <TableCell>
-                      <a
-                        href={`${htmlUrl}/blob/${check.sha}/${f.path}${f.line ? `#L${f.line}` : ''}`}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="font-mono text-xs underline-offset-4 hover:underline"
-                      >
-                        {f.path}
-                        {f.line ? `:${f.line}` : ''}
-                      </a>
-                    </TableCell>
-                    <TableCell className="whitespace-normal text-muted-foreground">
-                      {f.message}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-        ) : (
-          <EmptyNotice>
-            No structural findings at <Mono>{short(check.sha)}</Mono>. This does not show that the
-            code implements the specs.
-          </EmptyNotice>
-        )}
-      </Section>
+      {result.specs.length ? (
+        <>
+          <StatusDistributionPanel
+            distribution={statusDistribution(result.specs)}
+            categories={categoryBreakdown(
+              result.specs,
+              result.findings,
+              categoryOrder(result.model),
+            )}
+          />
+          <AcceptancePanel
+            coverage={acceptanceCoverage(result.specs)}
+            specCount={result.specs.length}
+            hrefFor={specHref}
+          />
+        </>
+      ) : null}
+
+      <FindingsPanel
+        grouped={groupFindings(result.findings, result.specs, findingView)}
+        view={findingView}
+        pagePath={base}
+        targetQuery={query}
+        specHref={specHref}
+        sourceUrl={(path, line) => `${htmlUrl}/blob/${check.sha}/${path}${line ? `#L${line}` : ''}`}
+        emptyNote={
+          noConfig ? (
+            <EmptyNotice>
+              This commit has no readable <Mono>.spectrum/config.json</Mono>, so there are no specs
+              to check. Follow the setup steps above to add one.
+            </EmptyNotice>
+          ) : result.findings.length ? null : (
+            <EmptyNotice>
+              No structural findings at <Mono>{short(check.sha)}</Mono>. This does not show that the
+              code implements the specs.
+            </EmptyNotice>
+          )
+        }
+      />
     </>
   );
 }
