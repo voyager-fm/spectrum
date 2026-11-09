@@ -6,3 +6,9 @@ node_modules/
 dist/
 coverage/
 .DS_Store
+# APM sources live in .apm/; ignore only regenerated native output and cache.
+apm_modules/
+/.agents/skills/
+/.claude/skills/
+# Internal-only planning handoff; contains private Slack links.
+/CONTEXT.md

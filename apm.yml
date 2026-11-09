@@ -1,0 +1,10 @@
+name: spectrum-agent-harness
+version: 0.1.0
+targets: [claude, codex, opencode]
+includes: auto
+dependencies:
+  apm:
+    - path: ./.apm/library/spectrum-development
+    - path: ./.apm/library/spectrum-test-authoring
+    - path: ./.apm/library/spectrum-ui
+    - path: ./.apm/library/spectrum-verification

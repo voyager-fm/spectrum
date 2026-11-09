@@ -1,0 +1,208 @@
+lockfile_version: '1'
+apm_version: 0.35.0
+dependencies:
+- repo_url: _local/spectrum-development
+  name: spectrum-development
+  version: unknown
+  package_type: claude_skill
+  deployed_files:
+  - .agents/skills/spectrum-development
+  - .agents/skills/spectrum-development/SKILL.md
+  - .claude/skills/spectrum-development
+  - .claude/skills/spectrum-development/SKILL.md
+  deployed_file_hashes:
+    .agents/skills/spectrum-development/SKILL.md: sha256:bfce00dd5beb9ff2190f8c2e61ee2dd0a6d0b59cd4eb491fe629d758a31a353a
+    .claude/skills/spectrum-development/SKILL.md: sha256:bfce00dd5beb9ff2190f8c2e61ee2dd0a6d0b59cd4eb491fe629d758a31a353a
+  source: local
+  local_path: ./.apm/library/spectrum-development
+  content_hash: sha256:c733ac865c5498cb04259789d5c85d679a5edfefd0d0ef5ca1d4ef3ff6af68bc
+- repo_url: _local/spectrum-test-authoring
+  name: spectrum-test-authoring
+  version: unknown
+  package_type: claude_skill
+  deployed_files:
+  - .agents/skills/spectrum-test-authoring
+  - .agents/skills/spectrum-test-authoring/SKILL.md
+  - .claude/skills/spectrum-test-authoring
+  - .claude/skills/spectrum-test-authoring/SKILL.md
+  deployed_file_hashes:
+    .agents/skills/spectrum-test-authoring/SKILL.md: sha256:5df99b3c3f4ad08c2853f850717da07f996617535f07652e64f4fc567b4f1357
+    .claude/skills/spectrum-test-authoring/SKILL.md: sha256:5df99b3c3f4ad08c2853f850717da07f996617535f07652e64f4fc567b4f1357
+  source: local
+  local_path: ./.apm/library/spectrum-test-authoring
+  content_hash: sha256:c80025d5c7f873bcf8eb38804d79088825679a7d19759ea0be3b7864fa08a08a
+- repo_url: _local/spectrum-ui
+  name: spectrum-ui
+  version: unknown
+  package_type: claude_skill
+  deployed_files:
+  - .agents/skills/spectrum-ui
+  - .agents/skills/spectrum-ui/SKILL.md
+  - .claude/skills/spectrum-ui
+  - .claude/skills/spectrum-ui/SKILL.md
+  deployed_file_hashes:
+    .agents/skills/spectrum-ui/SKILL.md: sha256:201107ed4b68ddd01b08fcb9795540e0c90e1e539a81e5b536aa58ce2589bc62
+    .claude/skills/spectrum-ui/SKILL.md: sha256:201107ed4b68ddd01b08fcb9795540e0c90e1e539a81e5b536aa58ce2589bc62
+  source: local
+  local_path: ./.apm/library/spectrum-ui
+  content_hash: sha256:e45d2d87c74ed4a515fe72a9632dc0af87c5026c70a2f22f97d518966350a7b6
+- repo_url: _local/spectrum-verification
+  name: spectrum-verification
+  version: unknown
+  package_type: claude_skill
+  deployed_files:
+  - .agents/skills/spectrum-verification
+  - .agents/skills/spectrum-verification/SKILL.md
+  - .claude/skills/spectrum-verification
+  - .claude/skills/spectrum-verification/SKILL.md
+  deployed_file_hashes:
+    .agents/skills/spectrum-verification/SKILL.md: sha256:da6b25dc53ab17bdc561c68df254c955a7b9518efb78187d713a963e6245049c
+    .claude/skills/spectrum-verification/SKILL.md: sha256:da6b25dc53ab17bdc561c68df254c955a7b9518efb78187d713a963e6245049c
+  source: local
+  local_path: ./.apm/library/spectrum-verification
+  content_hash: sha256:de981c9580636b65e08e44858225ccf456cee57e36114c8da56206ac205f0ff7
+deployments:
+- kind: project-relative
+  target: claude
+  value: .claude/skills/spectrum-development
+  runtime: null
+  scope: project
+  owners:
+  - ./.apm/library/spectrum-development
+  active_owner: ./.apm/library/spectrum-development
+  content_hash: null
+- kind: project-relative
+  target: claude
+  value: .claude/skills/spectrum-development/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - ./.apm/library/spectrum-development
+  active_owner: ./.apm/library/spectrum-development
+  content_hash: sha256:bfce00dd5beb9ff2190f8c2e61ee2dd0a6d0b59cd4eb491fe629d758a31a353a
+- kind: project-relative
+  target: claude
+  value: .claude/skills/spectrum-test-authoring
+  runtime: null
+  scope: project
+  owners:
+  - ./.apm/library/spectrum-test-authoring
+  active_owner: ./.apm/library/spectrum-test-authoring
+  content_hash: null
+- kind: project-relative
+  target: claude
+  value: .claude/skills/spectrum-test-authoring/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - ./.apm/library/spectrum-test-authoring
+  active_owner: ./.apm/library/spectrum-test-authoring
+  content_hash: sha256:5df99b3c3f4ad08c2853f850717da07f996617535f07652e64f4fc567b4f1357
+- kind: project-relative
+  target: claude
+  value: .claude/skills/spectrum-ui
+  runtime: null
+  scope: project
+  owners:
+  - ./.apm/library/spectrum-ui
+  active_owner: ./.apm/library/spectrum-ui
+  content_hash: null
+- kind: project-relative
+  target: claude
+  value: .claude/skills/spectrum-ui/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - ./.apm/library/spectrum-ui
+  active_owner: ./.apm/library/spectrum-ui
+  content_hash: sha256:201107ed4b68ddd01b08fcb9795540e0c90e1e539a81e5b536aa58ce2589bc62
+- kind: project-relative
+  target: claude
+  value: .claude/skills/spectrum-verification
+  runtime: null
+  scope: project
+  owners:
+  - ./.apm/library/spectrum-verification
+  active_owner: ./.apm/library/spectrum-verification
+  content_hash: null
+- kind: project-relative
+  target: claude
+  value: .claude/skills/spectrum-verification/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - ./.apm/library/spectrum-verification
+  active_owner: ./.apm/library/spectrum-verification
+  content_hash: sha256:da6b25dc53ab17bdc561c68df254c955a7b9518efb78187d713a963e6245049c
+- kind: project-relative
+  target: codex
+  value: .agents/skills/spectrum-development
+  runtime: null
+  scope: project
+  owners:
+  - ./.apm/library/spectrum-development
+  active_owner: ./.apm/library/spectrum-development
+  content_hash: null
+- kind: project-relative
+  target: codex
+  value: .agents/skills/spectrum-development/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - ./.apm/library/spectrum-development
+  active_owner: ./.apm/library/spectrum-development
+  content_hash: sha256:bfce00dd5beb9ff2190f8c2e61ee2dd0a6d0b59cd4eb491fe629d758a31a353a
+- kind: project-relative
+  target: codex
+  value: .agents/skills/spectrum-test-authoring
+  runtime: null
+  scope: project
+  owners:
+  - ./.apm/library/spectrum-test-authoring
+  active_owner: ./.apm/library/spectrum-test-authoring
+  content_hash: null
+- kind: project-relative
+  target: codex
+  value: .agents/skills/spectrum-test-authoring/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - ./.apm/library/spectrum-test-authoring
+  active_owner: ./.apm/library/spectrum-test-authoring
+  content_hash: sha256:5df99b3c3f4ad08c2853f850717da07f996617535f07652e64f4fc567b4f1357
+- kind: project-relative
+  target: codex
+  value: .agents/skills/spectrum-ui
+  runtime: null
+  scope: project
+  owners:
+  - ./.apm/library/spectrum-ui
+  active_owner: ./.apm/library/spectrum-ui
+  content_hash: null
+- kind: project-relative
+  target: codex
+  value: .agents/skills/spectrum-ui/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - ./.apm/library/spectrum-ui
+  active_owner: ./.apm/library/spectrum-ui
+  content_hash: sha256:201107ed4b68ddd01b08fcb9795540e0c90e1e539a81e5b536aa58ce2589bc62
+- kind: project-relative
+  target: codex
+  value: .agents/skills/spectrum-verification
+  runtime: null
+  scope: project
+  owners:
+  - ./.apm/library/spectrum-verification
+  active_owner: ./.apm/library/spectrum-verification
+  content_hash: null
+- kind: project-relative
+  target: codex
+  value: .agents/skills/spectrum-verification/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - ./.apm/library/spectrum-verification
+  active_owner: ./.apm/library/spectrum-verification
+  content_hash: sha256:da6b25dc53ab17bdc561c68df254c955a7b9518efb78187d713a963e6245049c
