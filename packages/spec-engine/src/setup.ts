@@ -1,6 +1,6 @@
 import { lstat, readFile, realpath } from 'node:fs/promises';
 import { basename, join, resolve, sep } from 'node:path';
-import { listTemplates, type RenderedTemplate, renderTemplate } from './templates.ts';
+import type { RenderedTemplate } from './templates.ts';
 
 /**
  * Where Spectrum's installed pieces live in a client repository. The CLI writes these paths
@@ -73,6 +73,9 @@ const STARTER_VALUES: Readonly<Record<string, string>> = {
 export async function renderStarterBundle(projectName: string): Promise<RenderedTemplate[]> {
   const name = projectName.trim();
   if (!name || /[\r\n\t\0]/.test(name)) throw new Error('Project name must be one line of text.');
+  // Loaded on demand so importing the setup table never touches template files, for example
+  // inside a server bundle that only inspects repositories.
+  const { listTemplates, renderTemplate } = await import('./templates.ts');
   const templates = (await listTemplates()).filter(
     (template) => !STARTER_EXCLUDED.test(template.id),
   );
