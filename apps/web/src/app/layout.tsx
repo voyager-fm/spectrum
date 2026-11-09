@@ -1,10 +1,11 @@
-import { GitCommitHorizontal } from 'lucide-react';
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import type { ReactNode } from 'react';
 import { cn } from '@/lib/utils';
 import { Nav } from '../components/nav.tsx';
+import { RepositorySwitcher } from '../components/repository-switcher.tsx';
 import { readRepositoryState, repositoryRoot } from '../lib/dashboard.ts';
+import { switcherRepositories } from '../lib/github.ts';
 import './globals.css';
 
 const sans = Geist({ subsets: ['latin'], variable: '--font-sans' });
@@ -18,7 +19,10 @@ export const metadata: Metadata = {
 export const dynamic = 'force-dynamic';
 
 export default async function RootLayout({ children }: { children: ReactNode }) {
-  const repo = await readRepositoryState(repositoryRoot());
+  const [repo, github] = await Promise.all([
+    readRepositoryState(repositoryRoot()),
+    switcherRepositories(),
+  ]);
   return (
     <html lang="en" className={cn('font-sans antialiased', sans.variable, mono.variable)}>
       <body>
@@ -33,23 +37,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
               </div>
               <span className="font-semibold tracking-tight">Spectrum</span>
             </div>
-            <div
-              className="rounded-lg border bg-background px-3 py-2"
-              title="Local repository read by this dashboard"
-            >
-              <div className="truncate text-sm font-medium">{repo.name}</div>
-              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                <GitCommitHorizontal className="size-3.5" aria-hidden />
-                {repo.revision ? (
-                  <span className="font-mono">{repo.revision.slice(0, 7)}</span>
-                ) : (
-                  'No Git revision'
-                )}
-              </div>
-              {repo.dirty ? (
-                <div className="text-xs text-muted-foreground">Uncommitted changes</div>
-              ) : null}
-            </div>
+            <RepositorySwitcher local={repo} github={github} />
             <Nav />
           </aside>
           <main className="mx-auto min-w-0 w-full max-w-5xl px-4 py-8 md:px-10 md:py-10">

@@ -9,7 +9,9 @@ import { after, describe, it } from 'node:test';
 import type { CheckResult } from '@spectrum/core';
 import { extractSnapshot, GitHubError, type Repository } from '@spectrum/integrations/github';
 import { checkRepository } from '@spectrum/spec-engine';
+import { inspectRepositorySetup, type RepositorySetup } from '@spectrum/spec-engine/setup';
 import {
+  AnalysisCache,
   type GitHubDependencies,
   githubAppStatus,
   loadConnectedRepositories,
@@ -34,14 +36,30 @@ const status = {
   installUrl: 'https://github.com/apps/x/installations/new',
 };
 const passing = { ok: true, findings: [], specs: [] } as unknown as CheckResult;
+const missing = (path: string) => ({ state: 'missing' as const, path, detail: null });
+const noSetup: RepositorySetup = {
+  config: missing('.spectrum/config.json'),
+  package: missing('package.json'),
+  skills: {
+    claude: missing('.claude/skills/spectrum/SKILL.md'),
+    codex: missing('.agents/skills/spectrum/SKILL.md'),
+  },
+  plugin: missing('.claude/settings.json'),
+};
 
 /** Labeled mock: an in-memory App and repository client, never a live GitHub call. */
 function fakeDependencies(overrides: Partial<GitHubDependencies> = {}) {
   const log: string[] = [];
   const client = {
     getRepository: async () => repository,
-    listBranches: async () => [{ name: 'main', sha: SHA }],
-    listOpenPullRequests: async () => [],
+    listBranches: async () => {
+      log.push('branches');
+      return [{ name: 'main', sha: SHA }];
+    },
+    listOpenPullRequests: async () => {
+      log.push('pulls');
+      return [];
+    },
     getPullRequest: async (n: number) => ({
       number: n,
       title: 'Add GitHub',
@@ -75,6 +93,8 @@ function fakeDependencies(overrides: Partial<GitHubDependencies> = {}) {
       log.push(`check ${root}`);
       return passing;
     },
+    setup: async () => noSetup,
+    cache: new AnalysisCache(),
     now: () => new Date('2026-11-09T00:00:00Z'),
     ...overrides,
   };
@@ -151,6 +171,26 @@ describe('loadConnectedRepositories', () => {
   });
 });
 
+describe('AnalysisCache', () => {
+  it('evicts the least recently used commit past its limit', async () => {
+    const cache = new AnalysisCache(2);
+    let runs = 0;
+    const run = async () => {
+      runs += 1;
+      return { result: passing, setup: noSetup, checkedAt: '' };
+    };
+    await cache.get('a', run);
+    await cache.get('b', run);
+    await cache.get('a', run);
+    await cache.get('c', run);
+    assert.equal(runs, 3);
+    await cache.get('a', run);
+    assert.equal(runs, 3, 'a was used recently and stays cached');
+    await cache.get('b', run);
+    assert.equal(runs, 4, 'b was evicted');
+  });
+});
+
 describe('loadRepositoryCheck', () => {
   it('checks the default branch at its resolved SHA and disposes the snapshot', async () => {
     const { deps, log } = fakeDependencies();
@@ -160,7 +200,52 @@ describe('loadRepositoryCheck', () => {
     assert.equal(view.check?.sha, SHA);
     assert.equal(view.check?.ref, 'main');
     assert.equal(view.check?.checkedAt, '2026-11-09T00:00:00.000Z');
-    assert.deepEqual(log, [`resolve main`, `tarball ${SHA}`, 'check /snapshot', 'dispose']);
+    assert.deepEqual(log, [
+      'branches',
+      'pulls',
+      'resolve main',
+      `tarball ${SHA}`,
+      'check /snapshot',
+      'dispose',
+    ]);
+    assert.deepEqual(view.check?.setup, noSetup);
+  });
+
+  it('reuses the analysis of a commit it already checked', async () => {
+    const { deps, log } = fakeDependencies();
+    const first = await loadRepositoryCheck('voyager-fm', 'spectrum', { kind: 'default' }, deps);
+    const later = { ...deps, now: () => new Date('2026-11-09T01:00:00Z') };
+    const second = await loadRepositoryCheck(
+      'voyager-fm',
+      'spectrum',
+      { kind: 'ref', ref: SHA },
+      later,
+      { refs: false },
+    );
+    assert.equal(log.filter((line) => line.startsWith('tarball')).length, 1);
+    assert.equal(second.status === 'ready' && second.check?.ref, SHA);
+    // The cached result keeps the time it was computed, not the time it was read.
+    assert.equal(
+      second.status === 'ready' && second.check?.checkedAt,
+      first.status === 'ready' && first.check?.checkedAt,
+    );
+    assert.equal(log.filter((line) => line === 'branches').length, 1);
+  });
+
+  it('retries an analysis that failed instead of caching the failure', async () => {
+    let calls = 0;
+    const { deps } = fakeDependencies({
+      check: async () => {
+        calls += 1;
+        if (calls === 1) throw new Error('transient');
+        return passing;
+      },
+    });
+    const failed = await loadRepositoryCheck('voyager-fm', 'spectrum', { kind: 'default' }, deps);
+    assert.equal(failed.status === 'ready' && failed.check, null);
+    const retried = await loadRepositoryCheck('voyager-fm', 'spectrum', { kind: 'default' }, deps);
+    assert.equal(retried.status === 'ready' && retried.check?.result.ok, true);
+    assert.equal(calls, 2);
   });
 
   it('checks a pull request at its head SHA', async () => {
@@ -236,7 +321,7 @@ describe('loadRepositoryCheck', () => {
       deps,
     );
     assert.equal(view.status === 'ready' && view.check, null);
-    assert.deepEqual(log, []);
+    assert.deepEqual(log, ['branches', 'pulls'], 'nothing is resolved or downloaded');
   });
 });
 
@@ -267,5 +352,41 @@ describe('remote snapshot with the real spec engine', () => {
     if (view.status !== 'ready') return;
     assert.equal(view.check?.result.ok, false);
     assert.ok(view.check?.result.findings.some((f) => f.path === '.spectrum/config.json'));
+  });
+
+  it('reports the declared setup from the snapshot', async () => {
+    const top = join(work, 'src', 'client-repo-abc1234');
+    await mkdir(join(top, '.claude', 'skills', 'spectrum'), { recursive: true });
+    await writeFile(
+      join(top, 'package.json'),
+      JSON.stringify({ devDependencies: { '@voyager-fm/spectrum': '^0.1.0' } }),
+    );
+    await writeFile(
+      join(top, '.claude', 'skills', 'spectrum', 'SKILL.md'),
+      '<!-- Generated by @voyager-fm/spectrum 0.1.0; reinstall with: npx --no spectrum skills install -->\n',
+    );
+    const archive = join(work, 'client.tar.gz');
+    execFileSync('tar', ['-czf', archive, '-C', join(work, 'src'), 'client-repo-abc1234']);
+
+    const { deps } = fakeDependencies({
+      extract: extractSnapshot,
+      check: (root) => checkRepository(root),
+      setup: inspectRepositorySetup,
+    });
+    const app = deps.app as NonNullable<GitHubDependencies['app']>;
+    const client = (await app.repositoryClient('voyager-fm', 'spectrum')) as unknown as {
+      downloadTarball: (sha: string) => Promise<Readable>;
+    };
+    client.downloadTarball = async () => createReadStream(archive);
+
+    const view = await loadRepositoryCheck('voyager-fm', 'spectrum', { kind: 'default' }, deps);
+    assert.equal(view.status, 'ready');
+    if (view.status !== 'ready') return;
+    const setup = view.check?.setup;
+    assert.equal(setup?.config.state, 'missing');
+    assert.deepEqual(setup?.package, { state: 'ok', path: 'package.json', detail: '^0.1.0' });
+    assert.equal(setup?.skills.claude.state, 'ok');
+    assert.equal(setup?.skills.claude.detail, '0.1.0');
+    assert.equal(setup?.skills.codex.state, 'missing');
   });
 });

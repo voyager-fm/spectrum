@@ -1,4 +1,3 @@
-import { ChevronLeft, ExternalLink } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { buttonVariants } from '@/components/ui/button';
@@ -15,18 +14,24 @@ import {
   EmptyNotice,
   LoadErrors,
   Mono,
-  PageHead,
   Section,
   StatCard,
   StatusBadge,
 } from '../../../../components/dashboard.tsx';
-import { GitHubSetup } from '../../../../components/github.tsx';
+import {
+  RepositoryFrame,
+  repositoryPath,
+  targetQuery,
+} from '../../../../components/repository.tsx';
+import { SetupChecklist } from '../../../../components/setup.tsx';
 import {
   type CheckTarget,
   loadRepositoryCheck,
   parseTarget,
   type RemoteCheck,
+  type RepositoryView,
 } from '../../../../lib/github.ts';
+import { onboardingSteps } from '../../../../lib/onboarding.ts';
 
 type Props = {
   params: Promise<{ owner: string; repo: string }>;
@@ -57,86 +62,50 @@ export default async function RepositoryPage({ params, searchParams }: Props) {
   const repo = decodeURIComponent(rawRepo);
   const target = parseTarget(await searchParams);
   const view = await loadRepositoryCheck(owner, repo, target);
-  const base = `/repositories/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}`;
+  const base = repositoryPath(owner, repo);
 
-  const back = (
-    <Link
-      href="/repositories"
-      className="mb-4 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+  return (
+    <RepositoryFrame
+      owner={owner}
+      repo={repo}
+      view={view}
+      tab="overview"
+      query={targetQuery(target)}
     >
-      <ChevronLeft className="size-4" aria-hidden />
-      Repositories
-    </Link>
+      {view.status === 'ready' ? <Ready view={view} base={base} target={target} /> : null}
+    </RepositoryFrame>
   );
-  const head = (
-    <PageHead
-      title={`${owner}/${repo}`}
-      description="Deterministic structural check of .spectrum/ at one pinned commit. No model runs; this is not a code review."
-    />
-  );
+}
 
-  if (view.status === 'not-configured') {
-    return (
-      <>
-        {back}
-        {head}
-        <GitHubSetup missing={view.app.missing} />
-      </>
-    );
-  }
-  if (view.status === 'invalid') {
-    return (
-      <>
-        {back}
-        {head}
-        <EmptyNotice>{view.message}</EmptyNotice>
-      </>
-    );
-  }
-  if (view.status === 'not-installed') {
-    return (
-      <>
-        {back}
-        {head}
-        <section className="rounded-xl border p-6">
-          <h2 className="text-sm font-medium">The Spectrum App is not installed here</h2>
-          <p className="mt-1 text-sm text-muted-foreground">
-            GitHub reports no installation that covers <Mono>{view.fullName}</Mono>, or the
-            repository does not exist. Nothing was checked.
-          </p>
-          {view.app.installUrl ? (
-            <a
-              href={view.app.installUrl}
-              target="_blank"
-              rel="noreferrer"
-              className={buttonVariants({ variant: 'outline', size: 'sm', className: 'mt-4' })}
-            >
-              Install the App
-              <ExternalLink aria-hidden />
-            </a>
-          ) : null}
-        </section>
-      </>
-    );
-  }
-  if (view.status === 'error') {
-    return (
-      <>
-        {back}
-        {head}
-        <LoadErrors errors={view.errors} />
-      </>
-    );
-  }
-
+function Ready({
+  view,
+  base,
+  target,
+}: {
+  view: Extract<RepositoryView, { status: 'ready' }>;
+  base: string;
+  target: ReturnType<typeof parseTarget>;
+}) {
   const { repository, branches, pullRequests, check } = view;
+  const source = (path: string) => `${repository.htmlUrl}/blob/${check?.sha}/${path}`;
+  const onboarding = check ? onboardingSteps(check.setup) : null;
   return (
     <>
-      {back}
-      {head}
       <LoadErrors errors={view.errors} />
-      {check ? (
-        <CheckSummary check={check} htmlUrl={repository.htmlUrl} />
+      {check && onboarding ? (
+        <>
+          {onboarding.complete ? null : (
+            <div className="mb-10">
+              <SetupChecklist onboarding={onboarding} sha={check.sha} sourceUrl={source} />
+            </div>
+          )}
+          <CheckSummary check={check} htmlUrl={repository.htmlUrl} base={base} />
+          {onboarding.complete ? (
+            <Section title="Setup">
+              <SetupChecklist onboarding={onboarding} sha={check.sha} sourceUrl={source} />
+            </Section>
+          ) : null}
+        </>
       ) : (
         <EmptyNotice>Not assessed. No check result exists for this revision.</EmptyNotice>
       )}
@@ -271,7 +240,15 @@ function TargetLink({ href, current }: { href: string; current: boolean }) {
   );
 }
 
-function CheckSummary({ check, htmlUrl }: { check: RemoteCheck; htmlUrl: string }) {
+function CheckSummary({
+  check,
+  htmlUrl,
+  base,
+}: {
+  check: RemoteCheck;
+  htmlUrl: string;
+  base: string;
+}) {
   const { result } = check;
   const errors = result.findings.filter((f) => f.severity === 'error').length;
   const warnings = result.findings.length - errors;
@@ -309,7 +286,21 @@ function CheckSummary({ check, htmlUrl }: { check: RemoteCheck; htmlUrl: string 
         <StatCard title="Findings" value={result.findings.length}>
           {errors} errors, {warnings} warnings
         </StatCard>
-        <StatCard title="Specs read" value={result.specs.length}>
+        <StatCard
+          title="Specs read"
+          value={
+            result.specs.length ? (
+              <Link
+                href={`${base}/specs${targetQuery(check.target)}`}
+                className="underline-offset-4 hover:underline"
+              >
+                {result.specs.length}
+              </Link>
+            ) : (
+              0
+            )
+          }
+        >
           Checked{' '}
           <time dateTime={check.checkedAt}>
             {check.checkedAt.replace('T', ' ').slice(0, 19)} UTC
@@ -321,7 +312,7 @@ function CheckSummary({ check, htmlUrl }: { check: RemoteCheck; htmlUrl: string 
         {noConfig ? (
           <EmptyNotice>
             This commit has no readable <Mono>.spectrum/config.json</Mono>, so there are no specs to
-            check. Add a Spectrum configuration to the repository first.
+            check. Follow the setup steps above to add one.
           </EmptyNotice>
         ) : null}
         {result.findings.length ? (

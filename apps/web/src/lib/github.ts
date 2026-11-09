@@ -14,6 +14,7 @@ import {
   validRepositoryName,
 } from '@spectrum/integrations/github';
 import { checkRepository } from '@spectrum/spec-engine';
+import { inspectRepositorySetup, type RepositorySetup } from '@spectrum/spec-engine/setup';
 
 /**
  * Server-only GitHub App service. Credentials come from the server environment and never
@@ -74,8 +75,50 @@ export interface GitHubDependencies {
   status: GitHubAppStatus;
   extract: typeof extractSnapshot;
   check: (root: string) => Promise<CheckResult>;
+  setup: (root: string) => Promise<RepositorySetup>;
+  /** Analyses keyed by repository and commit SHA. A commit's content never changes. */
+  cache: AnalysisCache;
   now: () => Date;
 }
+
+/** What one snapshot yields: the structural check and the declared Spectrum setup. */
+export interface SnapshotAnalysis {
+  result: CheckResult;
+  setup: RepositorySetup;
+  /** When this analysis ran; cached results keep their original time. */
+  checkedAt: string;
+}
+
+/** Bounded in-memory cache of analyses per `owner/name@sha`, oldest entry evicted first. */
+export class AnalysisCache {
+  readonly #entries = new Map<string, Promise<SnapshotAnalysis>>();
+  readonly #limit: number;
+  constructor(limit = 24) {
+    this.#limit = limit;
+  }
+  /** Reuse a finished or in-flight analysis; a failed one is dropped so the next call retries. */
+  get(key: string, run: () => Promise<SnapshotAnalysis>): Promise<SnapshotAnalysis> {
+    const cached = this.#entries.get(key);
+    if (cached) {
+      this.#entries.delete(key);
+      this.#entries.set(key, cached);
+      return cached;
+    }
+    const pending = run();
+    this.#entries.set(key, pending);
+    pending.catch(() => {
+      if (this.#entries.get(key) === pending) this.#entries.delete(key);
+    });
+    while (this.#entries.size > this.#limit) {
+      const oldest = this.#entries.keys().next().value;
+      if (oldest === undefined) break;
+      this.#entries.delete(oldest);
+    }
+    return pending;
+  }
+}
+
+const analyses = new AnalysisCache();
 
 let shared: { key: string; app: GitHubApp } | null = null;
 
@@ -103,6 +146,8 @@ export async function githubDependencies(env: Env = process.env): Promise<GitHub
     status,
     extract: extractSnapshot,
     check: (root) => checkRepository(root),
+    setup: inspectRepositorySetup,
+    cache: analyses,
     now: () => new Date(),
   };
 }
@@ -165,6 +210,60 @@ export async function loadConnectedRepositories(
   return { status: d.status, installations, repositories, errors };
 }
 
+const CONNECTED_TTL_MS = 60_000;
+let connected: { at: number; value: Promise<ConnectedRepositories> } | null = null;
+
+/**
+ * The connected repository list for navigation, reused for a minute so every page render does
+ * not call GitHub. Failed loads are not reused.
+ */
+export async function cachedConnectedRepositories(): Promise<ConnectedRepositories> {
+  const deps = await githubDependencies();
+  if (!deps.app) return loadConnectedRepositories(deps);
+  if (connected && Date.now() - connected.at < CONNECTED_TTL_MS) return connected.value;
+  const value = loadConnectedRepositories(deps);
+  connected = { at: Date.now(), value };
+  const result = await value;
+  if (result.errors.length && connected?.value === value) connected = null;
+  return result;
+}
+
+export interface SwitcherRepositories {
+  configured: boolean;
+  repositories: { owner: string; name: string; fullName: string; private: boolean }[];
+  /** True when GitHub failed or did not answer in time; the list is then incomplete. */
+  unavailable: boolean;
+}
+
+/**
+ * Connected repositories for the sidebar switcher. Navigation must never wait long on GitHub,
+ * so a slow answer is reported as unavailable instead of blocking every page.
+ */
+export async function switcherRepositories(timeoutMs = 3000): Promise<SwitcherRepositories> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const timeout = new Promise<null>((resolve) => {
+    timer = setTimeout(() => resolve(null), timeoutMs);
+  });
+  try {
+    const data = await Promise.race([cachedConnectedRepositories(), timeout]);
+    if (!data) return { configured: true, repositories: [], unavailable: true };
+    return {
+      configured: data.status.configured,
+      repositories: data.repositories.map((r) => ({
+        owner: r.owner,
+        name: r.name,
+        fullName: r.fullName,
+        private: r.private,
+      })),
+      unavailable: data.errors.length > 0,
+    };
+  } catch {
+    return { configured: true, repositories: [], unavailable: true };
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 /** Accept `owner/name`, `github.com/owner/name` or a full GitHub URL; anything else is null. */
 export function parseRepositoryInput(input: string): { owner: string; repo: string } | null {
   const path = input
@@ -215,6 +314,8 @@ export interface RemoteCheck {
   sha: string;
   checkedAt: string;
   result: CheckResult;
+  /** Spectrum pieces the commit declares: configuration, package, agent skills and plugin. */
+  setup: RepositorySetup;
 }
 
 export type RepositoryView =
@@ -235,15 +336,18 @@ export type RepositoryView =
   | { status: 'error'; app: GitHubAppStatus; fullName: string; errors: string[] };
 
 /**
- * Load a repository's refs and run the deterministic spec check on one pinned commit.
- * The snapshot is removed whether the check succeeds or fails.
+ * Load a repository's refs and run the deterministic spec check and setup inspection on one
+ * pinned commit. The snapshot is removed whether the check succeeds or fails, and the analysis
+ * is cached per commit SHA so moving between pages does not download the repository again.
  */
 export async function loadRepositoryCheck(
   owner: string,
   repo: string,
   target: CheckTarget | { kind: 'invalid'; message: string },
   deps?: GitHubDependencies,
+  options: { refs?: boolean } = {},
 ): Promise<RepositoryView> {
+  const withRefs = options.refs ?? true;
   const d = deps ?? (await githubDependencies());
   const fullName = `${owner}/${repo}`;
   if (!d.app) return { status: 'not-configured', app: d.status };
@@ -266,10 +370,11 @@ export async function loadRepositoryCheck(
   let branches: Branch[];
   let pullRequests: PullRequest[];
   try {
+    // Spec pages only need the pinned commit, so they skip the branch and pull request lists.
     [repository, branches, pullRequests] = await Promise.all([
       client.getRepository(),
-      client.listBranches(),
-      client.listOpenPullRequests(),
+      withRefs ? client.listBranches() : [],
+      withRefs ? client.listOpenPullRequests() : [],
     ]);
   } catch (error) {
     return { status: 'error', app: d.status, fullName, errors: [describeError(error)] };
@@ -300,25 +405,22 @@ export async function loadRepositoryCheck(
     };
   }
 
-  let snapshot: Awaited<ReturnType<typeof extractSnapshot>> | null = null;
   try {
-    snapshot = await d.extract(await client.downloadTarball(sha));
-    const result = await d.check(snapshot.root);
+    const analysis = await d.cache.get(`${repository.fullName}@${sha}`, async () => {
+      const snapshot = await d.extract(await client.downloadTarball(sha));
+      try {
+        const [result, setup] = await Promise.all([d.check(snapshot.root), d.setup(snapshot.root)]);
+        return { result, setup, checkedAt: d.now().toISOString() };
+      } finally {
+        await snapshot.dispose();
+      }
+    });
     return {
       ...ready,
-      check: {
-        repository: repository.fullName,
-        ref: label,
-        target,
-        sha,
-        checkedAt: d.now().toISOString(),
-        result,
-      },
+      check: { repository: repository.fullName, ref: label, target, sha, ...analysis },
       errors: [],
     };
   } catch (error) {
     return { ...ready, check: null, failure: 'failed', errors: [describeError(error)] };
-  } finally {
-    await snapshot?.dispose();
   }
 }
