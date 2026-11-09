@@ -8,13 +8,15 @@ implementation_state: mixed
 
 ## Decision and scope
 
-`apps/web` is Spectrum's single server application, using Next.js App Router. It owns the dashboard and the planned API, webhook, integration and model execution entry points. The CLI and agent plugin remain separate deliverables consuming the same domain packages.
+`apps/web` is Spectrum's single server application, using Next.js App Router: the hosted application in [product layers](product_layers.md). It owns the dashboard, the GitHub connection and accounts, and the planned webhook, automation and model execution entry points. The CLI and agent plugin are the separate local tool and consume the same domain packages.
 
 This decision establishes code ownership. It does not implement server APIs, select a hosting provider, configure credentials or authorize repository writes and external publication.
 
 ## Canonical traceability
 
+- [Product layers](product_layers.md)
 - [Distribution contract](../../../contracts/distribution.md)
+- [GitHub connection contract](../../../contracts/github-connection.md)
 - [Specification model](specification_model.md)
 - [Dashboard contract](../../../product/feature_inventory/specs/dsh/contracts/dashboard.toml)
 - [Runs surface contract](../../../product/feature_inventory/surfaces/web/runs/contract.toml)
@@ -23,20 +25,21 @@ This decision establishes code ownership. It does not implement server APIs, sel
 
 | Owner | Responsibility | Current state |
 | --- | --- | --- |
-| Next.js Server Components and dashboard loader | Read the configured local repository and render derived results | Implemented, read-only |
-| Next.js Route Handlers | Receive server API and webhook requests | Planned |
-| Server services within `apps/web/src/lib/` | Coordinate discovery, drafting, review, integration and model calls through shared packages and adapters | Planned |
+| Next.js Server Components and dashboard loader | Read the configured local repository or a connected GitHub repository at a pinned commit and render derived results | Implemented, read-only toward repositories |
+| Next.js Route Handlers | Receive sign-in, App setup, check and webhook requests | Sign-in, sign-out, App setup and the JSON check route implemented; webhooks planned |
+| Server services within `apps/web/src/lib/` | Coordinate the GitHub connection, accounts, setup detection, discovery, drafting, review and model calls through shared packages and adapters | GitHub connection, accounts and setup checklist implemented; drafting, review and model calls planned |
+| Service database in `apps/web/src/db/` | Users, sessions, workspaces and stored check results (Postgres) | Implemented in account mode |
 | `@spectrum/core` | Shared domain types and contracts | Implemented |
 | `@spectrum/spec-engine` | Repository reads, parsing, structural validation and derived model | Implemented |
 | `@spectrum/changeset` | Proposal rules shared by consumers | Partial approval/revision guard |
-| `@spectrum/integrations` | GitHub/Linear adapter contracts | Contracts only |
-| CLI and agent plugin | Deterministic local commands; reasoning supplied by the user's host agent | Implemented local path |
+| `@spectrum/integrations` | GitHub App, user authorization and repository snapshot clients; Linear contract | GitHub implemented; Linear contract only |
+| CLI and agent plugin (local tool) | Deterministic local commands; reasoning supplied by the user's host agent | Implemented; independent of this application |
 
 ## Current execution
 
-Server Components load repository data through `apps/web/src/lib/dashboard.ts` and `@spectrum/spec-engine`. Pages render the derived model. The dashboard remains loopback-only and read-only. Proposals, Runs and PR reviews show planned states without execution controls or synthetic results.
+Server Components load the local repository through `apps/web/src/lib/dashboard.ts` and connected repositories through `apps/web/src/lib/github.ts`, both with `@spectrum/spec-engine`. Pages render the derived model. The development and start scripts bind to `127.0.0.1`. The application never writes to a repository. Without account variables it runs in single-operator mode and keeps checks in memory. With them, it requires GitHub sign-in and stores checks in Postgres. Proposals, Runs and PR reviews show planned states without execution controls or synthetic results.
 
-The plugin uses its bundled CLI and the host agent's model. It does not depend on a Spectrum model service. No queue, model adapter, saved run history or remote review publisher exists.
+The local tool uses its CLI and the host agent's model. It does not depend on this application or a Spectrum model service. No queue, model adapter, agent run history, webhook receiver or remote review publisher exists.
 
 ## Planned server execution
 
@@ -58,6 +61,6 @@ When jobs require retry, deduplication or recovery after a restart, add persiste
 
 ## Sources
 
-- Runtime owners: `apps/web/src/lib/dashboard.ts`, `apps/web/src/app/`, `apps/cli/src/index.ts` and `packages/` in this repository.
+- Runtime owners: `apps/web/src/lib/dashboard.ts`, `apps/web/src/lib/github.ts`, `apps/web/src/lib/auth.ts`, `apps/web/src/db/`, `apps/web/src/app/`, `apps/cli/src/index.ts` and `packages/` in this repository.
 - [Next.js Route Handlers](https://nextjs.org/docs/app/api-reference/file-conventions/route)
 - [Next.js after duration](https://nextjs.org/docs/app/api-reference/functions/after#duration)

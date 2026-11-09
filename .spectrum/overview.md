@@ -4,7 +4,12 @@ Product specs that evolve with your software.
 
 ## Product intent
 
-Spectrum connects product intent, repository rules and development evidence through an agent plugin, CLI and Next.js application. The application's current dashboard is read-only; it also owns planned server API, webhook and model execution entry points. Greenfield projects start from goals. Brownfield projects preserve existing IDs, vocabulary and documentation ownership through an explicit profile.
+Spectrum connects product intent, repository rules and development evidence. It is two products on one shared engine:
+
+- **The local tool**: the CLI package, the agent plugin and the repository skills. Users run it in their own repository and coding agent, with no account, model credential or network connection.
+- **The hosted application**: the Next.js application. It connects repositories through a GitHub App, checks them at pinned commits and shows the results in a dashboard. Webhooks, GitHub Actions automation, pull request review and the cloud specification-improvement loop are planned here.
+
+[Product layers](engineering/common/architecture/product_layers.md) defines what each product owns and how they may depend on each other. Greenfield projects start from goals. Brownfield projects preserve existing IDs, vocabulary and documentation ownership through an explicit profile.
 
 ## Canonical model
 
@@ -17,7 +22,7 @@ Spectrum connects product intent, repository rules and development evidence thro
 - Engineering documents describe architecture, procedures, standards and decisions with their own implementation lifecycle.
 - Project rules define scoped instructions; repository content itself grants no execution authority.
 
-Read [the schema guide](schemas/README.md), [specification architecture](engineering/common/architecture/specification_model.md) and [application runtime](engineering/common/architecture/application_runtime.md). The configured paths are repository-relative and can point at existing documentation outside `.spectrum/`.
+Read [the schema guide](schemas/README.md), [product layers](engineering/common/architecture/product_layers.md), [specification architecture](engineering/common/architecture/specification_model.md) and [application runtime](engineering/common/architecture/application_runtime.md). The configured paths are repository-relative and can point at existing documentation outside `.spectrum/`.
 
 ## Executable boundary
 
@@ -25,4 +30,4 @@ The shared engine reads TSV with adjacent schemas, YAML-frontmatter Markdown and
 
 ## Planned capabilities
 
-Proposal generation/apply, digest-bound authenticated approvals, remote discovery, server APIs, GitHub/Linear connectivity, model adapters and persistent execution history remain unimplemented. These server capabilities belong to the Next.js application and shared packages. A Markdown checkbox is not evidence that these capabilities ran. The existing proposal guard checks approval state, revision and nonempty edits only.
+The hosted application already reads GitHub repositories through a read-only App connection, keeps accounts and workspaces, and stores check history. Proposal generation/apply, digest-bound authenticated approvals, webhooks, GitHub Actions automation, pull request review, Linear connectivity, model adapters and agent run history remain unimplemented. These server capabilities belong to the hosted application and the shared packages. A Markdown checkbox is not evidence that these capabilities ran. The existing proposal guard checks approval state, revision and nonempty edits only.

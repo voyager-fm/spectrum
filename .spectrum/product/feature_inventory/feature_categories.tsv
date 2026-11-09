@@ -1,8 +1,8 @@
 order	category_title	category_key	description
 1	Specification validation	VAL	Read, validate and list repository-native specifications with the shared deterministic engine.
-2	Specification dashboard	DSH	Inspect the shared repository model through read-only local web views.
+2	Specification dashboard	DSH	Inspect the shared repository model of a local or connected repository in the hosted application.
 3	Agent plugin	AGT	Run Spectrum inside the user's coding agent with the bundled deterministic CLI.
 4	Agent loop	LOOP	Propose, run and review specification changes under explicit human authority.
-5	Connections	INT	Connect hosted repositories, issue trackers and model providers to the shared model.
+5	Connections	INT	Connect hosted repositories, issue trackers and model providers to the shared model through the hosted application.
 6	Repository setup	SET	Install Spectrum into a client repository and guide it from an empty repository to a working agent setup.
 7	Implementation traceability	TRC	Connect canonical interaction specifications to explicitly declared implementation files and source locations.

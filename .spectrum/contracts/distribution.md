@@ -1,21 +1,21 @@
 # Distribution contract
 
-Spectrum ships as an agent plugin: a bundle of skills that runs inside the user's coding agent (Claude Code first; other Agent Skills hosts later). The host agent's model does the judgment. A bundled deterministic CLI does everything that must be exact. Spectrum does not need its own model credentials on this path.
+This contract covers how Spectrum's two products ship; [product layers](../engineering/common/architecture/product_layers.md) defines the products and their dependency rules. The local tool ships as the `@voyager-fm/spectrum` CLI package and as an agent plugin: a bundle of skills that runs inside the user's coding agent (Claude Code first; other Agent Skills hosts later). The host agent's model does the judgment. The deterministic CLI does everything that must be exact. Spectrum does not need its own model credentials on this path. The hosted application is the Next.js server described below.
 
 ## Repository layout
-- `apps/` holds three deliverables: `apps/plugin` is the agent plugin, `apps/web` the Next.js application, and `apps/cli` the deterministic command line, packaged as `@voyager-fm/spectrum` with a `spectrum` binary (packable, not yet published to npm).
+- `apps/` holds three deliverables in two products. The local tool is `apps/cli`, the deterministic command line, with `apps/plugin`, the agent plugin. The hosted application is `apps/web`. The CLI is packaged as `@voyager-fm/spectrum` with a `spectrum` binary (packable, not yet published to npm).
 - `packages/` holds shared libraries consumed as workspace packages (`@spectrum/<name>`) through package `exports`, never through relative paths into another package.
   - `core`: shared types and contracts.
   - `spec-engine`: reading, relationship and validation of `.spectrum/`.
   - `changeset`: proposal approval and staleness rules.
-  - `integrations`: GitHub/Linear adapter contracts.
+  - `integrations`: hosted adapters, used only by `apps/web`: the GitHub App, user authorization and snapshot clients, and the Linear contract.
 - `.claude-plugin/marketplace.json` at the repository root lists `apps/plugin`, so `claude plugin marketplace add <owner>/<repo>` installs it.
 - Skills for *developing* Spectrum stay in `.apm/library/`. Product skills live only in `apps/plugin/skills/`. Neither copies the other.
 
 ## Server application
 `apps/web` owns the dashboard and all planned server entry points: APIs, GitHub webhooks, integration calls and model execution. Route Handlers receive external HTTP requests; server services coordinate shared packages and implemented adapters. Domain parsing, validation and proposal rules stay in the workspace packages for reuse by the CLI and plugin.
 
-Today only local read-only dashboard views are executable. Server APIs, webhooks, model execution and saved run history remain unimplemented. The plugin's host-agent reasoning path continues to work independently of these planned services.
+Today the application serves the dashboard for the local repository and for GitHub repositories read through the [GitHub connection](github-connection.md). That connection covers sign-in, workspaces and stored check history. Webhooks, GitHub Actions automation, model execution and agent run history remain unimplemented. The local tool works independently of all of these services.
 
 Persistent execution state and queue delivery can be added when jobs require automatic retry or restart recovery. Execution duration and delivery guarantees depend on the deployment environment. See [application runtime](../engineering/common/architecture/application_runtime.md) for the accepted structure and execution limits.
 
