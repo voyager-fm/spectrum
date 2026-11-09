@@ -15,7 +15,8 @@ export default function RunsPage() {
           'Questions and approvals the run is waiting on',
         ]}
       >
-        The worker has no queue or model provider yet; <Mono>runJob</Mono> throws a not-implemented error.
+        The worker has no queue or model provider yet; <Mono>runJob</Mono> throws a not-implemented
+        error.
       </Planned>
     </>
   );

@@ -1,9 +1,9 @@
-import type { ReactNode } from 'react';
 import { CircleAlert, CircleDashed } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import type { ReactNode } from 'react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { cn } from '@/lib/utils';
 
 export function PageHead({ title, description }: { title: string; description: ReactNode }) {
   return (
@@ -24,12 +24,25 @@ export type Tone = 'ok' | 'bad' | 'planned' | 'info' | 'neutral';
 export function StatusBadge({ tone = 'neutral', children }: { tone?: Tone; children: ReactNode }) {
   if (tone === 'ok') return <Badge>{children}</Badge>;
   if (tone === 'bad') return <Badge variant="destructive">{children}</Badge>;
-  if (tone === 'planned') return <Badge variant="outline" className="border-dashed text-muted-foreground">{children}</Badge>;
+  if (tone === 'planned')
+    return (
+      <Badge variant="outline" className="border-dashed text-muted-foreground">
+        {children}
+      </Badge>
+    );
   if (tone === 'info') return <Badge variant="secondary">{children}</Badge>;
   return <Badge variant="outline">{children}</Badge>;
 }
 
-export function Section({ title, description, children }: { title: string; description?: ReactNode; children: ReactNode }) {
+export function Section({
+  title,
+  description,
+  children,
+}: {
+  title: string;
+  description?: ReactNode;
+  children: ReactNode;
+}) {
   return (
     <section className="mt-10 flex flex-col gap-3">
       <div>
@@ -41,31 +54,60 @@ export function Section({ title, description, children }: { title: string; descr
   );
 }
 
-export function StatCard({ title, value, children }: { title: string; value: ReactNode; children?: ReactNode }) {
+export function StatCard({
+  title,
+  value,
+  children,
+}: {
+  title: string;
+  value: ReactNode;
+  children?: ReactNode;
+}) {
   return (
     <Card size="sm">
       <CardHeader>
         <CardDescription>{title}</CardDescription>
         <CardTitle className="text-2xl font-semibold tabular-nums">{value}</CardTitle>
       </CardHeader>
-      {children ? <CardContent className="text-xs text-muted-foreground">{children}</CardContent> : null}
+      {children ? (
+        <CardContent className="text-xs text-muted-foreground">{children}</CardContent>
+      ) : null}
     </Card>
   );
 }
 
 export function Mono({ className, children }: { className?: string; children: ReactNode }) {
-  return <code className={cn('rounded bg-muted px-1 py-0.5 font-mono text-xs', className)}>{children}</code>;
+  return (
+    <code className={cn('rounded bg-muted px-1 py-0.5 font-mono text-xs', className)}>
+      {children}
+    </code>
+  );
 }
 
 /** Empty result of a successful load. Name the source and the next step. */
 export function EmptyNotice({ children }: { children: ReactNode }) {
-  return <div className="rounded-lg border border-dashed px-4 py-6 text-center text-sm text-muted-foreground">{children}</div>;
+  return (
+    <div className="rounded-lg border border-dashed px-4 py-6 text-center text-sm text-muted-foreground">
+      {children}
+    </div>
+  );
 }
 
 /** Explicit placeholder for a capability that is planned but not implemented. */
-export function Planned({ title, children, upcoming }: { title: string; children: ReactNode; upcoming: string[] }) {
+export function Planned({
+  title,
+  children,
+  upcoming,
+}: {
+  title: string;
+  children: ReactNode;
+  upcoming: string[];
+}) {
   return (
-    <section aria-label={`${title} (not implemented)`} className="rounded-xl border border-dashed p-6">
+    <section
+      aria-label={`${title} (not implemented)`}
+      className="rounded-xl border border-dashed p-6"
+    >
       <div className="flex items-center gap-2">
         <CircleDashed className="size-4 text-muted-foreground" aria-hidden />
         <h2 className="text-sm font-medium">{title}</h2>
@@ -74,7 +116,10 @@ export function Planned({ title, children, upcoming }: { title: string; children
       <p className="mt-2 text-sm text-muted-foreground">{children}</p>
       <ul className="mt-4 flex flex-col gap-1.5 text-sm">
         {upcoming.map((item) => (
-          <li key={item} className="flex gap-2 before:mt-2 before:size-1 before:shrink-0 before:rounded-full before:bg-muted-foreground">
+          <li
+            key={item}
+            className="flex gap-2 before:mt-2 before:size-1 before:shrink-0 before:rounded-full before:bg-muted-foreground"
+          >
             {item}
           </li>
         ))}

@@ -6,7 +6,10 @@ export const metadata: Metadata = { title: 'Proposals' };
 export default function ProposalsPage() {
   return (
     <>
-      <PageHead title="Proposals" description="Review spec change sets before anything is written to the repository." />
+      <PageHead
+        title="Proposals"
+        description="Review spec change sets before anything is written to the repository."
+      />
       <Planned
         title="Change set review"
         upcoming={[
@@ -16,7 +19,8 @@ export default function ProposalsPage() {
           'Stale state when the repository revision changes during review',
         ]}
       >
-        No proposal store or generator exists yet. The ChangeSet contract is in <Mono>.spectrum/contracts/change-set.md</Mono>.
+        No proposal store or generator exists yet. The ChangeSet contract is in{' '}
+        <Mono>.spectrum/contracts/change-set.md</Mono>.
       </Planned>
     </>
   );

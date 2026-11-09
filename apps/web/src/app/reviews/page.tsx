@@ -1,12 +1,15 @@
 import type { Metadata } from 'next';
-import { Mono, PageHead, Planned } from '../../components/dashboard.tsx';
+import { PageHead, Planned } from '../../components/dashboard.tsx';
 
 export const metadata: Metadata = { title: 'PR reviews' };
 
 export default function ReviewsPage() {
   return (
     <>
-      <PageHead title="PR reviews" description="Pull request reviews against the specs and rules they affect." />
+      <PageHead
+        title="PR reviews"
+        description="Pull request reviews against the specs and rules they affect."
+      />
       <Planned
         title="Spec-aware pull request review"
         upcoming={[
@@ -16,8 +19,8 @@ export default function ReviewsPage() {
           'Spec improvements proposed from review findings',
         ]}
       >
-        No GitHub App or webhook is connected. A review result must match the current head SHA before it can mark a pull
-        request as reviewed.
+        No GitHub App or webhook is connected. A review result must match the current head SHA
+        before it can mark a pull request as reviewed.
       </Planned>
     </>
   );

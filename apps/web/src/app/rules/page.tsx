@@ -1,6 +1,13 @@
 import type { Metadata } from 'next';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { EmptyNotice, LoadErrors, Mono, PageHead, Planned, StatusBadge } from '../../components/dashboard.tsx';
+import {
+  EmptyNotice,
+  LoadErrors,
+  Mono,
+  PageHead,
+  Planned,
+  StatusBadge,
+} from '../../components/dashboard.tsx';
 import { loadDashboard } from '../../lib/dashboard.ts';
 
 export const metadata: Metadata = { title: 'Rules' };
@@ -11,13 +18,19 @@ export default async function RulesPage() {
     <>
       <PageHead
         title="Rules"
-        description={<>Repository rules in <Mono>.spectrum/rules</Mono>, applied to agents and reviews.</>}
+        description={
+          <>
+            Repository rules in <Mono>.spectrum/rules</Mono>, applied to agents and reviews.
+          </>
+        }
       />
       <LoadErrors errors={data.errors} />
 
       <div className="flex flex-col gap-3">
         {data.rules.length === 0 ? (
-          <EmptyNotice>No rule files in <Mono>.spectrum/rules</Mono>.</EmptyNotice>
+          <EmptyNotice>
+            No rule files in <Mono>.spectrum/rules</Mono>.
+          </EmptyNotice>
         ) : (
           data.rules.map((rule) => (
             <Card key={rule.path}>
@@ -45,7 +58,8 @@ export default async function RulesPage() {
             'Show where each approved rule is installed and its baseline revision',
           ]}
         >
-          Spectrum does not yet discover rules outside <Mono>.spectrum/rules</Mono> or propose changes.
+          Spectrum does not yet discover rules outside <Mono>.spectrum/rules</Mono> or propose
+          changes.
         </Planned>
       </div>
     </>

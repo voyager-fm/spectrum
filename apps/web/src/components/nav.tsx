@@ -1,12 +1,17 @@
 'use client';
 
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
 import type { LucideIcon } from 'lucide-react';
 import { FileText, GitPullRequest, Inbox, LayoutGrid, Play, Plug, ScrollText } from 'lucide-react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 
-interface Item { href: string; label: string; icon: LucideIcon; planned?: boolean }
+interface Item {
+  href: string;
+  label: string;
+  icon: LucideIcon;
+  planned?: boolean;
+}
 
 const groups: { title: string; items: Item[] }[] = [
   {
@@ -54,7 +59,9 @@ export function Nav() {
               >
                 <item.icon className="size-4 shrink-0" aria-hidden />
                 <span className="flex-1">{item.label}</span>
-                {item.planned ? <span className="text-[11px] text-muted-foreground">Planned</span> : null}
+                {item.planned ? (
+                  <span className="text-[11px] text-muted-foreground">Planned</span>
+                ) : null}
               </Link>
             );
           })}
