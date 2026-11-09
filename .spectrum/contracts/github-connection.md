@@ -29,11 +29,21 @@ The Next.js application can read a GitHub repository through a GitHub App and ru
 - A result is the output of the deterministic structural check (`checkRepository`) for that commit: findings and specs read. It does not show that code implements the specs, that the specs are semantically right, or that a pull request is safe to merge.
 - A commit without a readable `.spectrum/config.json` fails with an `invalid-config` finding; the application explains that nothing could be checked.
 - When resolution, download or extraction fails, the result is "not assessed" with a safe error message, never a pass. A ref or pull request that does not exist is reported as not found, separately from a download or extraction failure.
-- Results are computed per request and not stored.
+- Each commit is analyzed once per server process. The analysis is cached in memory by repository and full SHA, at most 24 commits with the least recently used dropped first. Nothing is written to disk or a database, and a restart clears the cache. A failed analysis is not cached. A moving ref is resolved again on every request, so a new commit is analyzed when it appears.
+- A result shows the time its analysis ran, not the time it was read from the cache.
+
+## Repository setup
+- The same snapshot is inspected for the Spectrum pieces the repository declares: `.spectrum/config.json` with `schema_version` 2, `@voyager-fm/spectrum` in `package.json`, the repository skills and the Claude Code plugin in `.claude/settings.json`. Detection uses `inspectRepositorySetup` from `@spectrum/spec-engine/setup`, so it matches the CLI.
+- The dashboard turns missing pieces into a checklist of commands that the user runs in a clone. The App is read-only, so the dashboard never installs or writes anything. A skill that Spectrum did not install is never counted as done. The package is not published to npm yet, and the checklist says so.
+- A file being present shows declared setup. It does not show that the CLI or an agent integration runs.
+
+## Browsing and switching
+- `/repositories/{owner}/{repo}/specs` and `/repositories/{owner}/{repo}/specs/{id}` show the specs at the same pinned commit. They keep `?ref=` or `?pr=` and name the SHA they read.
+- The sidebar switches between the local repository and the connected repositories, and keeps the current tab. Its list is reused for one minute. If GitHub does not answer within three seconds, the list is marked incomplete and the page still renders.
 
 ## Not implemented
 - Webhooks and automatic checks on push or pull request events.
 - Pull request comments, reviews, check runs or any other write to GitHub.
-- Persisted check history and comparisons between commits.
+- Persisted check history and comparisons between commits, or any database. Connection state lives in GitHub and the server environment.
 - A CLI or plugin command for remote repositories. The JSON route `/api/github/repositories/{owner}/{repo}/check` returns the same result for later clients.
 - Model-based review of a remote repository.
