@@ -7,12 +7,12 @@
   },
   "packageManager": "pnpm@10.20.0",
   "scripts": {
-    "dev": "node apps/web/src/server.ts",
+    "dev": "pnpm --filter @spectrum/web dev",
     "cli": "node apps/cli/src/index.ts",
     "spec:check": "node apps/cli/src/index.ts check",
     "spec:list": "node apps/cli/src/index.ts list",
     "test": "node --test \"{apps,packages}/*/src/**/*.test.ts\"",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc --noEmit && pnpm --filter @spectrum/web typecheck",
     "check": "pnpm typecheck && pnpm test && pnpm spec:check",
     "agents:setup": "apm install --frozen && apm audit --ci",
     "agents:sync": "apm install && apm audit --ci"

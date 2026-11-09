@@ -12,3 +12,7 @@ apm_modules/
 /.claude/skills/
 # Internal-only planning handoff; contains private Slack links.
 /CONTEXT.md
+# Next.js build output and generated types
+.next/
+next-env.d.ts
+*.tsbuildinfo

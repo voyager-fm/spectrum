@@ -10,11 +10,11 @@ pnpm check
 pnpm spec:list
 pnpm dev
 ```
-Open http://127.0.0.1:3000. The dashboard reads this repository's own .spectrum directory. `pnpm cli check /path/to/repository` validates another compatible repository without writing to it.
+Open http://127.0.0.1:3000. The Next.js dashboard reads this repository's own .spectrum directory at request time; set `SPECTRUM_REPOSITORY=/path/to/repository` to read another local repository. `pnpm cli check /path/to/repository` validates another compatible repository without writing to it.
 
 ## Structure
 - apps/cli: deterministic check/list commands
-- apps/web: tiny Node HTTP read-only dashboard; replace with a full web framework as UI requirements settle
+- apps/web: Next.js (App Router) read-only dashboard with Tailwind CSS v4 and shadcn/ui in a monotone theme. Overview, specs, spec detail, rules and integrations read real repository data; proposals, runs and PR reviews are explicit not-implemented placeholders
 - apps/worker: explicit nonfunctional queue/job boundary
 - packages/core: shared spec and proposal types
 - packages/spec-engine: parsing, local links and validation
