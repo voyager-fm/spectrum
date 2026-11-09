@@ -2,6 +2,7 @@
 Write all product content, specifications, and commit messages in English.
 Read .spectrum/overview.md and .spectrum/rules/agents.md before changes.
 Use TypeScript with erasable syntax and explicit .ts imports (Node >=22.18).
+Keep the engine (`apps/`, `packages/`) and Spectrum's own client specifications (`.spectrum/`) separate: specification format definitions live only in `packages/spec-engine/`, and `.spectrum/` and template output contain only what a customer repository would contain. See [the boundary rules](.apm/library/spectrum-development/references/repository-boundary.md).
 Keep the plugin, CLI and Next.js application on the shared workspace packages (@spectrum/core, spec-engine, changeset). apps/web owns the dashboard and planned server API, webhook and model execution entry points; see .spectrum/contracts/distribution.md and .spectrum/engineering/common/architecture/application_runtime.md.
 Use the root Biome configuration for shared linting, formatting and import organization; do not add ESLint or Prettier. Run `pnpm format` after development work and `pnpm check` before handoff. Use `pnpm lint:fix` for safe lint and import fixes. Add regression tests for changed behavior.
 Keep unimplemented integration paths explicit; never fabricate successful model calls or reviews.

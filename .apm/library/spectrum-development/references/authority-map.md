@@ -9,7 +9,8 @@ Use [the configured source map](../../../../.spectrum/config.json) to locate the
 | Question | Read |
 | --- | --- |
 | Product intent and executable boundary | [Overview](../../../../.spectrum/overview.md) |
-| Document ownership, serialization and relationships | [Schema guide](../../../../.spectrum/schemas/README.md) and the specification-model architecture in the configured engineering root |
+| Specification format: schemas, base schemas, layout, templates | Engine-owned definitions in `packages/spec-engine/` ([document model](../../../../packages/spec-engine/docs/document-model.md)); see [the boundary](repository-boundary.md) |
+| Spectrum's own engine architecture | The specification-model architecture in the configured engineering root |
 | Objects, surfaces, regions and stable feature/interaction IDs | Configured IA and FI inventories under `.spectrum/product/` |
 | Behavior and acceptance criteria | The affected feature bundle's contracts, flows and interaction Markdown specs |
 | Web routes and page behavior | Configured route inventory and page bundles under `.spectrum/product/website/` |
