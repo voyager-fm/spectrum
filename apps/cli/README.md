@@ -11,6 +11,7 @@ npm install --save-dev @voyager-fm/spectrum
 npx --no spectrum init             # .spectrum/config.json and a connected starter bundle
 npx --no spectrum skills install   # .claude/skills/spectrum and .agents/skills/spectrum
 npx --no spectrum check
+npx --no spectrum status           # what is set up, what is missing, which skill is outdated
 ```
 
 Always pass `--no` to `npx`. The unscoped npm package `spectrum` is unrelated, so a bare `npx spectrum` could download it.
@@ -23,6 +24,7 @@ Always pass `--no` to `npx`. The unscoped npm package `spectrum` is unrelated, s
 | `list [path] [--profile p.json]` | nothing | Interaction specs as JSON |
 | `init [path] [--name project] [--dry-run]` | the starter bundle | Files written, conflicts and a check summary |
 | `skills install [path] [--agent claude\|codex\|all] [--force] [--dry-run]` | agent skill files | One outcome per agent: created, updated, unchanged or conflict |
+| `status [path]` | nothing | Configuration, package and agent skill state, skill version drift and the next commands; exit 0 only when ready |
 | `--version` | nothing | The installed version |
 
 `init` is all-or-nothing. When any starter path already exists, including `.spectrum/config.json`, it reports the conflicts and writes nothing. Starter values Spectrum cannot know are `TBD`, and `check` reports them as warnings until a person decides them. Nothing in the starter is approved or verified.

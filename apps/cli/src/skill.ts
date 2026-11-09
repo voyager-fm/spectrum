@@ -28,6 +28,7 @@ ${bin} list
 
 - \`check\` prints \`{ "ok", "findings", "specs", "config", "model" }\` as JSON. Exit code 0 means no structural errors; unresolved warnings remain visible. Exit code 1 means structural errors or a missing/invalid configuration.
 - \`list\` prints the parsed interaction specs as a JSON array with the same validation and exit status.
+- \`${bin} status\` reports which setup steps are missing and whether this skill came from the installed version.
 - \`${bin} --version\` prints the installed version.
 
 If \`${bin}\` does not exist, the package is not installed: tell the user to run \`npm install --save-dev ${SETUP.packageName}\` (or their package manager's equivalent). Do not run \`npx ${SETUP.bin}\` without \`--no\`; that can download an unrelated package with the same name.

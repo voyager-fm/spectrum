@@ -7451,7 +7451,7 @@ var init_templates = __esm({
 });
 
 // ../cli/src/index.ts
-import { readFile as readFile3 } from "node:fs/promises";
+import { readFile as readFile4 } from "node:fs/promises";
 
 // ../../packages/spec-engine/src/index.ts
 import { realpath as realpath2 } from "node:fs/promises";
@@ -10561,6 +10561,7 @@ async function checkRepository(root, options = {}) {
 }
 
 // ../../packages/spec-engine/src/setup.ts
+import { lstat, readFile as readFile2, realpath as realpath3 } from "node:fs/promises";
 import { basename as basename2, join, resolve as resolve3, sep as sep2 } from "node:path";
 var SETUP = {
   packageName: "@voyager-fm/spectrum",
@@ -10638,9 +10639,68 @@ function defaultProjectName(root) {
   return basename2(resolve3(root)) || "Project";
 }
 var MAX_SETUP_FILE = 1024 * 1024;
+async function readInside(root, path) {
+  const target = join(root, path);
+  try {
+    const stat2 = await lstat(target);
+    if (!stat2.isFile() || stat2.size > MAX_SETUP_FILE) return null;
+    const [real, base] = await Promise.all([realpath3(target), realpath3(root)]);
+    if (!real.startsWith(base + sep2)) return null;
+    return await readFile2(target, "utf8");
+  } catch {
+    return null;
+  }
+}
+function parseJson(text2) {
+  try {
+    const value = JSON.parse(text2);
+    return value && typeof value === "object" && !Array.isArray(value) ? value : null;
+  } catch {
+    return null;
+  }
+}
+function skillVersion(content) {
+  const index = content.indexOf(SETUP.skillMarker);
+  if (index < 0) return null;
+  return /^ (\S+?);?\s/.exec(content.slice(index + SETUP.skillMarker.length))?.[1] ?? null;
+}
+async function inspectRepositorySetup(root) {
+  const item = (path, state, detail = null) => ({
+    state,
+    path,
+    detail
+  });
+  const configText = await readInside(root, SETUP.config);
+  const configJson = configText === null ? null : parseJson(configText);
+  const config = configText === null ? item(SETUP.config, "missing") : configJson?.schema_version === 2 ? item(SETUP.config, "ok", "schema_version 2") : item(
+    SETUP.config,
+    "invalid",
+    configJson ? "schema_version is not 2" : "not a JSON object"
+  );
+  const manifestText = await readInside(root, "package.json");
+  const manifest = manifestText === null ? null : parseJson(manifestText);
+  let pkg;
+  if (manifestText === null) pkg = item("package.json", "missing", "no package.json");
+  else if (!manifest) pkg = item("package.json", "invalid", "not a JSON object");
+  else {
+    const range = ["devDependencies", "dependencies"].map((field) => manifest[field]?.[SETUP.packageName]).find((value) => typeof value === "string");
+    pkg = range ? item("package.json", "ok", range) : item("package.json", "missing", `${SETUP.packageName} is not declared`);
+  }
+  const skills = {};
+  for (const agent of SKILL_AGENTS) {
+    const path = SETUP.skills[agent];
+    const content = await readInside(root, path);
+    skills[agent] = content === null ? item(path, "missing") : content.includes(SETUP.skillMarker) ? item(path, "ok", skillVersion(content)) : item(path, "unmanaged", "not installed by Spectrum");
+  }
+  const settingsText = await readInside(root, SETUP.claudeSettings);
+  const settings = settingsText === null ? null : parseJson(settingsText);
+  const enabled = settings?.enabledPlugins?.[SETUP.plugin];
+  const plugin = settingsText === null ? item(SETUP.claudeSettings, "missing") : !settings ? item(SETUP.claudeSettings, "invalid", "not a JSON object") : enabled === true ? item(SETUP.claudeSettings, "ok", `${SETUP.plugin} enabled`) : item(SETUP.claudeSettings, "missing", `${SETUP.plugin} is not enabled`);
+  return { config, package: pkg, skills, plugin };
+}
 
 // ../cli/src/files.ts
-import { lstat, mkdir, readFile as readFile2, realpath as realpath3, writeFile } from "node:fs/promises";
+import { lstat as lstat2, mkdir, readFile as readFile3, realpath as realpath4, writeFile } from "node:fs/promises";
 import { dirname as dirname2, isAbsolute as isAbsolute2, join as join2, relative as relative3, resolve as resolve4, sep as sep3 } from "node:path";
 function insideRoot(root, path) {
   if (isAbsolute2(path) || path.split("/").some((part) => part === ".." || part === ""))
@@ -10650,20 +10710,20 @@ function insideRoot(root, path) {
 async function inspectFile(root, path) {
   const target = insideRoot(root, path);
   try {
-    const stat2 = await lstat(target);
+    const stat2 = await lstat2(target);
     if (!stat2.isFile()) return { kind: "other" };
-    return { kind: "file", content: await readFile2(target, "utf8") };
+    return { kind: "file", content: await readFile3(target, "utf8") };
   } catch (error) {
     if (error.code === "ENOENT") return { kind: "missing" };
     throw error;
   }
 }
 async function assertContained(root, target) {
-  const base = await realpath3(root);
+  const base = await realpath4(root);
   let ancestor = dirname2(target);
   for (; ; ) {
     try {
-      const real = await realpath3(ancestor);
+      const real = await realpath4(ancestor);
       const rel = relative3(base, real);
       if (rel === "" || !rel.startsWith(`..${sep3}`) && rel !== ".." && !isAbsolute2(rel)) return;
       throw new Error(`Refusing to write through a link outside the repository: ${target}`);
@@ -10710,6 +10770,7 @@ ${bin} list
 
 - \`check\` prints \`{ "ok", "findings", "specs", "config", "model" }\` as JSON. Exit code 0 means no structural errors; unresolved warnings remain visible. Exit code 1 means structural errors or a missing/invalid configuration.
 - \`list\` prints the parsed interaction specs as a JSON array with the same validation and exit status.
+- \`${bin} status\` reports which setup steps are missing and whether this skill came from the installed version.
 - \`${bin} --version\` prints the installed version.
 
 If \`${bin}\` does not exist, the package is not installed: tell the user to run \`npm install --save-dev ${SETUP.packageName}\` (or their package manager's equivalent). Do not run \`npx ${SETUP.bin}\` without \`--no\`; that can download an unrelated package with the same name.
@@ -10812,6 +10873,32 @@ async function installSkills(root, version, options = {}) {
   }
   return { ok, dryRun, skills };
 }
+async function repositoryStatus(root, version) {
+  const setup = await inspectRepositorySetup(root);
+  const warnings = [];
+  const next = [];
+  if (setup.config.state === "missing") next.push(SETUP_COMMANDS.init);
+  else if (setup.config.state === "invalid")
+    warnings.push(`${setup.config.path}: ${setup.config.detail}; fix it or move it aside`);
+  if (setup.package.state === "missing") next.push(SETUP_COMMANDS.install);
+  else if (setup.package.state === "invalid")
+    warnings.push(`${setup.package.path}: ${setup.package.detail}`);
+  const skills = SKILL_AGENTS.map((agent) => setup.skills[agent]);
+  for (const skill of skills) {
+    if (skill.state === "unmanaged")
+      warnings.push(`${skill.path} was not installed by Spectrum; replace it with --force`);
+    else if (skill.state === "ok" && skill.detail !== version)
+      warnings.push(
+        `${skill.path} was installed by ${skill.detail ?? "an unknown version"}; this CLI is ${version}. Run ${SETUP_COMMANDS.skills}`
+      );
+  }
+  const agentReady = skills.some((skill) => skill.state === "ok") || setup.plugin.state === "ok";
+  if (!agentReady) next.push(SETUP_COMMANDS.skills);
+  else if (skills.some((skill) => skill.state === "unmanaged"))
+    next.push(`${SETUP_COMMANDS.skills} --force`);
+  const ready = setup.config.state === "ok" && setup.package.state === "ok" && agentReady;
+  return { ready, version, setup, warnings, next };
+}
 
 // ../cli/src/version.ts
 var VERSION = "0.1.0";
@@ -10826,12 +10913,14 @@ Commands:
                                           Write .spectrum/config.json and a starter bundle
   skills install [path] [--agent claude|codex|all] [--force] [--dry-run]
                                           Install the Spectrum agent skill into the repository
+  status [path]                           Report configuration, package and agent skill setup
   --version                               Print the installed version`;
 var COMMANDS = {
   check: { "--profile": true },
   list: { "--profile": true },
   init: { "--name": true, "--dry-run": false },
-  "skills install": { "--agent": true, "--force": false, "--dry-run": false }
+  "skills install": { "--agent": true, "--force": false, "--dry-run": false },
+  status: {}
 };
 var UsageError = class extends Error {
 };
@@ -10886,7 +10975,7 @@ async function run(argv) {
   const value = (name) => options.get(name);
   if (command === "check" || command === "list") {
     const profilePath = value("--profile");
-    const profile = profilePath ? JSON.parse(await readFile3(profilePath, "utf8")) : void 0;
+    const profile = profilePath ? JSON.parse(await readFile4(profilePath, "utf8")) : void 0;
     const result2 = await checkRepository(root, { config: profile });
     print(command === "list" ? result2.specs : result2);
     return result2.ok ? 0 : 1;
@@ -10898,6 +10987,11 @@ async function run(argv) {
     });
     print(result2);
     return result2.ok && (result2.check?.ok ?? true) ? 0 : 1;
+  }
+  if (command === "status") {
+    const result2 = await repositoryStatus(root, VERSION);
+    print(result2);
+    return result2.ready ? 0 : 1;
   }
   const result = await installSkills(root, VERSION, {
     agents: parseAgents(value("--agent")),

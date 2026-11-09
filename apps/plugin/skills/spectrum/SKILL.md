@@ -37,6 +37,8 @@ These commands write files. Run them only when the user asks to set Spectrum up,
 - `spectrum init [path] [--name <project>] [--dry-run]` writes `.spectrum/config.json` and a connected starter bundle. It refuses, writing nothing, when any target file already exists.
 - `spectrum skills install [path] [--agent claude|codex|all] [--force] [--dry-run]` writes `.claude/skills/spectrum/SKILL.md` and `.agents/skills/spectrum/SKILL.md`, which run the repository's installed package. It updates files it installed earlier and refuses to replace other files without `--force`.
 
+`spectrum status [path]` writes nothing. It reports whether the configuration, package and agent skills are in place, warns when an installed skill came from another CLI version, and lists the commands for missing steps.
+
 To pin a version for the whole team, suggest `npm install --save-dev @voyager-fm/spectrum`. The package is not yet published to npm.
 
 ## Read the specs

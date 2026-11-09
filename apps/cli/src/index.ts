@@ -1,6 +1,6 @@
 import { readFile } from 'node:fs/promises';
 import { checkRepository } from '@spectrum/spec-engine';
-import { initRepository, installSkills, parseAgents } from './setup-commands.ts';
+import { initRepository, installSkills, parseAgents, repositoryStatus } from './setup-commands.ts';
 import { VERSION } from './version.ts';
 
 const USAGE = `Usage: spectrum <command> [repository path] [options]
@@ -12,6 +12,7 @@ Commands:
                                           Write .spectrum/config.json and a starter bundle
   skills install [path] [--agent claude|codex|all] [--force] [--dry-run]
                                           Install the Spectrum agent skill into the repository
+  status [path]                           Report configuration, package and agent skill setup
   --version                               Print the installed version`;
 
 /** Options each command accepts; `true` takes a value, `false` is a boolean flag. */
@@ -20,6 +21,7 @@ const COMMANDS: Record<string, Record<string, boolean>> = {
   list: { '--profile': true },
   init: { '--name': true, '--dry-run': false },
   'skills install': { '--agent': true, '--force': false, '--dry-run': false },
+  status: {},
 };
 
 class UsageError extends Error {}
@@ -93,6 +95,11 @@ async function run(argv: string[]): Promise<number> {
     });
     print(result);
     return result.ok && (result.check?.ok ?? true) ? 0 : 1;
+  }
+  if (command === 'status') {
+    const result = await repositoryStatus(root, VERSION);
+    print(result);
+    return result.ready ? 0 : 1;
   }
   const result = await installSkills(root, VERSION, {
     agents: parseAgents(value('--agent')),

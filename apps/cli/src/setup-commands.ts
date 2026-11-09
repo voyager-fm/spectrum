@@ -1,6 +1,8 @@
 import { checkRepository } from '@spectrum/spec-engine';
 import {
   defaultProjectName,
+  inspectRepositorySetup,
+  type RepositorySetup,
   renderStarterBundle,
   SETUP,
   SETUP_COMMANDS,
@@ -129,4 +131,45 @@ export async function installSkills(
           outcome === 'created' ? 'create' : 'replace',
         );
   return { ok, dryRun, skills };
+}
+
+export interface StatusResult {
+  /** Configuration, package and at least one agent integration are in place. */
+  ready: boolean;
+  version: string;
+  setup: RepositorySetup;
+  warnings: string[];
+  next: string[];
+}
+
+/**
+ * Report the repository's Spectrum setup with the same rules the dashboard uses, plus drift
+ * between installed skills and the running CLI. Reads fixed paths only and writes nothing.
+ */
+export async function repositoryStatus(root: string, version: string): Promise<StatusResult> {
+  const setup = await inspectRepositorySetup(root);
+  const warnings: string[] = [];
+  const next: string[] = [];
+  if (setup.config.state === 'missing') next.push(SETUP_COMMANDS.init);
+  else if (setup.config.state === 'invalid')
+    warnings.push(`${setup.config.path}: ${setup.config.detail}; fix it or move it aside`);
+  if (setup.package.state === 'missing') next.push(SETUP_COMMANDS.install);
+  else if (setup.package.state === 'invalid')
+    warnings.push(`${setup.package.path}: ${setup.package.detail}`);
+  const skills = SKILL_AGENTS.map((agent) => setup.skills[agent]);
+  for (const skill of skills) {
+    if (skill.state === 'unmanaged')
+      warnings.push(`${skill.path} was not installed by Spectrum; replace it with --force`);
+    else if (skill.state === 'ok' && skill.detail !== version)
+      warnings.push(
+        `${skill.path} was installed by ${skill.detail ?? 'an unknown version'}` +
+          `; this CLI is ${version}. Run ${SETUP_COMMANDS.skills}`,
+      );
+  }
+  const agentReady = skills.some((skill) => skill.state === 'ok') || setup.plugin.state === 'ok';
+  if (!agentReady) next.push(SETUP_COMMANDS.skills);
+  else if (skills.some((skill) => skill.state === 'unmanaged'))
+    next.push(`${SETUP_COMMANDS.skills} --force`);
+  const ready = setup.config.state === 'ok' && setup.package.state === 'ok' && agentReady;
+  return { ready, version, setup, warnings, next };
 }
