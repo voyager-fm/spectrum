@@ -41,6 +41,9 @@ importers:
       '@spectrum/core':
         specifier: workspace:*
         version: link:../../packages/core
+      '@spectrum/integrations':
+        specifier: workspace:*
+        version: link:../../packages/integrations
       '@spectrum/spec-engine':
         specifier: workspace:*
         version: link:../../packages/spec-engine

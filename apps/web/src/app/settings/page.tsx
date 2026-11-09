@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import {
   Table,
   TableBody,
@@ -9,17 +10,19 @@ import {
 } from '@/components/ui/table';
 import { LoadErrors, Mono, PageHead, Section, StatusBadge } from '../../components/dashboard.tsx';
 import { loadDashboard } from '../../lib/dashboard.ts';
+import { githubAppStatus } from '../../lib/github.ts';
 
 export const metadata: Metadata = { title: 'Integrations' };
 
 export default async function SettingsPage() {
-  const data = await loadDashboard();
+  const [data, github] = await Promise.all([loadDashboard(), githubAppStatus()]);
   const config = data.config;
   const rows = [
     {
       name: 'GitHub',
       configured: config?.github,
-      detail: 'Pull request detection and review publication',
+      detail: 'Read-only repository checks through the GitHub App',
+      connection: github.configured ? ('app' as const) : ('missing' as const),
     },
     { name: 'Linear', configured: config?.linear, detail: 'Links between requirements and issues' },
     { name: 'Agents', configured: config?.agents, detail: 'Discovery, drafting and review jobs' },
@@ -56,7 +59,15 @@ export default async function SettingsPage() {
                   </StatusBadge>
                 </TableCell>
                 <TableCell>
-                  <StatusBadge tone="planned">Not implemented</StatusBadge>
+                  {'connection' in r ? (
+                    <Link href="/repositories" className="underline-offset-4 hover:underline">
+                      <StatusBadge tone={r.connection === 'app' ? 'info' : 'neutral'}>
+                        {r.connection === 'app' ? 'App configured' : 'Not configured'}
+                      </StatusBadge>
+                    </Link>
+                  ) : (
+                    <StatusBadge tone="planned">Not implemented</StatusBadge>
+                  )}
                 </TableCell>
                 <TableCell className="whitespace-normal text-muted-foreground">
                   {r.detail}

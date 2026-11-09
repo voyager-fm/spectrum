@@ -1,7 +1,16 @@
 'use client';
 
 import type { LucideIcon } from 'lucide-react';
-import { FileText, GitPullRequest, Inbox, LayoutGrid, Play, Plug, ScrollText } from 'lucide-react';
+import {
+  FileText,
+  FolderGit2,
+  GitPullRequest,
+  Inbox,
+  LayoutGrid,
+  Play,
+  Plug,
+  ScrollText,
+} from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
@@ -32,7 +41,10 @@ const groups: { title: string; items: Item[] }[] = [
   },
   {
     title: 'Repository',
-    items: [{ href: '/settings', label: 'Integrations', icon: Plug }],
+    items: [
+      { href: '/repositories', label: 'Repositories', icon: FolderGit2 },
+      { href: '/settings', label: 'Integrations', icon: Plug },
+    ],
   },
 ];
 
