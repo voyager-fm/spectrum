@@ -12,7 +12,7 @@ Use [the configured source map](../../../../.spectrum/config.json) to locate the
 | Document ownership, serialization and relationships | [Schema guide](../../../../.spectrum/schemas/README.md) and the specification-model architecture in the configured engineering root |
 | Objects, surfaces, regions and stable feature/interaction IDs | Configured IA and FI inventories under `.spectrum/product/` |
 | Behavior and acceptance criteria | The affected feature bundle's contracts, flows and interaction Markdown specs |
-| Web routes and page behavior | Configured route inventory and page bundles under `.spectrum/website/` |
+| Web routes and page behavior | Configured route inventory and page bundles under `.spectrum/product/website/` |
 | Runtime and package boundaries | [Distribution contract](../../../../.spectrum/contracts/distribution.md) and the application-runtime architecture in the configured engineering root |
 | Engineering decisions and scoped instructions | Applicable `.spectrum/engineering/`, `.spectrum/rules/` and local `AGENTS.md` |
 

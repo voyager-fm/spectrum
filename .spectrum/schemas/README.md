@@ -15,8 +15,8 @@ The canonical representation connects TSV inventories with adjacent schemas, TOM
 | `feature_specs/<category>/contracts/*.toml` | Shared policy, vocabulary, state models, reads/writes | Flows and interaction specs |
 | `feature_specs/<category>/flows/*.md` | Interaction coverage, happy paths and failure handling | Interaction sources and review |
 | `feature_specs/<category>/<feature_id>/*.md` | One interaction's detailed behavior and ACs | CLI, dashboard, host-agent context |
-| `website/route_map/routes/{data.tsv,schema.json}` | Web route identity and declared implementation status | Page contract matching |
-| `website/page_contracts/<page>/` | `contract.toml`, `layout.md`, `flow.md`, optional `spec.md` | Web experience and review |
+| `product/website/route_map/routes/{data.tsv,schema.json}` | Web route identity and declared implementation status | Page contract matching |
+| `product/website/page_contracts/<page>/` | `contract.toml`, `layout.md`, `flow.md`, optional `spec.md` | Web experience and review |
 | `engineering/<platform>/{architecture,guides,standards,decisions}/` | Technical knowledge and decisions | Development context |
 
 `config.json` explicitly maps these sources. Paths are relative to the repository root. A profile passed with `--profile` uses the same shape and can point directly at a repository's existing documentation directories. Customer vocabulary, optional columns, stable IDs and platform policy stay in the customer's files.
@@ -76,3 +76,7 @@ Sources and Verification prose own engineering evidence. A runtime approval for 
 ## Migration
 
 Version 1 feature JSON and the standalone JSON draft model are retired. Spectrum's `SP-001` through `SP-004` feature IDs and their original acceptance statements are preserved in FI and interaction Markdown. Spectrum's own feature IDs stay product-scoped (`SP-<nnn>`); its category keys (`VAL`, `DSH`, `AGT`, `LOOP`, `INT`) classify features without renumbering them. No automatic customer-document migration or remote publication runs during validation.
+
+## Directory and scaffolding contract
+
+[The product-level contract](../product/specification_structure.md) defines the default layout and selected-module rules. Web route/page documents are nested under `product/website/`. The current template API renders paths and contents; an initializer and automatic file writer remain unimplemented.

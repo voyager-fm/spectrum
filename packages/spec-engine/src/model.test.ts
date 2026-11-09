@@ -200,7 +200,7 @@ async function fixture(t: TestContext) {
       inventories,
       documents: [
         { kind: 'feature_bundle', root: '.spectrum/product/feature_specs' },
-        { kind: 'page_bundle', root: '.spectrum/website/page_contracts' },
+        { kind: 'page_bundle', root: '.spectrum/product/website/page_contracts' },
       ],
     }),
   );
@@ -251,13 +251,17 @@ async function fixture(t: TestContext) {
   );
   await put(
     root,
-    '.spectrum/website/page_contracts/home/contract.toml',
+    '.spectrum/product/website/page_contracts/home/contract.toml',
     '[contract]\nid = "website.home"\npage_id = "HOME"\npath = "/"\nimplementation_status = "planned"\n\n[responsibility]\nprimary = "Read specifications."\n',
   );
-  await put(root, '.spectrum/website/page_contracts/home/layout.md', '# Home layout\n\n- Header\n');
   await put(
     root,
-    '.spectrum/website/page_contracts/home/flow.md',
+    '.spectrum/product/website/page_contracts/home/layout.md',
+    '# Home layout\n\n- Header\n',
+  );
+  await put(
+    root,
+    '.spectrum/product/website/page_contracts/home/flow.md',
     '# Home flow\n\nRead specifications.\n',
   );
   return root;
@@ -433,7 +437,7 @@ test('malformed TOML and mismatched page contract routes fail', async (t) => {
   await put(root, '.spectrum/product/feature_specs/core/contracts/check.toml', '[contract\n');
   await replace(
     root,
-    '.spectrum/website/page_contracts/home/contract.toml',
+    '.spectrum/product/website/page_contracts/home/contract.toml',
     'path = "/"',
     'path = "/other"',
   );
@@ -498,8 +502,17 @@ test('a profile reads canonical documents at existing repository paths', async (
   );
   const config = JSON.parse(await readFile(join(root, '.spectrum/config.json'), 'utf8'));
   config.documents[0].root = 'PRODUCT/feature_specs';
+  await cp(join(root, '.spectrum/product/website/page_contracts'), join(root, 'WEBSITE/pages'), {
+    recursive: true,
+  });
+  config.documents[1].root = 'WEBSITE/pages';
   await put(root, 'migration-profile.json', JSON.stringify(config));
   const result = await checkRepository(root, { configPath: 'migration-profile.json' });
   assert.deepEqual(result.findings, []);
   assert.equal(result.specs[0].path, 'PRODUCT/feature_specs/core/check_repository.md');
+  assert.ok(
+    result.model.documents.some(
+      (doc) => doc.kind === 'page_contract' && doc.path === 'WEBSITE/pages/home/contract.toml',
+    ),
+  );
 });

@@ -68,6 +68,6 @@ Browser smoke tests cover the planned states and the absence of execution contro
 
 - [Contract](../contracts/dashboard.toml)
 - [Flow](../flows/dashboard.md)
-- [Proposals page contract](../../../../website/page_contracts/proposals/contract.toml)
-- [Runs page contract](../../../../website/page_contracts/runs/contract.toml)
-- [PR reviews page contract](../../../../website/page_contracts/reviews/contract.toml)
+- [Proposals page contract](../../../website/page_contracts/proposals/contract.toml)
+- [Runs page contract](../../../website/page_contracts/runs/contract.toml)
+- [PR reviews page contract](../../../website/page_contracts/reviews/contract.toml)

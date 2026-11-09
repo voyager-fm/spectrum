@@ -102,12 +102,12 @@
   {
     "id": "inventory.routes.schema",
     "source": "inventories/routes.schema.json",
-    "output": ".spectrum/website/route_map/routes/schema.json"
+    "output": ".spectrum/product/website/route_map/routes/schema.json"
   },
   {
     "id": "inventory.routes.data",
     "source": "inventories/routes.data.tsv",
-    "output": ".spectrum/website/route_map/routes/data.tsv"
+    "output": ".spectrum/product/website/route_map/routes/data.tsv"
   },
   {
     "id": "inventory.menus.schema",
@@ -147,26 +147,31 @@
   {
     "id": "page.contract",
     "source": "page/contract.toml",
-    "output": ".spectrum/website/page_contracts/{{path:page_key}}/contract.toml"
+    "output": ".spectrum/product/website/page_contracts/{{path:page_key}}/contract.toml"
   },
   {
     "id": "page.layout",
     "source": "page/layout.md",
-    "output": ".spectrum/website/page_contracts/{{path:page_key}}/layout.md"
+    "output": ".spectrum/product/website/page_contracts/{{path:page_key}}/layout.md"
   },
   {
     "id": "page.flow",
     "source": "page/flow.md",
-    "output": ".spectrum/website/page_contracts/{{path:page_key}}/flow.md"
+    "output": ".spectrum/product/website/page_contracts/{{path:page_key}}/flow.md"
   },
   {
     "id": "page.spec",
     "source": "page/spec.md",
-    "output": ".spectrum/website/page_contracts/{{path:page_key}}/spec.md"
+    "output": ".spectrum/product/website/page_contracts/{{path:page_key}}/spec.md"
   },
   {
     "id": "engineering.adr",
     "source": "engineering/adr.md",
     "output": ".spectrum/engineering/{{path:platform}}/decisions/{{path:decision_month}}/{{path:article_key}}.md"
+  },
+  {
+    "id": "repository.structure",
+    "source": "repository/structure.md",
+    "output": ".spectrum/product/specification_structure.md"
   }
 ]

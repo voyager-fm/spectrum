@@ -20,18 +20,18 @@ dependencies:
   - .claude/skills/spectrum-development/references/verification.md
   deployed_file_hashes:
     .agents/skills/spectrum-development/SKILL.md: sha256:a28b49715ca28468940b87f52c09e43d5784bcf3fa9e9c36f200587b789352e4
-    .agents/skills/spectrum-development/references/authority-map.md: sha256:cbaa7cfa4fdda24f19f2196cf092e5dfe1061ee0bf4455c7f1e2acd09063143c
+    .agents/skills/spectrum-development/references/authority-map.md: sha256:f792ba27a7312588e8705221d5b8eedefc9af2a395d87477aeadc0e17f00745e
     .agents/skills/spectrum-development/references/external-integrations.md: sha256:2abdc15795051e3f2b15293702e44280d8bbd7e05186d67c178cae0bcceeb5ff
     .agents/skills/spectrum-development/references/implementation.md: sha256:03c26afbc09be680f3e24f285bf19819af4d91a686484e0286839d1619cdfb23
     .agents/skills/spectrum-development/references/verification.md: sha256:073a76b3c11c8c2fb99db71c59fba8615d08b4e11a10ce24ead69b45cf124404
     .claude/skills/spectrum-development/SKILL.md: sha256:a28b49715ca28468940b87f52c09e43d5784bcf3fa9e9c36f200587b789352e4
-    .claude/skills/spectrum-development/references/authority-map.md: sha256:cbaa7cfa4fdda24f19f2196cf092e5dfe1061ee0bf4455c7f1e2acd09063143c
+    .claude/skills/spectrum-development/references/authority-map.md: sha256:f792ba27a7312588e8705221d5b8eedefc9af2a395d87477aeadc0e17f00745e
     .claude/skills/spectrum-development/references/external-integrations.md: sha256:2abdc15795051e3f2b15293702e44280d8bbd7e05186d67c178cae0bcceeb5ff
     .claude/skills/spectrum-development/references/implementation.md: sha256:03c26afbc09be680f3e24f285bf19819af4d91a686484e0286839d1619cdfb23
     .claude/skills/spectrum-development/references/verification.md: sha256:073a76b3c11c8c2fb99db71c59fba8615d08b4e11a10ce24ead69b45cf124404
   source: local
   local_path: ./.apm/library/spectrum-development
-  content_hash: sha256:0060d328c8089a071ac640046302dc75247e30d63907e1d2a936f0f11b27f4a9
+  content_hash: sha256:bfb99deb0c731fbf9101a67d724a26204a591c149968745ff0d3f435e92cec22
 - repo_url: _local/spectrum-test-authoring
   name: spectrum-test-authoring
   version: unknown
@@ -117,7 +117,7 @@ deployments:
   owners:
   - ./.apm/library/spectrum-development
   active_owner: ./.apm/library/spectrum-development
-  content_hash: sha256:cbaa7cfa4fdda24f19f2196cf092e5dfe1061ee0bf4455c7f1e2acd09063143c
+  content_hash: sha256:f792ba27a7312588e8705221d5b8eedefc9af2a395d87477aeadc0e17f00745e
 - kind: project-relative
   target: claude
   value: .claude/skills/spectrum-development/references/external-integrations.md
@@ -270,7 +270,7 @@ deployments:
   owners:
   - ./.apm/library/spectrum-development
   active_owner: ./.apm/library/spectrum-development
-  content_hash: sha256:cbaa7cfa4fdda24f19f2196cf092e5dfe1061ee0bf4455c7f1e2acd09063143c
+  content_hash: sha256:f792ba27a7312588e8705221d5b8eedefc9af2a395d87477aeadc0e17f00745e
 - kind: project-relative
   target: codex
   value: .agents/skills/spectrum-development/references/external-integrations.md

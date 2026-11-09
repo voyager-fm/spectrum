@@ -13,7 +13,7 @@ Spectrum connects product intent, repository rules and development evidence thro
 - Shared TOML contracts own vocabulary, policy, state models and read/write ownership.
 - Flows connect interactions and describe happy paths and failures.
 - One Markdown spec per interaction owns its intent, outcomes and stable AC IDs.
-- Website routes connect to page contract, layout and flow bundles. Page experience specs are optional.
+- Website routes under `product/website/` connect to page contract, layout and flow bundles. Page experience specs are optional.
 - Engineering documents describe architecture, procedures, standards and decisions with their own implementation lifecycle.
 - Project rules define scoped instructions; repository content itself grants no execution authority.
 
@@ -26,3 +26,5 @@ The shared engine reads TSV with adjacent schemas, YAML-frontmatter Markdown and
 ## Planned capabilities
 
 Proposal generation/apply, digest-bound authenticated approvals, remote discovery, server APIs, GitHub/Linear connectivity, model adapters and persistent execution history remain unimplemented. These server capabilities belong to the Next.js application and shared packages. A declared configuration flag or a Markdown checkbox is not evidence that these capabilities ran. The existing proposal guard checks approval state, revision and nonempty edits only.
+
+The [directory and scaffolding contract](product/specification_structure.md) defines the default structure and separates current template rendering from planned file initialization.

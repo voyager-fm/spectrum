@@ -1,5 +1,5 @@
 {
-  "$schema": "../../../schemas/inventory.schema.json",
+  "$schema": "../../../../schemas/inventory.schema.json",
   "schema_version": "1.0",
   "name": "ROUTES",
   "primary_key": ["page_id"],

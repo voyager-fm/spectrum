@@ -5,7 +5,7 @@ This directory ships the reusable authoring files owned by `@spectrum/spec-engin
 | IDs | Files and purpose |
 | --- | --- |
 | `schema.*` | JSON Schema definitions for configuration, standalone inventories, inventory extensions, interaction frontmatter and engineering metadata |
-| `repository.*` | Source mapping, overview and agent rules |
+| `repository.*` | Source mapping, overview, layout/scaffolding contract and agent rules |
 | `inventory.*.schema`, `inventory.*.data` | FI categories/features/interactions, IA objects/surfaces/regions, routes, optional menus and custom tables |
 | `feature.interaction` | Complete interaction frontmatter, all required sections and a stable `AC-1` task item |
 | `feature.contract`, `feature.flow` | TOML vocabulary, policy, state model and reads/writes; Markdown coverage, happy/alternate paths and failures |
@@ -34,3 +34,5 @@ FI schema templates extend the engine's `spectrum:*` base schemas. Base column t
 ## Verification
 
 `src/templates.test.ts` renders the catalog into an isolated repository and runs the actual checker, YAML/Markdown and TOML parsers. It also checks escaping, traversal rejection, missing inputs and schema installation consistency. These checks prove structural usability, not that filled-in product behavior is implemented. Run `pnpm check` for the repository gate.
+
+The shipped `repository/structure.md` defines the default directory layout and current scaffolding boundary. Web product documents render under `.spectrum/product/website/`. `engineering.adr` remains the only engineering document template; other engineering knowledge grows through implementation.

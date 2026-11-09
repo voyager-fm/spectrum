@@ -77,6 +77,24 @@ test('templates render a connected repository that passes the real engine', asyn
   assert.equal(result.specs[0].id, inputs.interaction_id);
   assert.equal(result.specs[0].status, 'draft');
   assert.equal(result.specs[0].acceptance[0].verification, 'not_recorded');
+  const routeTable = result.model.inventories.find((table) => table.kind === 'routes');
+  assert.equal(routeTable?.path, '.spectrum/product/website/route_map/routes/data.tsv');
+  assert.ok(
+    result.model.documents.some(
+      (doc) =>
+        doc.kind === 'page_contract' &&
+        doc.path === '.spectrum/product/website/page_contracts/home/contract.toml',
+    ),
+  );
+  for (const template of await listTemplates()) {
+    const output = await renderTemplate(template.id, inputs);
+    if (!output.path.endsWith('.json')) continue;
+    const schema = JSON.parse(output.content).$schema;
+    if (typeof schema === 'string' && !schema.includes(':')) {
+      const installed = await readFile(resolve(directory, dirname(output.path), schema), 'utf8');
+      assert.doesNotThrow(() => JSON.parse(installed));
+    }
+  }
   for (const kind of [
     'interaction',
     'contract',
@@ -115,7 +133,7 @@ test('template substitutions escape structured values and reject unsafe output p
   await assert.rejects(loadTemplate('../outside'), /Unknown specification template/);
 });
 
-test('shipped JSON schema templates match the self-repository schema contract', async () => {
+test('shipped schema and layout definitions match the self-repository installation', async () => {
   for (const template of (await listTemplates()).filter((template) =>
     template.id.startsWith('schema.'),
   )) {
@@ -123,4 +141,9 @@ test('shipped JSON schema templates match the self-repository schema contract', 
     const installed = await readFile(resolve(import.meta.dirname, '../../..', output.path), 'utf8');
     assert.deepEqual(JSON.parse(output.content), JSON.parse(installed));
   }
+  const layout = await renderTemplate('repository.structure', {});
+  assert.equal(
+    layout.content,
+    await readFile(resolve(import.meta.dirname, '../../..', layout.path), 'utf8'),
+  );
 });
