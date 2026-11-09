@@ -29,8 +29,19 @@ The Next.js application can read a GitHub repository through a GitHub App and ru
 - A result is the output of the deterministic structural check (`checkRepository`) for that commit: findings and specs read. It does not show that code implements the specs, that the specs are semantically right, or that a pull request is safe to merge.
 - A commit without a readable `.spectrum/config.json` fails with an `invalid-config` finding; the application explains that nothing could be checked.
 - When resolution, download or extraction fails, the result is "not assessed" with a safe error message, never a pass. A ref or pull request that does not exist is reported as not found, separately from a download or extraction failure.
-- Each commit is analyzed once per server process. The analysis is cached in memory by repository and full SHA, at most 24 commits with the least recently used dropped first. Nothing is written to disk or a database, and a restart clears the cache. A failed analysis is not cached. A moving ref is resolved again on every request, so a new commit is analyzed when it appears.
+- Each commit is analyzed once. The analysis is cached in memory by repository and full SHA, at most 24 commits with the least recently used dropped first. A failed analysis is not cached. A moving ref is resolved again on every request, so a new commit is analyzed when it appears.
+- With accounts enabled, the analysis is also stored in the service database, one record per repository id and SHA. A stored analysis is reused after a restart instead of downloading the commit again. The record keeps the ref label of the first request and the user who triggered it. Without accounts, nothing is written to disk or a database and a restart clears the cache.
 - A result shows the time its analysis ran, not the time it was read from the cache.
+
+## Accounts and workspaces
+- Accounts are enabled when `DATABASE_URL`, `GITHUB_APP_CLIENT_ID` and `GITHUB_APP_CLIENT_SECRET` are all set. With none of them set, the server runs in single-operator mode: no sign-in, and everyone who can reach it sees every repository the App can read. The UI says which mode is active. With only some set, repository data is withheld and the missing names are shown; the server never falls back to single-operator mode.
+- Sign-in uses the App's user authorization (`/api/auth/github/login` and `/api/auth/github/callback`) with a random state bound to an HttpOnly cookie. The callback URL must be registered on the App. `SPECTRUM_PUBLIC_URL` sets the origin behind a proxy. Only same-site relative paths are followed after sign-in.
+- The user token is used once, to read the user and `GET /user/installations`, and is then dropped. No GitHub token is stored.
+- A workspace is one GitHub account (organization or user) that installed the App. A user is a member of a workspace when GitHub reported that installation for them at their last sign-in; memberships GitHub no longer reports are removed then. Members share the workspace's repositories and check history. Access granted or revoked on GitHub takes effect at the next sign-in.
+- A signed-in user sees only repositories of their workspaces' installations. A repository whose installation is outside them is reported like an uninstalled one, and no installation token is requested for it.
+- Sessions last seven days. The cookie holds a random token; the database stores only its SHA-256 hash. Sign-out is a POST.
+- The App's Setup URL sends a user through sign-in again so a new installation appears in their workspaces.
+- Local development runs Postgres from the root `docker-compose.yml` (`pnpm db:up`, then `pnpm db:migrate`). Migrations live in `apps/web/drizzle` and are applied explicitly, never on server start. Tests run the same migrations on an in-process Postgres (PGlite).
 
 ## Repository setup
 - The same snapshot is inspected for the Spectrum pieces the repository declares: `.spectrum/config.json` with `schema_version` 2, `@voyager-fm/spectrum` in `package.json`, the repository skills and the Claude Code plugin in `.claude/settings.json`. Detection uses `inspectRepositorySetup` from `@spectrum/spec-engine/setup`, so it matches the CLI.
@@ -44,6 +55,6 @@ The Next.js application can read a GitHub repository through a GitHub App and ru
 ## Not implemented
 - Webhooks and automatic checks on push or pull request events.
 - Pull request comments, reviews, check runs or any other write to GitHub.
-- Persisted check history and comparisons between commits, or any database. Connection state lives in GitHub and the server environment.
+- Comparisons between commits, retention limits for stored checks, and workspace roles or invitations beyond GitHub's own access.
 - A CLI or plugin command for remote repositories. The JSON route `/api/github/repositories/{owner}/{repo}/check` returns the same result for later clients.
 - Model-based review of a remote repository.

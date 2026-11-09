@@ -33,7 +33,7 @@ The page lists the interaction specifications the shared engine reads from that 
 
 ## State Changes
 
-None. Results may be cached per commit SHA. The snapshot is removed after reading.
+No repository writes. Results are cached per commit SHA, and with accounts enabled one check record per SHA is stored in the service database. The snapshot is removed after reading.
 
 ## User-visible Feedback
 
@@ -55,7 +55,7 @@ Requires the GitHub App with read access. Nothing is written to the repository.
 
 ## Observability / Analytics
 
-Each result is bound to its commit SHA. No history is stored.
+Each result is bound to its commit SHA. With accounts enabled, the analysis is stored once per commit SHA as check history; in single-operator mode nothing is stored.
 
 ## Related Interactions
 

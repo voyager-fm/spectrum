@@ -40,7 +40,7 @@ Each missing step shows the command that completes it. Detection uses `inspectRe
 
 ## State Changes
 
-None. The App is read-only, and the snapshot is removed after inspection.
+No repository writes: the App is read-only, and the snapshot is removed after inspection. With accounts enabled, the setup state is stored with the check record for that SHA.
 
 ## User-visible Feedback
 
@@ -62,7 +62,7 @@ Requires the GitHub App with read access. The page offers no write action: comma
 
 ## Observability / Analytics
 
-The checklist is bound to the commit SHA shown on the page. No history is stored.
+The checklist is bound to the commit SHA shown on the page. With accounts enabled, the analysis is stored once per commit SHA as check history; in single-operator mode nothing is stored.
 
 ## Related Interactions
 
